@@ -1,5 +1,8 @@
 # crudapi
 
+### LICENSE
+[LICENSE](./LICENSE)
+
 ### build
 ```bash
 mvn clean install -Dmaven.test.skip=true -s settings.xml
