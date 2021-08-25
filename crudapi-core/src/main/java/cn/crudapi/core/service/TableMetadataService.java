@@ -1,0 +1,37 @@
+package cn.crudapi.core.service;
+
+import java.util.List;
+import java.util.Map;
+
+import cn.crudapi.core.dto.TableDTO;
+import cn.crudapi.core.query.Condition;
+
+public interface TableMetadataService {
+    Long create(TableDTO tableDTO);
+
+    void update(Long tableId, TableDTO tableDTO);
+
+    TableDTO get(Long tableId);
+
+    TableDTO get(String tableName);
+
+    void delete(Long tableId, Boolean isDropPhysicalTable);
+    
+    void delete(List<Long> ids, Boolean isDropPhysicalTable);
+
+    void deleteAll(Boolean isDropPhysicalTable);
+
+    Long count(String filter, String search, Condition condition);
+    
+    List<TableDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby);
+
+	List<TableDTO> listAll();
+
+	Map<String, Object> getMeataData(String tableName);
+
+	List<Map<String, Object>> getMeataDatas();
+	
+	void repairMeataData(String tableName, List<String> columnNameLsit);
+
+	void checkTable();
+}

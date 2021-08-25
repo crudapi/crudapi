@@ -1,0 +1,1383 @@
+package cn.crudapi.core.service.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.TableDTO;
+import cn.crudapi.core.dto.TableRelationDTO;
+import cn.crudapi.core.enumeration.DataTypeEnum;
+import cn.crudapi.core.enumeration.IndexTypeEnum;
+import cn.crudapi.core.enumeration.OperatorTypeEnum;
+import cn.crudapi.core.enumeration.TableRelationTypeEnum;
+import cn.crudapi.core.event.BusinessEvent;
+import cn.crudapi.core.exception.BusinessException;
+import cn.crudapi.core.query.CompositeCondition;
+import cn.crudapi.core.query.Condition;
+import cn.crudapi.core.query.LeafCondition;
+import cn.crudapi.core.service.FileService;
+import cn.crudapi.core.service.SequenceService;
+import cn.crudapi.core.service.TableMetadataService;
+import cn.crudapi.core.service.TableRelationMetadataService;
+import cn.crudapi.core.service.TableService;
+import cn.crudapi.core.util.ConditionUtils;
+import cn.crudapi.core.util.DateTimeUtils;
+import cn.crudapi.core.util.DbUtils;
+
+@SuppressWarnings("unchecked")
+@Service
+public class TableServiceImpl implements TableService {
+	private static final Logger log = LoggerFactory.getLogger(TableServiceImpl.class);
+	
+	private static final String EXCEL_XLS = "xls";
+	private static final String EXCEL_XLSX = "xlsx";
+	
+    public static final String COLUMN_CRAEAED_DATE = "createdDate";
+    public static final String COLUMN_LAST_MODIFIED_DATE = "lastModifiedDate";
+
+    private Pattern BCRYPT_PATTERN = Pattern
+			.compile("\\A\\$2(a|y|b)?\\$(\\d\\d)\\$[./0-9A-Za-z]{53}");
+    
+    @Autowired
+    private TableMetadataService tableMetadataService;
+
+    @Autowired
+    private SequenceService sequenceService;
+
+    @Autowired
+    private TableRelationMetadataService tableRelationService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    
+    @Autowired
+    private ApplicationContext applicationContext;
+    
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private FileService fileService;
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String create(String name, Map<String, Object> map) {
+        tableMetadataService.checkTable();
+        
+        TableDTO tableDTO = tableMetadataService.get(name);
+        
+        Map<String, Object> recId = insertRecursion(tableDTO, map);
+
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+        applicationContext.publishEvent(businessEvent);
+        
+        return convertToId(tableDTO, recId);
+    }
+    
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void importData(String name, List<Map<String, Object>> mapList) {
+    	tableMetadataService.checkTable();
+    	 
+    	TableDTO tableDTO = tableMetadataService.get(name);
+
+    	for (Map<String, Object> paramMap :  mapList) {
+    		 Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
+
+	        if (fullTextBodyMap != null) {
+	        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
+	        	paramMap.put(item.getKey(), item.getValue());
+	        }
+    	}
+     
+        batchInsert(tableDTO, mapList);
+        
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+	    applicationContext.publishEvent(businessEvent);
+    }
+    
+    @Override
+	public void importData(String name, String fileName) {
+		File tempFile = fileService.getFile(fileName);
+		importData(name, tempFile);
+	}
+
+	@Override
+	public void importData(String name, File file) {
+		try {
+			Workbook wb = null;
+	        FileInputStream in = new FileInputStream(file);
+	        if(file.getName().endsWith(EXCEL_XLS)){     //Excel&nbsp;2003
+	            wb = new HSSFWorkbook(in);
+	        } else if(file.getName().endsWith(EXCEL_XLSX)){    // Excel 2007/2010
+	            wb = new XSSFWorkbook(in);
+	        }
+	        
+	        // Excel的页签数量
+	        int sheet_size = wb.getNumberOfSheets();
+	        if (sheet_size == 0) {
+				throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "Sheet页不能为0");
+	        }
+	        
+	        Sheet sheet = wb.getSheetAt(0);
+	        
+	        int maxRow = sheet.getLastRowNum();
+            log.info("总行数为：" + maxRow);
+            
+            List<String> columnCaptionList = new ArrayList<String>();
+            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            
+            TableDTO tableDTO = tableMetadataService.get(name);
+            
+            for (int row = 0; row <= maxRow; row++) {
+                int maxCol = sheet.getRow(row).getLastCellNum();
+                
+                Map<String, Object> map = new HashMap<String, Object>();
+            
+                for (int col = 0; col < maxCol; col++) {
+                	if (row == 0) {
+                		String columnCaption = sheet.getRow(row).getCell(col).toString();
+                		columnCaptionList.add(columnCaption);
+                		log.info(columnCaption);
+                	} else {
+                		Object colValue = sheet.getRow(row).getCell(col);
+                		String value = (colValue != null) ? colValue.toString() : null;
+                		
+                		String caption = columnCaptionList.get(col);
+                		ColumnDTO columnDTO = tableDTO.getColumnDTOList()
+                		.stream()
+                		.filter(t -> t.getCaption().equalsIgnoreCase(caption))
+                		.findFirst().get();
+                		String key = columnDTO.getName();
+                		
+                		if (caption.equalsIgnoreCase("名称")) {
+                			map.put("name", value);
+                		}
+            			map.put(key, value);
+                	}
+                }
+               
+                if (row > 0) {
+                	mapList.add(map);
+                }
+            }
+           
+            log.info(mapList.toString());
+            importData(name, mapList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}
+	
+	@Override
+	public String getImportTemplate(String name, String type) {
+		String fileName = null;
+		try {
+			if (StringUtils.isEmpty(type)) {
+				type = EXCEL_XLSX;
+			}
+			
+			fileName = fileService.getRandomFileName(name + "." + type);
+			File file = fileService.getFile(fileName);
+			
+			log.info(file.getAbsolutePath());
+			
+			Workbook wb = null;
+	        if(file.getName().endsWith(EXCEL_XLS)){     //Excel&nbsp;2003
+	            wb = new HSSFWorkbook();
+	        } else if(file.getName().endsWith(EXCEL_XLSX)){    // Excel 2007/2010
+	            wb = new XSSFWorkbook();
+	        }
+	        
+	        Sheet sheet = wb.createSheet(name);
+	        Row row = sheet.createRow(0);
+	        
+	        TableDTO tableDTO = tableMetadataService.get(name);
+	        int i = 0;
+	        for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        	 if (columnDTO.getInsertable()) {
+	        		 Cell cell = row.createCell(i++);
+		        	 cell.setCellValue(columnDTO.getCaption());
+	        	 }
+	        }
+	        
+ 			FileOutputStream output;
+ 			output = new FileOutputStream(file.getAbsolutePath());
+
+ 			wb.write(output);
+
+ 			output.flush();
+ 			output.close();
+ 			return fileName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}
+	
+
+	@Override
+	public String exportData(String name, String type) {
+		String fileName = null;
+		try {
+			if (StringUtils.isEmpty(type)) {
+				type = EXCEL_XLSX;
+			}
+			
+			fileName = fileService.getRandomFileName(name + "." + type);
+			File file = fileService.getFile(fileName);
+			
+			log.info(file.getAbsolutePath());
+			
+			Workbook wb = null;
+	        if(file.getName().endsWith(EXCEL_XLS)){     //Excel&nbsp;2003
+	            wb = new HSSFWorkbook();
+	        } else if(file.getName().endsWith(EXCEL_XLSX)){    // Excel 2007/2010
+	            wb = new XSSFWorkbook();
+	        }
+	        
+	        Sheet sheet = wb.createSheet(name);
+	        Row row = sheet.createRow(0);
+	        
+	        TableDTO tableDTO = tableMetadataService.get(name);
+	        int i = 0;
+	        for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        	 Cell cell = row.createCell(i++);
+	        	 cell.setCellValue(columnDTO.getCaption());
+	        }
+	        
+	        int rowIndex = 1;
+	        List<Map<String, Object>> mapList = list(name, null, null, null, null, null, 0, 999999, null);
+	        for (Map<String, Object> map : mapList) {
+	        	 Row dataRow = sheet.createRow(rowIndex++);
+	        	 
+	        	 int cellIndex = 0;
+	        	 for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        		 Cell dataCell = dataRow.createCell(cellIndex++);
+	        		 Object value = map.get(columnDTO.getName());
+	        		 dataCell.setCellValue(value != null ? value.toString() : "");
+		         }
+	        }
+	        
+ 			FileOutputStream output;
+ 			output = new FileOutputStream(file.getAbsolutePath());
+
+ 			wb.write(output);
+
+ 			output.flush();
+ 			output.close();
+ 			return fileName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}
+
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void update(String name, String id, Map<String, Object> newMap) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+        
+        log.info("newMap = " + newMap.toString());
+        
+        Map<String, Object> recId = convertToRecId(tableDTO, id);
+        
+        updateRecursion(tableDTO, recId, newMap);
+        
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+        applicationContext.publishEvent(businessEvent);
+    }
+
+    @Override
+    public void delete(String name, String id) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+
+        Map<String, Object> recId = convertToRecId(tableDTO, id);
+        
+        deleteRecursion(tableDTO, recId);
+        
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+        applicationContext.publishEvent(businessEvent);
+    }
+
+	@Override
+	public void delete(String name, List<String> idList) {
+		TableDTO tableDTO = tableMetadataService.get(name);
+		 for (String id : idList) { 
+			 Map<String, Object> recId = convertToRecId(tableDTO, id);
+			 deleteRecursion(tableDTO, recId);
+		 }
+		 
+		 BusinessEvent businessEvent = new BusinessEvent(this, name);
+	     applicationContext.publishEvent(businessEvent);
+	}
+	
+    @Override
+    public Map<String, Object> get(String name, String id, String select, String expand) {
+      	List<String> selectColumnNameList = convertSelect(select);
+    	List<String> expandList = convertExpand(expand);
+
+    	TableDTO tableDTO = tableMetadataService.get(name);
+    	
+    	Map<String, Object> recId = convertToRecId(tableDTO, id);
+    	
+        return selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
+    }
+    
+    @Override
+    public List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+      
+        List<Map<String, Object>> maplist = new ArrayList<Map<String, Object>>();
+
+      	List<String> selectColumnNameList = convertSelect(select);
+    	List<String> expandList = convertExpand(expand);
+
+    	for (String id : idList) {
+            log.info("listAllByIds->id = " + id);
+            Map<String, Object> recId = convertToRecId(tableDTO, id);
+            Map<String, Object> map = selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
+            maplist.add(map);
+        }
+
+        return maplist;
+    }
+    
+
+    @Override
+    public List<Map<String, Object>> list(String name, String select, String expand, String filter,
+    		String search, Condition condition, Integer offset, Integer limit, String orderby) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+      
+        List<Map<String, Object>> maplist = new ArrayList<Map<String, Object>>();
+
+      	List<String> selectColumnNameList = convertSelect(select);
+    	List<String> expandList = convertExpand(expand);
+
+    	Condition newCond = convertConditon(tableDTO, filter, search, condition);
+
+    	List<Map<String, Object>> recIdList = queryIds(tableDTO.getTableName(), tableDTO.getPrimaryNameList(), newCond, offset, limit, orderby);
+        for (Map<String, Object> recId : recIdList) {
+            log.info("list->recId = " + recId);
+            Map<String, Object> map = selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
+            maplist.add(map);
+        }
+
+        return maplist;
+    }
+    
+    @Override
+    public Condition convertConditon(String name, String filter, String search, Condition condition) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+
+    	Condition newCond = convertConditon(tableDTO, filter, search, condition);
+
+        return newCond;
+    }
+
+	@Override
+	public Long count(String name, String filter, String search,  Condition condition) {
+		TableDTO tableDTO = tableMetadataService.get(name);
+
+		Condition newCond = convertConditon(tableDTO, filter, search, condition);
+
+		return queryForCount(tableDTO.getTableName(), newCond);
+	}
+
+    @Override
+    public void deleteAll(List<String> nameList) {
+        for (String name : nameList) {
+        	TableDTO tableDTO = tableMetadataService.get(name);
+        	if (tableDTO != null) {
+        		jdbcTemplate.execute("DROP TABLE IF EXISTS `" + tableDTO.getTableName() + "`");
+        	}
+        }
+    }
+    
+    private String convertToId(TableDTO tableDTO, Map<String, Object> recId) {
+    	List<String> primaryNameList = tableDTO.getPrimaryNameList();
+        if (primaryNameList.size() == 1) {
+          return recId.get(primaryNameList.get(0)).toString();
+        } else {
+          List<String> recIdList = new ArrayList<String>();
+          
+          for (Map.Entry<String, Object> entry : recId.entrySet()) {
+        	  recIdList.add(entry.getKey() + "=" + entry.getValue());
+          }
+          return String.join(",", recIdList);
+        }
+    }
+    
+    private String generateId(TableDTO tableDTO, Map<String, Object> data) {
+    	List<String> primaryNameList = tableDTO.getPrimaryNameList();
+        if (primaryNameList.size() == 1) {
+          Object value = data.get(primaryNameList.get(0));
+          if (value != null) {
+        	  return value.toString();
+          } else {
+        	  return "";
+          }
+        } else {
+          List<String> recIdList = new ArrayList<String>();
+          
+          for (String primaryName: primaryNameList) {
+        	  Object value = data.get(primaryName);
+        	  if (value != null) {
+        		  recIdList.add(primaryName + "=" + value.toString());
+              }
+          }
+          return String.join(",", recIdList);
+        }
+    }
+    
+    private Map<String, Object> generateRecId(TableDTO tableDTO, Map<String, Object> data) {
+    	Map<String, Object> recId = new HashMap<String, Object>();
+    	
+    	List<String> primaryNameList = tableDTO.getPrimaryNameList();
+        if (primaryNameList.size() == 1) {
+          String primaryName = primaryNameList.get(0);
+          Object value = data.get(primaryName);
+          recId.put(primaryName, value);
+        } else {
+          for (String primaryName: primaryNameList) {
+        	  Object value = data.get(primaryName);
+        	  recId.put(primaryName, value);
+          }
+        }
+        
+        return recId;
+    }
+    
+    private Map<String, Object> convertToRecId(TableDTO tableDTO, String id) {
+    	String[] idArry = id.toString().trim().split(",");
+    	
+    	Map<String, Object> recId = new HashMap<String, Object>();
+    	for (String t : idArry) {
+    		String[] valueArray = t.split("=");
+    		
+    		String columnName = null;
+    		String columnValue = null;
+    		if (valueArray.length == 2) {
+    			columnName = valueArray[0].trim();
+        		columnValue = valueArray[1].trim();
+    		} else {
+    			columnName = tableDTO.getPrimaryNameList().get(0);
+    			columnValue = valueArray[0].trim();
+    		}
+    		
+    		Object value = columnValue;
+    		
+    		ColumnDTO columnDTO = tableDTO.getColumn(columnName);
+    		switch (columnDTO.getDataType()) {
+	            case BIT:    
+	            case TINYINT:
+	            case SMALLINT:
+	            case MEDIUMINT:
+	            case INT:
+	            	value = Integer.parseInt(columnValue);
+	            	break;
+	            case BIGINT:
+	            	value = Long.parseLong(columnValue);
+	            	break;
+	            case FLOAT:
+	            case DOUBLE:
+	            case DECIMAL:
+	            	break;
+	            case BOOL:
+	            	value = Boolean.parseBoolean(columnValue);
+	                break;
+	            case DATE:
+	            case TIME:
+	            case YEAR:
+	            case DATETIME:
+	            case TIMESTAMP:
+	                break;
+	            case CHAR:
+	            case VARCHAR:
+	            case TINYTEXT:
+	            case TEXT:
+	            case MEDIUMTEXT:
+	            case LONGTEXT:
+	            case PASSWORD:
+	            case ATTACHMENT:
+	                break;
+	            default:
+	                break;
+	        }
+    		
+    		recId.put(columnName, value);
+	    }
+    	return recId;
+    }
+    
+    private String encodePassword(Object value) {
+    	 String password = null;
+    	 if (value != null) {
+    		 password = value.toString();
+        	 if (!BCRYPT_PATTERN.matcher(value.toString()).matches()){
+        		 password = passwordEncoder.encode(password);
+             }
+    	 }
+    	
+    	 return password;
+    }
+    
+
+    private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap) {
+        List<String> columnNameList = new ArrayList<String>();
+        List<Object> valueList = new ArrayList<Object>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+            if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
+                columnNameList.add(t.getName());
+                
+                Object value = newMap.get(t.getName());
+                if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
+                	value = encodePassword(value);
+                }
+                
+                valueList.add(value);
+            } else if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
+                columnNameList.add(t.getName());
+                valueList.add(DateTimeUtils.sqlTimestamp());
+            }
+        });
+
+        String physicalTableName = tableDTO.getTableName();
+        String sql = DbUtils.toUpdateSql(physicalTableName, columnNameList);
+        log.info(sql);
+        
+        Condition cond = ConditionUtils.toCondition(recId);
+        sql += " WHERE " + cond.toQuerySql();
+        valueList.addAll(cond.toQueryValues());
+        log.info(sql);
+       
+        int row = jdbcTemplate.update(sql, new PreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps) throws SQLException {
+                int index = 0;
+                for (index = 0; index < valueList.size(); ++index) {
+                    ps.setObject(index + 1, valueList.get(index));
+                } 
+            }
+        });
+
+        log.info("row = " + row);
+
+        if (row == 0) {
+            throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, recId);
+        }    	
+    }
+    
+    private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap) {
+    	//获取旧表数据
+        Map<String, Object> oldMap = selectRecursion(tableDTO, recId, null, null);
+        log.info("oldMap = " + oldMap.toString());
+        
+        Map<String, Object> oldMainMap = queryForMap(tableDTO, null, recId);
+        log.info("oldMainMap = " + oldMainMap.toString());
+
+        //1. 多对一，一对一：本表字段平铺
+    	List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableDTO.getId());
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            String relationName = tableRelationDTO.getName();
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne 
+            		|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+                String fkName = tableRelationDTO.getFromColumnDTO().getName();
+                Object obj = newMap.get(relationName);
+                if (obj != null) {
+                    Map<String, Object> relationMap = (Map<String, Object>) obj;
+                    newMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                }
+            }
+        }
+        log.info("newMap = " + newMap.toString());
+        
+        //2. 把新表字段合并到旧表，然后计算fullText
+        for(Map.Entry<String, Object> entry : newMap.entrySet()) {
+        	oldMainMap.put(entry.getKey(), entry.getValue());
+        }
+        log.info("oldMainMap = " + oldMainMap.toString());
+
+        Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, oldMainMap);
+        if (fullTextBodyMap != null) {
+        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
+        	newMap.put(item.getKey(), item.getValue());
+        	log.info("newMap = " + newMap.toString());
+        }
+        
+        //3. 修改本表字段
+        updateMainOnly(tableDTO, recId, newMap);
+        
+        //4. 一对多，删除，修改，添加, 一对一，修改，添加
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
+                Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+                String relationName = tableRelationDTO.getName();
+                TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+                Object obj = newMap.get(relationName);
+                if (obj != null) {
+                	List<String> deleteIds = new ArrayList<String>();
+                	List<Map<String, Object>> insertMapList = new ArrayList<Map<String, Object>>();
+                	List<Map<String, Object>> updateMapList = new ArrayList<Map<String, Object>>();
+                    
+                    List<Map<String, Object>> oldMapList = (List<Map<String, Object>>)oldMap.get(relationName);
+                    List<Map<String, Object>> newMapList = (List<Map<String, Object>>)newMap.get(relationName);
+                 
+                    //1. delete
+            		for (Map<String, Object> oldItem : oldMapList) {
+            			log.info(oldItem.toString());
+            			
+            			String oldItemId = generateId(relationTableDTO, oldItem);
+            			if (!newMapList.stream().anyMatch(t -> oldItemId.equals(generateId(relationTableDTO, t)))) {
+            				deleteIds.add(oldItemId);
+            			}
+            		}
+            		
+            		// 2. add and update
+            		Optional<Map<String, Object>> optional = null;
+            		for (Map<String, Object> newItem : newMapList) {
+            			log.info(newItem.toString());
+            			String newItemId = generateId(relationTableDTO, newItem);
+            			if (StringUtils.isAllEmpty(newItemId)) {
+            				insertMapList.add(newItem);
+            			} else {
+            				optional = oldMapList.stream().filter(t -> newItemId.equals(generateId(relationTableDTO, t))).findFirst();
+                			if (optional.isPresent()) {
+                				updateMapList.add(newItem);
+                			} else {
+                				insertMapList.add(newItem);
+                			}
+            			}
+            		}
+            		
+            		String pkName = tableRelationDTO.getFromColumnDTO().getName();
+                    String fkName = tableRelationDTO.getToColumnDTO().getName();
+                    for (String deleteId : deleteIds) {
+                    	 Map<String, Object> deleteRecId = convertToRecId(relationTableDTO, deleteId);
+                    	 deleteRecursion(relationTableDTO, deleteRecId);
+                    }
+                    
+                    updateMapList.stream().forEach(t -> {
+                        t.put(fkName, recId.get(pkName));
+                        Map<String, Object> relationRecId = generateRecId(relationTableDTO, t);
+                        log.info("updateRecursion relationRecId: " + relationRecId);
+                        updateRecursion(relationTableDTO, relationRecId, t);
+                    });
+                    
+            		insertMapList.stream().forEach(t -> {
+                        t.put(fkName, recId.get(pkName));
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t);
+                        log.info("insertRecursion relationRecId: " + relationRecId);
+                    });
+                }
+            } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub) {
+                Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+                String relationName = tableRelationDTO.getName();
+                TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+                Map<String, Object> obj = (Map<String, Object>)newMap.get(relationName);
+                if (obj != null) {
+                	String pkName = tableRelationDTO.getFromColumnDTO().getName();
+                	String fkName = tableRelationDTO.getToColumnDTO().getName();
+                    obj.put(fkName, recId.get(pkName));
+                    
+                    String newItemId = generateId(relationTableDTO, obj);
+        			if (StringUtils.isAllEmpty(newItemId)) {
+                		Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj);
+                        log.info("insertRecursion relationRecId: " + relationRecId);
+                	} else {
+                		Map<String, Object> relationRecId = generateRecId(relationTableDTO, obj);
+                        log.info("updateRecursion relationRecId: " + relationRecId);
+                        updateRecursion(relationTableDTO, relationRecId, obj);
+                	}
+                }
+            } 
+        }
+    }	
+    
+    private List<String> convertSelect(String select) {
+     	List<String> selectColumnNameList = null;
+    	if (!StringUtils.isEmpty(select)) {
+    		selectColumnNameList = Arrays.stream(select.split(",")).map(String::trim).collect(Collectors.toList());
+    	}
+    	return selectColumnNameList;
+    }
+
+    private List<String> convertExpand(String expand) {
+    	List<String> expandList = null;
+    	if (!StringUtils.isEmpty(expand)) {
+    		expandList = Arrays.stream(expand.split(",")).map(String::trim).collect(Collectors.toList());
+    	}
+    	return expandList;
+    }
+
+    private Condition convertConditon(TableDTO tableDTO, String filter, String search, Condition condition) {
+    	Condition newCond = null;
+
+    	try {
+    		//1. filter
+	    	Condition filterCond = ConditionUtils.toCondition(filter);
+	    	
+	    	//2. search
+	    	LeafCondition searchCond = null;
+	    	if (!StringUtils.isEmpty(search)) {
+		        Optional<ColumnDTO> fullTextColumnOptional = tableDTO.getColumnDTOList().stream()
+		        		.filter(t -> IndexTypeEnum.FULLTEXT.equals(t.getIndexType()))
+		        		.findFirst();
+		        if (fullTextColumnOptional.isPresent()) {
+		        	searchCond = new LeafCondition();
+		        	searchCond.setColumnName(fullTextColumnOptional.get().getName());
+		        	searchCond.setOperatorType(OperatorTypeEnum.SEARCH);
+		        	searchCond.addValue(search + "*");
+		        }
+			}
+	    	
+	    	//3. other condition
+	    	if (filterCond == null && searchCond == null && condition == null) {
+	    		newCond = null;
+	    	} else {
+	    		CompositeCondition compositeCondition = new CompositeCondition();
+	    		compositeCondition.add(filterCond);
+	    		compositeCondition.add(condition);
+	    		compositeCondition.add(searchCond);
+	    		
+	    		newCond = compositeCondition;
+
+	    		log.info(newCond.toString());
+	    		log.info(newCond.toQuerySql());
+	    	}
+    	} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+
+    	return newCond;
+    }
+
+    private Map<String, Object> getFullTextBody(TableDTO tableDTO, Map<String, Object> paramMap) {
+        String body = "";
+
+        Optional<ColumnDTO> fullTextColumnOptional = tableDTO.getColumnDTOList().stream()
+        		.filter(t -> IndexTypeEnum.FULLTEXT.equals(t.getIndexType()))
+        		.findFirst();
+
+        List<String> bodyList = new ArrayList<String>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+        	Object obj = paramMap.get(t.getName());
+        	if (Boolean.TRUE.equals(t.getQueryable()) && obj != null) {
+        		if (!StringUtils.isEmpty(obj.toString())) {
+        			bodyList.add(obj.toString());
+        		}
+        	}
+        });
+
+        body = String.join(" ", bodyList);
+
+        //log.info("getFullTextBody paramMap: " + paramMap.toString());
+        //log.info("getFullTextBody body: " + body);
+
+        Map<String, Object> fullTextBodyMap = null;
+        if (fullTextColumnOptional.isPresent()) {
+        	fullTextBodyMap = new LinkedHashMap<String, Object>();
+        	fullTextBodyMap.put(fullTextColumnOptional.get().getName(), body);
+        	//log.info("getFullTextBody fullTextBodyMap: " + fullTextBodyMap.toString());
+        }
+
+        return fullTextBodyMap;
+    }
+    
+    private Map<String, Object> insertRecursion(TableDTO tableDTO, Map<String, Object> paramMap) {
+        // 1. 多对一，一对一：本表字段平铺
+        Long tableId = tableDTO.getId();
+        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            String relationName = tableRelationDTO.getName();
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+                String fkName = tableRelationDTO.getFromColumnDTO().getName();
+                Object obj = paramMap.get(relationName);
+                if (obj != null) {
+                    Map<String, Object> relationMap = (Map<String, Object>) obj;
+                    paramMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                }
+            }
+        }
+
+        // 2. 插入本表数据
+        Map<String, Object> recId = insertMainOnly(tableDTO, paramMap);
+
+        // 3. 插入关联表数据
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
+                Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+                String relationName = tableRelationDTO.getName();
+                TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+                Object obj = paramMap.get(relationName);
+                if (obj != null) {
+                    String fkName = tableRelationDTO.getToColumnDTO().getName();
+                    String pkName = tableRelationDTO.getFromColumnDTO().getName();
+                    List<Map<String, Object>> mapList = (List<Map<String, Object>>) paramMap.get(relationName);
+                    mapList.stream().forEach(t -> {
+                        t.put(fkName, recId.get(pkName));
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t);
+                        log.info("relationRecId: " + relationRecId);
+                    });
+                }
+            } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub) {
+                Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+                String relationName = tableRelationDTO.getName();
+                TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+                Map<String, Object> obj = (Map<String, Object>)paramMap.get(relationName);
+                if (obj != null) {
+                    String pkName = tableRelationDTO.getFromColumnDTO().getName();
+                    String fkName = tableRelationDTO.getToColumnDTO().getName();
+                    obj.put(fkName, recId.get(pkName));
+                    Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj);
+                    log.info("relationRecId: " + relationRecId);
+                }
+            } 
+        }
+
+        return recId;
+    }
+
+    private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap) {
+    	Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
+        if (fullTextBodyMap != null) {
+          	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
+          	paramMap.put(item.getKey(), item.getValue());
+        }
+    	
+        List<String> columnNameList = getColumnNameList(tableDTO);
+        Map<Long, List<Object>> seqValueListMap = getSeqValueListMap(tableDTO, paramMap);
+        List<Object> valueList = getColumnValueList(tableDTO, paramMap, seqValueListMap);
+
+        List<String> primaryNameList = tableDTO.getPrimaryNameList();	
+        Map<String, Object> recId = insert(tableDTO.getTableName(), primaryNameList, tableDTO.getAutoIncrement(), columnNameList, valueList);
+        if (recId == null) {
+        	recId = new HashMap<String, Object>();
+        	for (String primaryName : primaryNameList) {
+        		recId.put(primaryName, paramMap.get(primaryName));
+        	}
+        }
+        
+        return recId;
+    }
+
+    private Map<String, Object> insert(String tableName, List<String> primaryNameList,  boolean autoIncrement, List<String> columnNameList, List<Object> valueList) {
+        String sql = DbUtils.toInserSql(tableName, columnNameList, false);
+        log.info(sql);
+        log.info(valueList.toString());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        int row = jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+                for (int index = 0; index < valueList.size(); ++index) {
+                    ps.setObject(index + 1, valueList.get(index));
+                }
+
+                return ps;
+            }
+
+        }, keyHolder);
+
+        if (row > 0 && autoIncrement) {
+        	 Map<String, Object> recId = new HashMap<String, Object>();
+        	 recId.put(primaryNameList.get(0),  keyHolder.getKey().longValue());
+             return recId;
+        } else {
+            return null;
+        }
+    }
+
+    private int[] batchInsert(TableDTO tableDTO, List<Map<String, Object>> mapList) {
+        List<String> columnNameList = getColumnNameList(tableDTO);
+        Map<Long, List<Object>> seqValueListMap = getSeqValueListMap(tableDTO, mapList);
+        List<List<Object>> valueListList = getColumnValueListList(tableDTO, mapList, seqValueListMap);
+
+        return batchInsert(tableDTO.getTableName(), columnNameList, valueListList);
+    }
+
+    private int[] batchInsert(String tableName, List<String> columnNameList, List<List<Object>> valueListList) {
+        String sql = DbUtils.toInserSql(tableName, columnNameList, true);
+        log.info(sql);
+        
+        int[] ret = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                List<Object> valueList = valueListList.get(i);
+                
+                log.info(valueList.toString());
+                for (int index = 0; index < valueList.size(); ++index) {
+                    ps.setObject(index + 1, valueList.get(index));
+                }
+            }
+
+            @Override
+            public int getBatchSize() {
+                return valueListList.size();
+            }
+        });
+
+        return ret;
+    }
+
+    private int delete(String tableName, Condition cond) {
+        String sql = DbUtils.toDeleteSql(tableName);
+        log.info(sql);
+
+        sql += " WHERE " + cond.toQuerySql();
+        log.info(sql);
+        
+        int row = jdbcTemplate.update(sql, cond.toQueryValues().toArray());
+
+        return row;
+    }
+    
+    private int deleteMainOnly(String tableName, Map<String, Object> recId) {
+    	return delete(tableName, ConditionUtils.toCondition(recId));	
+    }
+
+    private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId) {
+        log.info("deleteRecursion = " + tableDTO.getName() + ", recId:" + recId);
+
+        // 1. 一对多，一对一
+        Long tableId = tableDTO.getId();
+        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+            TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub
+            	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
+            	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                for (Map<String, Object> relationRecId : relationRecIdList) {
+                    log.info("relationRecId = " + relationRecId);
+                    deleteRecursion(relationTableDTO, relationRecId);
+                }
+            }
+        }
+
+        // 2. 删除本表数据
+        deleteMainOnly(tableDTO.getTableName(), recId);
+    }
+    
+	private String getSubExpandKey(String expand) {
+        int index = expand.indexOf(".");
+ 
+        String result = expand.substring(0, index);
+        
+        return result;
+    }
+	
+	private String getSubExpandValue(String expand) {
+        int index = expand.indexOf(".");
+ 
+        String result = expand.substring(index + 1);
+        
+        return result;
+    }
+
+    private Map<String, Object> selectRecursion(TableDTO tableDTO, Map<String, Object> recId,
+    		List<String> selectColumnNameList,  List<String> expandList) {
+        Long tableId = tableDTO.getId();
+
+        // 1. 关联表字段select
+        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+
+        if (!CollectionUtils.isEmpty(selectColumnNameList)) {
+		  for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+		      String relationName = tableRelationDTO.getName();
+
+		      if (selectColumnNameList.contains(relationName)
+		    		  && (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
+		    		  || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain)) {
+		          String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+		          selectColumnNameList.add(fkColumnName);
+		      }
+		  }
+        }
+        
+        List<String> mainExpandList = new ArrayList<String>();
+        Map<String, List<String>> subExpandMap = new HashMap<String, List<String>>();
+       
+        if (!CollectionUtils.isEmpty(expandList)) {
+    	   for (String t : expandList) {
+           	if (t.contains(".")) {
+           		String key = getSubExpandKey(t);
+           		String value = getSubExpandValue(t);
+           		List<String> subExpandList = null;
+           		if (subExpandMap.get(key) == null) {
+           			subExpandList = new ArrayList<String>();
+           			subExpandList.add(value);
+           			subExpandMap.put(key, subExpandList);
+           		} else {
+           			subExpandList = subExpandMap.get(key);
+           			subExpandList.add(value);
+           		}
+           	} else {
+           		mainExpandList.add(t);
+           	}
+           }
+        }
+     
+        // 2. 主表
+        Map<String, Object> map = queryForMap(tableDTO, selectColumnNameList, recId);
+
+        // 3. 关联表数据
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+            String relationName = tableRelationDTO.getName();
+
+            if (!CollectionUtils.isEmpty(selectColumnNameList) && !selectColumnNameList.contains(relationName)) {
+            	continue;
+            }
+
+            TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
+            	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
+
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                List<Map<String, Object>> relationMapList = new ArrayList<Map<String, Object>>();
+
+                for (Map<String, Object> relationRecId : relationRecIdList) {
+                    log.info("selectRecursion.relationRecId = " + relationRecId);
+                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, null, subExpandMap.get(relationName));
+                    relationMapList.add(relationMap);
+                }
+                map.put(relationName, relationMapList);
+            } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub) {
+            	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                
+                for (Map<String, Object> relationRecId : relationRecIdList) {
+                    log.info("selectRecursion.relationRecId = " + relationRecId);
+                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, null, subExpandMap.get(relationName));
+                    map.put(relationName, relationMap);
+                    break;
+                }
+            } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
+            	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+                String pkColumnName = tableRelationDTO.getToColumnDTO().getName();
+                String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                Object fkUqValue = map.get(fkColumnName);
+                
+                if (fkUqValue != null) {
+                	 List<String> relationSelectColumnNameList = new ArrayList<String>();
+                     relationSelectColumnNameList.addAll(relationTableDTO.getPrimaryNameList());
+                     relationSelectColumnNameList.add(pkColumnName);
+                     for (ColumnDTO t : relationTableDTO.getColumnDTOList()) {
+                     	if (t.getDisplayable()) {
+                     		relationSelectColumnNameList.add(t.getName());
+                     	}
+                     }
+                     
+                     if (!CollectionUtils.isEmpty(mainExpandList) && mainExpandList.contains(relationName)) {
+                     	relationSelectColumnNameList = null;
+                     }
+                     
+                     Map<String, Object> relationRecId = new HashMap<String, Object>();
+                     relationRecId.put(pkColumnName, fkUqValue);
+                     
+                     Map<String, Object> relationMap = queryForMap(relationTableDTO, relationSelectColumnNameList, relationRecId);
+                     map.put(relationName, relationMap);
+                }
+            }
+        }
+
+        return map;
+    }
+   
+    private List<Map<String, Object>> queryIds(String tableName, List<String> primaryNameList, Condition cond) {
+        List<Map<String, Object>> ids = queryForList(tableName, primaryNameList, cond);
+        
+        return ids;
+    }
+
+    private List<Map<String, Object>> queryIds(String tableName, List<String> primaryNameList, Condition cond, Integer offset, Integer limit, String orderby) {
+        List<Map<String, Object>> ids = queryForList(tableName, primaryNameList, primaryNameList, cond, offset, limit, orderby);
+       
+        return ids;
+    }
+
+    private List<Map<String, Object>> queryForList(String tableName, List<String> selectColumnNameList, Condition cond) {
+    	 String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
+         log.info(sql);
+
+         List<Object> values = new ArrayList<Object>();
+
+         if (cond != null) {
+         	sql += " WHERE " + cond.toQuerySql();
+         	log.info(sql);
+
+         	values = cond.toQueryValues();
+         }
+
+         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
+
+         return mapList;
+    }
+
+    private List<Map<String, Object>> queryForList(String tableName, List<String> primaryNameList, List<String> selectColumnNameList, Condition cond, Integer offset, Integer limit, String orderby) {
+        String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
+        log.info(sql);
+
+        List<Object> values = new ArrayList<Object>();
+
+        if (cond != null) {
+        	sql += " WHERE " + cond.toQuerySql();
+        	log.info(sql);
+
+        	values = cond.toQueryValues();
+        }
+
+        if (StringUtils.isEmpty(orderby)) {
+        	sql += " ORDER BY " + String.join(",", primaryNameList) +" DESC LIMIT ?, ?";
+        } else {
+        	log.info(orderby);
+        	String[] orderbys = orderby.replaceAll(" +", ";").split(";");
+        	
+        	List<String> newOrderbys  = new ArrayList<String>();
+        	
+        	List<String> orderbyNames  = new ArrayList<String>();
+        	for (String t : orderbys) {
+        		if (t.equalsIgnoreCase("ASC") || t.equalsIgnoreCase("DESC")) {
+        			newOrderbys.add(t);
+        		} else {
+        			String[] orderbyNameArr = t.split(",");
+        			for (String n : orderbyNameArr) { 
+        				orderbyNames.add("`" + n + "`");
+        			}
+        		}
+        	}
+        	String newOrderby = String.join(",", orderbyNames) + " " +  String.join(" ", newOrderbys);
+        	
+        	log.info(newOrderby);
+        	sql += " ORDER BY " + newOrderby + " LIMIT ?, ?";
+        }
+
+        if (offset == null) {
+        	offset = 0;
+        }
+
+        if (limit == null) {
+        	limit = 10;
+        }
+
+        values.add(offset);
+        values.add(limit);
+
+        log.info(sql);
+        log.info(values.toString());
+
+        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
+
+        return mapList;
+    }
+
+    private Long queryForCount(String tableName, Condition cond) {
+        String sql = DbUtils.toCountSql(tableName);
+        log.info(sql);
+
+        List<Object> values = new ArrayList<Object>();
+
+        if (cond != null) {
+        	sql += " WHERE " + cond.toQuerySql();
+        	log.info(sql);
+
+        	values = cond.toQueryValues();
+        }
+
+        log.info(sql);
+        log.info(values.toString());
+
+        Long count =  jdbcTemplate.queryForObject(sql, values.toArray(), Long.class);
+
+        return count;
+    }
+
+    private Map<String, Object> queryForMap(TableDTO tableDTO, List<String> selectColumnNameList, Map<String, Object> recId) {
+    	List<String> fullSelectColumnNameList = new ArrayList<String>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+        	if (!IndexTypeEnum.FULLTEXT.equals(t.getIndexType())) {
+            	fullSelectColumnNameList.add(t.getName());
+        	}
+        });
+
+    	if (!CollectionUtils.isEmpty(selectColumnNameList)) {
+        	fullSelectColumnNameList.retainAll(selectColumnNameList);
+        }
+    	
+    	Condition cond = ConditionUtils.toCondition(recId);
+
+    	return queryForMap(tableDTO.getTableName(), fullSelectColumnNameList, cond);
+    }
+
+    private Map<String, Object> queryForMap(String tableName, List<String> selectColumnNameList, Condition cond) {
+        String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
+        log.info(sql);
+        
+        List<Object> values = new ArrayList<Object>();
+        if (cond != null) {
+        	sql += " WHERE " + cond.toQuerySql();
+        	log.info(sql);
+
+        	values = cond.toQueryValues();
+        }
+        
+        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
+        int count = mapList.size();
+        if (count > 0) {
+        	 if (count > 1) {
+        		 log.warn(tableName + "queryForMap size:" + count);
+        	 }
+        	 return mapList.get(0);
+        } else {
+        	return null;
+        }
+    }
+
+    private List<String> getColumnNameList(TableDTO tableDTO) {
+        List<String> columnNameList = new ArrayList<String>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+            columnNameList.add(t.getName());
+        });
+        return columnNameList;
+    }
+
+    private List<List<Object>> getColumnValueListList(TableDTO tableDTO, List<Map<String, Object>> mapList, Map<Long, List<Object>> seqValueListMap) {
+        List<List<Object>> valueListList = new ArrayList<List<Object>>();
+
+        for (Map<String, Object> paramMap : mapList) {
+            List<Object> valueList = getColumnValueList(tableDTO, paramMap, seqValueListMap);
+            valueListList.add(valueList);
+        }
+
+        return valueListList;
+    }
+
+    private List<Object> getColumnValueList(TableDTO tableDTO, Map<String, Object> paramMap, Map<Long, List<Object>> seqValueListMap) {
+        List<Object> valueList = new ArrayList<Object>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+            valueList.add(getColumnValue(t, paramMap, seqValueListMap));
+        });
+
+        return valueList;
+    }
+
+    private Object getColumnValue(ColumnDTO columnDTO, Map<String, Object> paramMap, Map<Long, List<Object>> seqValueListMap) {
+        Object value = null;
+        if (paramMap.containsKey(columnDTO.getName())) {
+            value = paramMap.get(columnDTO.getName());
+            if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
+            	value = encodePassword(value);
+            }
+        } else if (columnDTO.getSeqId() != null) {
+            Long key = columnDTO.getSeqId();
+            List<Object> valueList = seqValueListMap.get(key);
+            value = valueList.remove(0);
+        } else if (columnDTO.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
+            value = DateTimeUtils.sqlTimestamp();
+        }
+        
+        if (value != null) {
+        	paramMap.put(columnDTO.getName(), value);
+        }
+
+        return value;
+    }
+
+    private Map<Long, List<Object>> getSeqValueListMap(TableDTO tableDTO, List<Map<String, Object>> mapList) {
+        Map<Long, Integer> seqCountMap = new HashMap<Long, Integer>();
+        setSeqCountMap(seqCountMap, tableDTO, mapList);
+        return getSeqValueListMap(seqCountMap);
+    }
+
+    private Map<Long, List<Object>> getSeqValueListMap(TableDTO tableDTO, Map<String, Object> paramMap) {
+        Map<Long, Integer> seqCountMap = new HashMap<Long, Integer>();
+        setSeqCountMap(seqCountMap, tableDTO, paramMap);
+        return getSeqValueListMap(seqCountMap);
+    }
+
+    private Map<Long, List<Object>> getSeqValueListMap(Map<Long, Integer> seqCountMap) {
+        Map<Long, List<Object>> seqValueListMap = new HashMap<Long, List<Object>>();
+        for (Map.Entry<Long, Integer> entry : seqCountMap.entrySet()) {
+            Long seqId = entry.getKey();
+            Integer count = entry.getValue();
+            List<Object> valueList = sequenceService.getNextValues(seqId, count);
+            seqValueListMap.put(seqId, valueList);
+        }
+
+        return seqValueListMap;
+    }
+
+    private void setSeqCountMap(Map<Long, Integer> seqCountMap, TableDTO tableDTO, List<Map<String, Object>> mapList) {
+        for (Map<String, Object> paramMap : mapList) {
+            setSeqCountMap(seqCountMap, tableDTO, paramMap);
+        }
+    }
+
+    private void setSeqCountMap(Map<Long, Integer> seqCountMap, TableDTO tableDTO, Map<String, Object> paramMap) {
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+            if (t.getSeqId() != null && !paramMap.containsKey(t.getName())) {
+                Long key = t.getSeqId();
+                if (seqCountMap.containsKey(key)) {
+                    seqCountMap.put(key, seqCountMap.get(key) + 1);
+                } else {
+                    seqCountMap.put(key, 1);
+                }
+            }
+        });
+    }
+}

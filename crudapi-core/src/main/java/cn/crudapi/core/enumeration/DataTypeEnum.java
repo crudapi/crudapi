@@ -1,0 +1,61 @@
+package cn.crudapi.core.enumeration;
+
+public enum DataTypeEnum {
+	BOOL,
+	
+	PASSWORD,
+	
+	ATTACHMENT,
+	
+	BIT,
+	 
+	TINYINT,
+
+	SMALLINT,
+
+	MEDIUMINT,
+
+	INT,
+
+	BIGINT,
+
+	FLOAT,
+
+	DOUBLE,
+
+	DECIMAL,
+
+	DATE,
+
+	TIME,
+
+	YEAR,
+
+	DATETIME,
+
+	TIMESTAMP,
+
+	CHAR,
+
+	VARCHAR,
+
+	BINARY,
+
+	VARBINARY,
+
+	TINYTEXT,
+
+	TEXT,
+
+	MEDIUMTEXT,
+
+	LONGTEXT,
+
+	TINYBLOB,
+
+	BLOB,
+
+	MEDIUMBLOB,
+
+	LONGBLOB
+}
