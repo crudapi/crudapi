@@ -17,7 +17,7 @@ public class SchedulingConfig {
 	@Autowired
 	private FileService fileService;
 
-	@Scheduled(cron = "${job.file.cron}") // 每隔50秒执行一次
+	//@Scheduled(cron = "${job.file.cron}") // 每隔50秒执行一次
 	public void fileServiceDoClean() {
 		try {
 			fileService.clean();
