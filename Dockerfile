@@ -15,26 +15,26 @@ RUN mvn dependency:go-offline -s settings.xml > mvnlog.txt && \
 
 COPY . /crudapi/
 
-#free and pro
+#pro and free
 RUN mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     tail mvnlog.txt && \
     rm -rf mvnlog.txt && \
     version=`awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' pom.xml` && \
-    mkdir -p /crudapi/dist/free/$version && \
-    rm -rf /crudapi/crudapi-core/target/*proguard* && \
-    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/free/$version && \
-    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/free/$version && \
-    cp /crudapi/config/pro/MetaDataConfig.java /crudapi/crudapi-core/src/main/java/cn/crudapi/core/constant/MetaDataConfig.java  && \
-    mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
-    tail mvnlog.txt && \
-    rm -rf mvnlog.txt && \
     mkdir -p /crudapi/dist/pro/$version && \
     rm -rf /crudapi/crudapi-core/target/*proguard* && \
     cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/pro/$version
+    cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/pro/$version && \
+    cp /crudapi/config/free/MetaDataConfig.java /crudapi/crudapi-core/src/main/java/cn/crudapi/core/constant/MetaDataConfig.java  && \
+    mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
+    tail mvnlog.txt && \
+    rm -rf mvnlog.txt && \
+    mkdir -p /crudapi/dist/free/$version && \
+    rm -rf /crudapi/crudapi-core/target/*proguard* && \
+    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/free/$version && \
+    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/free/$version &&
 
 FROM openjdk:8-jdk-alpine
 

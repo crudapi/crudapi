@@ -1,5 +1,5 @@
 package cn.crudapi.core.constant;
 
 public class MetaDataConfig {
-    public static final int MAX_TABLE_COUNT = 999999999;
+    public static final int MAX_TABLE_COUNT = 999999;
 }
