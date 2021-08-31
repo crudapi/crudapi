@@ -34,7 +34,7 @@ RUN mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     mkdir -p /crudapi/dist/free/$version && \
     rm -rf /crudapi/crudapi-core/target/*proguard* && \
     cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/free/$version && \
-    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/free/$version &&
+    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/free/$version
 
 FROM openjdk:8-jdk-alpine
 
