@@ -1,11 +1,13 @@
 package cn.crudapi.core.service.impl;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.constant.MetaDataConfig;
@@ -39,7 +43,7 @@ import cn.crudapi.core.repository.TableRelationMetadataRepository;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.DbUtils;
+import cn.crudapi.core.util.JsonUtils;
 
 @Service
 public class TableMetadataServiceImpl implements TableMetadataService {
@@ -95,8 +99,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     public Long create(TableDTO tableDTO) {
     	checkTable();
     	
-    	if (!tableDTO.getReverse() && isExist(tableDTO.getTableName())) {
-    		throw new BusinessException(ApiErrorCode.DUPLICATE_TABLE_NAME, "表已经存在");
+    	if (!Boolean.TRUE.equals(tableDTO.getReverse()) && isExist(tableDTO.getTableName())) {
+    		throw new BusinessException(ApiErrorCode.DUPLICATE_TABLE_NAME, tableDTO.getTableName() + "表已经存在");
     	}
         TableEntity tableEntity = tableMapper.toEntity(tableDTO);
         
@@ -108,6 +112,21 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         return insert(tableEntity);
     }
 
+	@Override
+	public void importData(File file) {
+		try {
+			String body = FileUtils.readFileToString(file, "utf-8");
+			List<TableDTO> tableDTOs = JsonUtils.toObject(body, new TypeReference<List<TableDTO>>(){});
+			List<Long> tableIds = new ArrayList<Long>();
+			for (TableDTO tableDTO : tableDTOs) { 
+				Long tableId = create(tableDTO);
+				tableIds.add(tableId);
+			}
+		} catch (Exception e) {
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "导入失败！" + e.getMessage()); 
+		}
+	}
+	
     @Override
     //@CacheEvict(value = "tableMetadata", key="#id")
     public void update(Long id, TableDTO tableDTO) {

@@ -1,5 +1,6 @@
 package cn.crudapi.core.service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import cn.crudapi.core.query.Condition;
 public interface TableMetadataService {
     Long create(TableDTO tableDTO);
 
+	void importData(File file);
+	
     void update(Long tableId, TableDTO tableDTO);
 
     TableDTO get(Long tableId);

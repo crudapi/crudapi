@@ -27,6 +27,15 @@ public final class JsonUtils {
             return null;
         }
     }
+    
+    public static <T> T toObject(String json, TypeReference<T> toValueTypeRef) {
+        try {
+            return JSON_MAPPER.readValue(json, toValueTypeRef);
+        } catch (Exception e) {
+        	System.err.println(e);
+            return null;
+        }
+    }
 
     public static <T> Map<String, T> toMap(JsonNode jsonNode) {
         try {

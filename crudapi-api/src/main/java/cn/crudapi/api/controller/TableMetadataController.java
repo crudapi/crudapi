@@ -1,5 +1,6 @@
 package cn.crudapi.api.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,12 +22,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
+import cn.crudapi.core.service.FileService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.RequestUtils;
@@ -41,6 +45,9 @@ public class TableMetadataController {
 	@Autowired
 	private TableMetadataService tableMetadataService;
 
+	@Autowired
+	private FileService fileService;
+
 	@ApiOperation(value="创建表")
 	@PostMapping()
 	public ResponseEntity<Long> create(@RequestBody @Validated TableDTO tableDTO) {
@@ -49,8 +56,8 @@ public class TableMetadataController {
 		return new ResponseEntity<Long>(tableId, HttpStatus.CREATED);
 	}
 	
-	@ApiOperation(value="导入表")
-	@PostMapping("/import")
+	@ApiOperation(value="批量创建表")
+	@PostMapping("/batch")
 	public ResponseEntity<List<Long>> batchCreate(@RequestBody @Validated List<TableDTO> tableDTOs) {
 		List<Long> tableIds = new ArrayList<Long>();
 		for (TableDTO tableDTO : tableDTOs) { 
@@ -60,6 +67,18 @@ public class TableMetadataController {
 
 		return new ResponseEntity<List<Long>>(tableIds, HttpStatus.CREATED);
 	}
+	
+    @ApiOperation(value="导入表")
+	@PostMapping(value = "/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Void> importData(@RequestPart MultipartFile file) {
+		Map<String, Object> map = fileService.upload(file);
+		String fileName = map.get("name").toString();
+		File tempFile = fileService.getFile(fileName);
+		tableMetadataService.importData(tempFile);
+		fileService.delete(fileName);
+		
+        return new ResponseEntity<Void>(HttpStatus.CREATED);
+    }
 
 	@ApiOperation(value="修改表")
 	@PatchMapping(value = "/{tableId}")
