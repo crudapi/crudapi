@@ -76,6 +76,10 @@ public final class ConditionUtils {
 	}
 	
 	public static Condition toCondition(String name, List<Object> values) {
+		if (values == null || values.size() == 0) {
+			return null;
+		}
+		
 		LeafCondition condition = new LeafCondition();
 		condition.setColumnName(name);
 		condition.setOperatorType(OperatorTypeEnum.IN);

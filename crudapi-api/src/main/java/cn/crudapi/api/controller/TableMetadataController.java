@@ -163,25 +163,13 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="导出表")
-	@GetMapping("/export")
-	public ResponseEntity<List<TableDTO>> export() {
-		    HttpHeaders headers = new HttpHeaders();
-		    headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-		    headers.add("Content-Disposition", "attachment; filename=metadataTable.json");
-		    headers.add("Pragma", "no-cache");
-		    headers.add("Expires", "0");
-		    headers.add("Last-Modified", new Date().toString());
-		    headers.add("ETag", String.valueOf(System.currentTimeMillis()));
-		 
-			List<TableDTO> tableDTOList = tableMetadataService.listAll();
-
-		    return ResponseEntity
-		            .ok()
-		            .headers(headers)
-		            .contentType(MediaType.APPLICATION_JSON)
-		            .body(tableDTOList);
-	}
-
+	@PostMapping("/export")
+    public ResponseEntity<String> getImportTemplate(@RequestBody(required = false) List<Long> idList) {
+		String fileName = tableMetadataService.getExportFile("crudapi", null);
+		String url = fileService.getFullUrl(fileName);
+        return new ResponseEntity<String>(url, HttpStatus.CREATED);
+    }
+	  
 	@ApiOperation(value="删除表")
 	@DeleteMapping(value = "/{tableId}")
 	public ResponseEntity<Void> delete(@PathVariable("tableId") Long tableId,

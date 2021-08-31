@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.constant.MetaDataConfig;
+import cn.crudapi.core.dto.ColumnDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
@@ -40,6 +41,7 @@ import cn.crudapi.core.repository.IndexLineMetadataRepository;
 import cn.crudapi.core.repository.IndexMetadataRepository;
 import cn.crudapi.core.repository.TableMetadataRepository;
 import cn.crudapi.core.repository.TableRelationMetadataRepository;
+import cn.crudapi.core.service.FileService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
@@ -69,6 +71,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private FileService fileService;
 
     @Override
 	public Map<String, Object> getMeataData(String tableName) {
@@ -119,6 +124,10 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 			List<TableDTO> tableDTOs = JsonUtils.toObject(body, new TypeReference<List<TableDTO>>(){});
 			List<Long> tableIds = new ArrayList<Long>();
 			for (TableDTO tableDTO : tableDTOs) { 
+				if (Boolean.TRUE.equals(tableDTO.getSystemable())) {
+					log.info("skip system table:" + tableDTO.getName());
+					continue;
+				}
 				Long tableId = create(tableDTO);
 				tableIds.add(tableId);
 			}
@@ -252,8 +261,15 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     }
     
     @Override
-    public List<TableDTO> listAll() {
-    	List<TableEntity> tableEntityList = tableMetadataRepository.findAll(TableEntity.class);
+    public List<TableDTO> listAll(List<Long> idList) {
+		List<Object> values = new ArrayList<>();
+    	if (idList != null) {
+        	idList.forEach(t -> values.add(t));
+    	}
+    	
+    	Condition cond = ConditionUtils.toCondition("id", values);
+    	
+    	List<TableEntity> tableEntityList = tableMetadataRepository.find(cond, TableEntity.class);
         
         for (TableEntity tableEntity : tableEntityList) {
         	List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
@@ -265,6 +281,25 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         
         return tableMapper.toDTO(tableEntityList);
     }
+    
+    @Override
+    public String getExportFile(String name, List<Long> ids) {
+		String fileName = null;
+		try {
+			fileName = fileService.getRandomFileName(name + ".json");
+			File file = fileService.getFile(fileName);
+
+			log.info(file.getAbsolutePath());
+			
+			List<TableDTO> tableDTOs = listAll(ids);
+			FileUtils.writeStringToFile(file, JsonUtils.toJson(tableDTOs), "utf-8");
+			
+ 			return fileName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}
     
     private Boolean isExist(String tableName) {
     	Boolean ret = false;

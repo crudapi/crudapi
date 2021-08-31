@@ -28,7 +28,7 @@ public interface TableMetadataService {
     
     List<TableDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby);
 
-	List<TableDTO> listAll();
+	List<TableDTO> listAll(List<Long> idList);
 
 	Map<String, Object> getMeataData(String tableName);
 
@@ -37,4 +37,6 @@ public interface TableMetadataService {
 	void repairMeataData(String tableName, List<String> columnNameLsit);
 
 	void checkTable();
+
+	String getExportFile(String name, List<Long> ids);
 }
