@@ -286,7 +286,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     public String getExportFile(String name, List<Long> ids) {
 		String fileName = null;
 		try {
-			fileName = fileService.getRandomFileName(name + ".json");
+			fileName = fileService.getRandomFileName(name + ".data");
 			File file = fileService.getFile(fileName);
 
 			log.info(file.getAbsolutePath());

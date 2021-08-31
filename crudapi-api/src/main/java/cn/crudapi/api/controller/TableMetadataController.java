@@ -165,7 +165,7 @@ public class TableMetadataController {
 	@ApiOperation(value="导出表")
 	@PostMapping("/export")
     public ResponseEntity<String> getImportTemplate(@RequestBody(required = false) List<Long> idList) {
-		String fileName = tableMetadataService.getExportFile("crudapi", null);
+		String fileName = tableMetadataService.getExportFile("crudapi", idList);
 		String url = fileService.getFullUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
