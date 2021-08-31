@@ -57,5 +57,6 @@ ARG JAR_FILE=/crudapi/crudapi-service/target/*.jar
 COPY --from=builder ${JAR_FILE} crudapi-service.jar
 COPY --from=builder /crudapi/dist /crudapi/dist/
 COPY run.sh run.sh
+COPY crudapi-service/src/main/resources/application-prod.properties application-prod.properties
 
 CMD ["/crudapi/run.sh"]
