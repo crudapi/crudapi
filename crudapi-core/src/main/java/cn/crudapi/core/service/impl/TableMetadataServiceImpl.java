@@ -292,7 +292,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 			log.info(file.getAbsolutePath());
 			
 			List<TableDTO> tableDTOs = listAll(ids);
-			FileUtils.writeStringToFile(file, JsonUtils.toJson(tableDTOs), "utf-8");
+			String body = JsonUtils.toJson(tableDTOs);
+			log.info(body);
+			FileUtils.writeStringToFile(file, body, "utf-8");
 			
  			return fileName;
 		} catch (Exception e) {
@@ -348,7 +350,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             //批量插入index
             batchInsertIndex(tableEntity.getIndexEntityList(), newTableEntity);
             
-            if (!tableEntity.getReverse()) {
+            if (!Boolean.TRUE.equals(tableEntity.getReverse())) {
             	execute(tableEntity.toSql());
             	
             	List<String> sqlList = tableEntity.toIndexSqlList();

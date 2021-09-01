@@ -2,18 +2,21 @@ package cn.crudapi.core.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 public final class JsonUtils {
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+    private static final ObjectMapper JSON_MAPPER = 
+    		new ObjectMapper().registerModule(new JodaModule())
+    		.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+    		//.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
     public static String toJson(Object obj) {
         try {
-        	JSON_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,true);
             return JSON_MAPPER.writeValueAsString(obj);
         } catch (Exception e) {
         	System.err.println(e);
