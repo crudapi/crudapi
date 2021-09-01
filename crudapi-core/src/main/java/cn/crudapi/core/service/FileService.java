@@ -36,4 +36,6 @@ public interface FileService {
 	String getRandomFileName(String fileName);
 
 	String getFullUrl(String fileName);
+
+	String getUploadFullPath(String fileName);
 }

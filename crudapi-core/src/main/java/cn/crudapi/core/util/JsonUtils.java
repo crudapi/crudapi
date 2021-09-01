@@ -6,12 +6,14 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public final class JsonUtils {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     public static String toJson(Object obj) {
         try {
+        	JSON_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,true);
             return JSON_MAPPER.writeValueAsString(obj);
         } catch (Exception e) {
         	System.err.println(e);

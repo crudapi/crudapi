@@ -220,7 +220,8 @@ public class FileServiceImpl implements FileService {
 		return uuid.toString().replace("-", "") + "." + ext;
 	}
 	
-	private String getUploadFullPath(String fileName) {
+	@Override
+	public String getUploadFullPath(String fileName) {
 		return ossFilePath + "/" + ossUploadPath + "/" + fileName;
     }
 	
