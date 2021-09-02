@@ -253,7 +253,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         	List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
      	    tableEntity.setColumnEntityList(columnEntityList);
      	    
-     	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId());
+     	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId(), columnEntityList);
      	    tableEntity.setIndexEntityList(indexEntityList);
         }
         
@@ -262,24 +262,14 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     
     @Override
     public List<TableDTO> listAll(List<Long> idList) {
-		List<Object> values = new ArrayList<>();
+		List<TableDTO> tableDTOs = new ArrayList<TableDTO>();
     	if (idList != null) {
-        	idList.forEach(t -> values.add(t));
+        	idList.forEach(t -> {
+        		tableDTOs.add(get(t));
+        	});
     	}
     	
-    	Condition cond = ConditionUtils.toCondition("id", values);
-    	
-    	List<TableEntity> tableEntityList = tableMetadataRepository.find(cond, TableEntity.class);
-        
-        for (TableEntity tableEntity : tableEntityList) {
-        	List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
-     	    tableEntity.setColumnEntityList(columnEntityList);
-     	    
-     	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId());
-     	    tableEntity.setIndexEntityList(indexEntityList);
-        }
-        
-        return tableMapper.toDTO(tableEntityList);
+        return tableDTOs;
     }
     
     @Override
@@ -595,7 +585,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
 	    tableEntity.setColumnEntityList(columnEntityList);
 	    
-	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId());
+	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId(), columnEntityList);
 	    tableEntity.setIndexEntityList(indexEntityList);
 	    
         return tableEntity;
@@ -619,7 +609,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
 	    tableEntity.setColumnEntityList(columnEntityList);
 	    
-	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId());
+	    List<IndexEntity> indexEntityList = getIndexEntityList(tableEntity.getId(), columnEntityList);
 	    tableEntity.setIndexEntityList(indexEntityList);
 	    
         return tableEntity;
@@ -636,7 +626,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         return columnEntityList;
     }
     
-    private List<IndexEntity> getIndexEntityList(Long tableId) {
+    private List<IndexEntity> getIndexEntityList(Long tableId,  List<ColumnEntity> columnEntityList) {
         LeafCondition cond = new LeafCondition();
 	    cond.setColumnName("tableId");
 	    cond.setValue(tableId);
@@ -651,8 +641,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 		    
 		    List<IndexLineEntity> indexLineEntityList = indexLineMetadataRepository.find(subCond, IndexLineEntity.class);
 		    for (IndexLineEntity indexLineEntity : indexLineEntityList) {
-		    	ColumnEntity columnEntity = new ColumnEntity();
-		    	columnEntity.setId(indexLineEntity.getColumnId());
+		    	ColumnEntity columnEntity = columnEntityList.stream().filter(t -> t.getId().equals(indexLineEntity.getColumnId())).findFirst().get();
 		    	indexLineEntity.setColumnEntity(columnEntity);
 		    }
 		    
