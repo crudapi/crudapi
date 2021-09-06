@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Aug 05, 2021 at 05:09 AM
+-- Generation Time: Sep 06, 2021 at 09:45 AM
 -- Server version: 8.0.23
 -- PHP Version: 7.4.20
 
@@ -24,29 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ca_category`
---
-
-CREATE TABLE `ca_category` (
-  `id` bigint UNSIGNED NOT NULL COMMENT '编号',
-  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-  `fullTextBody` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
-  `createdDate` datetime NOT NULL COMMENT '创建时间',
-  `lastModifiedDate` datetime DEFAULT NULL COMMENT '修改时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分类';
-
---
--- Dumping data for table `ca_category`
---
-
-INSERT INTO `ca_category` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`) VALUES
-(1, '按摩足浴', '按摩足浴', '2021-07-25 22:23:58', NULL),
-(2, '美食餐厅', '美食餐厅', '2021-07-25 22:24:06', NULL),
-(3, '酒店民宿', '酒店民宿', '2021-07-25 22:24:31', NULL);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `ca_city`
 --
 
@@ -59,15 +36,6 @@ CREATE TABLE `ca_city` (
   `code` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `provinceId` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ca_city`
---
-
-INSERT INTO `ca_city` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`, `code`, `provinceId`) VALUES
-(19, '南京', NULL, '2021-02-08 17:02:05', NULL, NULL, 5),
-(20, '淮安', NULL, '2021-02-08 17:02:06', NULL, NULL, 5),
-(21, '徐州', NULL, '2021-02-08 17:02:06', NULL, NULL, 5);
 
 -- --------------------------------------------------------
 
@@ -84,14 +52,6 @@ CREATE TABLE `ca_district` (
   `code` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cityId` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ca_district`
---
-
-INSERT INTO `ca_district` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`, `code`, `cityId`) VALUES
-(12, '雨花台', NULL, '2021-02-08 17:02:05', NULL, NULL, 19),
-(13, '江宁', NULL, '2021-02-08 17:02:05', NULL, NULL, 19);
 
 -- --------------------------------------------------------
 
@@ -126,43 +86,6 @@ CREATE TABLE `ca_folder` (
   `lastModifiedDate` datetime DEFAULT NULL,
   `parentFolderId` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ca_merchant`
---
-
-CREATE TABLE `ca_merchant` (
-  `id` bigint UNSIGNED NOT NULL COMMENT '编号',
-  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-  `fullTextBody` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
-  `createdDate` datetime NOT NULL COMMENT '创建时间',
-  `lastModifiedDate` datetime DEFAULT NULL COMMENT '修改时间',
-  `openingHours` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '营业时间',
-  `phone` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '联系电话',
-  `address` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '门店地址',
-  `promotion` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '优惠信息',
-  `status` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '状态',
-  `categoryId` bigint DEFAULT NULL COMMENT '分类编号',
-  `userId` bigint NOT NULL COMMENT '用户编号'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商户';
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ca_merchantPhoto`
---
-
-CREATE TABLE `ca_merchantPhoto` (
-  `id` bigint UNSIGNED NOT NULL COMMENT '编号',
-  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-  `fullTextBody` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
-  `createdDate` datetime NOT NULL COMMENT '创建时间',
-  `lastModifiedDate` datetime DEFAULT NULL COMMENT '修改时间',
-  `merchantId` bigint DEFAULT NULL COMMENT '商户编号',
-  `imgUrl` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '图片链接'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商户照片行';
 
 -- --------------------------------------------------------
 
@@ -301,41 +224,6 @@ INSERT INTO `ca_meta_column` (`id`, `autoIncrement`, `caption`, `createdDate`, `
 (255, b'0', 'Enable', '2021-07-25 16:41:11.900000', 'INT', NULL, 'Enable', 11, NULL, NULL, NULL, b'1', '2021-07-25 16:41:37.922000', 10, 'enable', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 37),
 (256, b'0', 'Log', '2021-07-25 16:41:11.900000', 'TEXT', NULL, 'Log', 12, NULL, NULL, NULL, b'1', '2021-07-25 16:41:37.922000', NULL, 'log', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 37),
 (257, b'0', 'JsapiTicket', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'JsapiTicket', 13, NULL, NULL, NULL, b'1', '2021-07-25 16:41:37.922000', 400, 'jsapiTicket', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 37),
-(258, b'1', '编号', '2021-07-25 21:22:30.820000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-07-27 11:24:50.112000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', NULL, b'1', 38),
-(259, b'0', '名称', '2021-07-25 21:22:30.820000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-07-27 11:24:50.112000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'1', 38),
-(260, b'0', '全文索引', '2021-07-25 21:22:30.820000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-07-27 11:24:50.112000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 38),
-(261, b'0', '创建时间', '2021-07-25 21:22:30.820000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-07-27 11:24:50.112000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 38),
-(262, b'0', '修改时间', '2021-07-25 21:22:30.820000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-07-27 11:24:50.112000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 38),
-(263, b'0', '手机', '2021-07-25 21:22:30.820000', 'VARCHAR', NULL, '手机', 5, 'uq_mobile', NULL, 'UNIQUE', b'1', '2021-07-27 11:24:50.112000', 200, 'mobile', b'0', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 38),
-(264, b'0', '会员卡号', '2021-07-25 21:22:30.820000', 'VARCHAR', NULL, '会员卡号', 6, 'uq_membership_no', NULL, 'UNIQUE', b'1', '2021-07-27 11:24:50.112000', 200, 'membershipNo', b'0', NULL, b'1', NULL, 3, b'0', b'1', NULL, b'0', 38),
-(265, b'0', '会员等级', '2021-07-25 21:22:30.820000', 'VARCHAR', NULL, '等级', 7, NULL, NULL, NULL, b'1', '2021-07-27 11:24:50.112000', 200, 'membershipLevel', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 38),
-(266, b'0', '会员积分', '2021-07-25 21:22:30.820000', 'BIGINT', NULL, '会员积分', 8, NULL, NULL, NULL, b'1', '2021-07-27 11:24:50.112000', 20, 'membershipPoints', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 38),
-(267, b'0', '用户编号', '2021-07-25 21:25:53.687000', 'BIGINT', NULL, '用户编号', 10, 'uq_user_id', 'BTREE', 'UNIQUE', b'1', '2021-07-27 11:24:50.112000', 20, 'userId', b'0', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 38),
-(268, b'0', '有效期', '2021-07-25 21:57:02.694000', 'DATETIME', NULL, '有效期', 9, NULL, NULL, NULL, b'1', '2021-07-27 11:24:50.112000', NULL, 'ExpiresIn', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 38),
-(269, b'1', '编号', '2021-07-25 22:02:23.362000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-07-27 11:26:11.767000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', NULL, b'1', 39),
-(270, b'0', '名称', '2021-07-25 22:02:23.362000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'1', 39),
-(271, b'0', '全文索引', '2021-07-25 22:02:23.362000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-07-27 11:26:11.767000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 39),
-(272, b'0', '创建时间', '2021-07-25 22:02:23.362000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-07-27 11:26:11.767000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 39),
-(273, b'0', '修改时间', '2021-07-25 22:02:23.362000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-07-27 11:26:11.767000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 39),
-(274, b'0', '营业时间', '2021-07-25 22:02:23.362000', 'VARCHAR', NULL, '营业时间', 5, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 200, 'openingHours', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(275, b'0', '联系电话', '2021-07-25 22:02:23.362000', 'VARCHAR', NULL, '联系电话', 6, 'uq_phone', NULL, 'UNIQUE', b'1', '2021-07-27 11:26:11.767000', 200, 'phone', b'0', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(276, b'0', '门店地址', '2021-07-25 22:02:23.362000', 'VARCHAR', NULL, '门店地址', 7, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 200, 'address', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(277, b'0', '优惠信息', '2021-07-25 22:02:23.362000', 'VARCHAR', NULL, '优惠信息', 8, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 200, 'promotion', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(278, b'0', '状态', '2021-07-25 22:02:48.225000', 'VARCHAR', NULL, '状态', 10, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 200, 'status', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(279, b'1', '编号', '2021-07-25 22:07:49.970000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-07-25 22:28:12.819000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', NULL, b'1', 40),
-(280, b'0', '名称', '2021-07-25 22:07:49.970000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-07-25 22:28:12.819000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'1', 40),
-(281, b'0', '全文索引', '2021-07-25 22:07:49.970000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-07-25 22:28:12.819000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 40),
-(282, b'0', '创建时间', '2021-07-25 22:07:49.970000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-07-25 22:28:12.819000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 40),
-(283, b'0', '修改时间', '2021-07-25 22:07:49.970000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-07-25 22:28:12.819000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 40),
-(284, b'0', '商户编号', '2021-07-25 22:07:49.970000', 'BIGINT', NULL, '商户编号', 5, NULL, NULL, NULL, b'1', '2021-07-25 22:28:12.819000', 20, 'merchantId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 40),
-(285, b'0', '图片链接', '2021-07-25 22:07:49.970000', 'ATTACHMENT', NULL, '图片链接', 6, NULL, NULL, NULL, b'1', '2021-07-25 22:28:12.819000', 1000, 'imgUrl', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 40),
-(286, b'1', '编号', '2021-07-25 22:23:43.705000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-07-25 22:23:43.705000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', NULL, b'1', 41),
-(287, b'0', '名称', '2021-07-25 22:23:43.705000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-07-25 22:23:43.705000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'1', 41),
-(288, b'0', '全文索引', '2021-07-25 22:23:43.705000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-07-25 22:23:43.705000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 41),
-(289, b'0', '创建时间', '2021-07-25 22:23:43.705000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-07-25 22:23:43.705000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 41),
-(290, b'0', '修改时间', '2021-07-25 22:23:43.705000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-07-25 22:23:43.705000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 41),
-(291, b'0', '分类编号', '2021-07-25 22:25:10.900000', 'BIGINT', NULL, '分类编号', 9, NULL, NULL, NULL, b'1', '2021-07-27 11:26:11.767000', 20, 'categoryId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
-(292, b'0', '用户编号', '2021-07-26 15:26:54.695000', 'BIGINT', NULL, '用户编号', 11, 'uq_user_id', NULL, 'UNIQUE', b'1', '2021-07-27 11:26:11.767000', 20, 'userId', b'0', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 39),
 (293, b'1', '编号', '2021-07-27 15:46:57.240000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-07-27 15:46:57.240000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', NULL, b'1', 42),
 (294, b'0', '名称', '2021-07-27 15:46:57.240000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-07-27 15:46:57.240000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'1', 42),
 (295, b'0', '全文索引', '2021-07-27 15:46:57.240000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-07-27 15:46:57.240000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 42),
@@ -351,7 +239,31 @@ INSERT INTO `ca_meta_column` (`id`, `autoIncrement`, `caption`, `createdDate`, `
 (305, b'0', '修改时间', '2021-07-28 10:56:47.092000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-07-28 10:56:47.092000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', NULL, b'1', 43),
 (306, b'0', '签名', '2021-07-28 10:56:47.092000', 'VARCHAR', NULL, '签名', 5, NULL, NULL, NULL, b'1', '2021-07-28 10:56:47.092000', 200, 'sign', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 43),
 (307, b'0', '模板', '2021-07-28 10:56:47.092000', 'VARCHAR', NULL, '模板', 6, NULL, NULL, NULL, b'1', '2021-07-28 10:56:47.092000', 200, 'template', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 43),
-(308, b'0', '短信配置编号', '2021-07-28 10:56:47.092000', 'BIGINT', NULL, '短信配置编号', 7, NULL, NULL, NULL, b'1', '2021-07-28 10:56:47.092000', 20, 'smsConfigId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 43);
+(308, b'0', '短信配置编号', '2021-07-28 10:56:47.092000', 'BIGINT', NULL, '短信配置编号', 7, NULL, NULL, NULL, b'1', '2021-07-28 10:56:47.092000', 20, 'smsConfigId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', NULL, b'0', 43),
+(432, b'1', '编号', '2021-09-02 15:30:37.086000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-09-06 17:30:59.446000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', b'0', b'0', 62),
+(433, b'0', '名称', '2021-09-02 15:30:37.086000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-09-06 17:30:59.446000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'0', 62),
+(434, b'0', '全文索引', '2021-09-02 15:30:37.086000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-09-06 17:30:59.446000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 62),
+(435, b'0', '创建时间', '2021-09-02 15:30:37.086000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-09-06 17:30:59.446000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 62),
+(436, b'0', '修改时间', '2021-09-02 15:30:37.086000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-09-06 17:30:59.446000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 62),
+(437, b'1', '编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', b'0', '2021-09-02 15:34:04.947000', 20, 'id', b'0', NULL, b'0', NULL, NULL, b'1', b'0', b'0', b'0', 63),
+(438, b'0', '名称', '2021-09-02 15:34:04.947000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, b'1', '2021-09-02 15:34:04.947000', 200, 'name', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'0', 63),
+(439, b'0', '全文索引', '2021-09-02 15:34:04.947000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', b'0', '2021-09-02 15:34:04.947000', NULL, 'fullTextBody', b'1', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 63),
+(440, b'0', '创建时间', '2021-09-02 15:34:04.947000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, b'0', '2021-09-02 15:34:04.947000', NULL, 'createdDate', b'0', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 63),
+(441, b'0', '修改时间', '2021-09-02 15:34:04.947000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, b'0', '2021-09-02 15:34:04.947000', NULL, 'lastModifiedDate', b'1', NULL, b'0', NULL, NULL, b'0', b'0', b'0', b'0', 63),
+(442, b'0', '模块编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '模块编号', 5, NULL, NULL, NULL, b'1', '2021-09-02 15:34:04.947000', 20, 'moduleId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 63),
+(443, b'0', '表编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '表编号', 6, NULL, NULL, NULL, b'1', '2021-09-02 15:34:04.947000', 20, 'tableId', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 63),
+(461, b'1', '编号', '2021-09-02 15:59:07.090000', 'BIGINT', NULL, '编号', 0, NULL, NULL, 'PRIMARY', b'1', '2021-09-06 16:20:28.739000', NULL, 'id', b'0', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(462, b'0', '中文名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '中文名称', 2, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', 255, 'caption', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'0', 66),
+(463, b'0', '是否创建物理表', '2021-09-02 15:59:07.090000', 'BOOL', NULL, '是否创建物理表', 3, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', NULL, 'createPhysicalTable', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(464, b'0', '创建时间', '2021-09-02 15:59:07.090000', 'DATETIME', NULL, '创建时间', 4, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', 6, 'createdDate', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(465, b'0', '描述', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '描述', 5, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', 255, 'description', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(466, b'0', '引擎', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '引擎', 6, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', 255, 'engine', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(467, b'0', '修改时间', '2021-09-02 15:59:07.090000', 'DATETIME', NULL, '修改时间', 7, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', 6, 'lastModifiedDate', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(468, b'0', '英文名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '英文名称', 1, 'uq_bsm_table_name', 'BTREE', 'UNIQUE', b'1', '2021-09-06 16:20:28.739000', 255, 'name', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'1', b'0', 66),
+(469, b'0', '英文复数', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '英文复数', 8, 'uq_bsm_table_plural_name', 'BTREE', 'UNIQUE', b'1', '2021-09-06 16:20:28.739000', 255, 'pluralName', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(470, b'0', '物理表名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '物理表名称', 9, 'uq_bsm_table_table_name', 'BTREE', 'UNIQUE', b'1', '2021-09-06 16:20:28.739000', 255, 'tableName', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(471, b'0', '是否系统表', '2021-09-02 15:59:07.090000', 'BOOL', NULL, '是否系统表', 10, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', NULL, 'systemable', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66),
+(473, b'0', '是否只读', '2021-09-06 16:10:31.028000', 'BOOL', NULL, '是否只读', 11, NULL, NULL, NULL, b'1', '2021-09-06 16:20:28.739000', NULL, 'readOnly', b'1', NULL, b'1', NULL, NULL, b'0', b'1', b'0', b'0', 66);
 
 -- --------------------------------------------------------
 
@@ -432,31 +344,31 @@ CREATE TABLE `ca_meta_table` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pluralName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tableName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `systemable` bit(1) DEFAULT NULL
+  `systemable` bit(1) DEFAULT NULL,
+  `readOnly` bit(1) DEFAULT NULL COMMENT '是否只读'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `ca_meta_table`
 --
 
-INSERT INTO `ca_meta_table` (`id`, `caption`, `createPhysicalTable`, `createdDate`, `description`, `engine`, `lastModifiedDate`, `name`, `pluralName`, `tableName`, `systemable`) VALUES
-(1, '用户', b'1', '2020-12-23 17:06:29.161000', '用户', 'INNODB', '2021-08-05 10:52:53.955000', 'user', 'users', 'spring_user', b'1'),
-(2, '角色', b'1', '2021-02-01 10:51:21.324000', '角色', 'INNODB', '2021-08-05 10:53:53.426000', 'role', 'roles', 'spring_role', b'1'),
-(3, '资源', b'1', '2021-02-01 10:54:05.668000', '资源', 'INNODB', '2021-02-05 17:52:19.025000', 'resource', 'resources', 'spring_resource', b'1'),
-(4, '用户角色行', b'1', '2021-02-01 11:11:15.312000', '用户角色行', 'INNODB', '2021-02-01 11:11:15.312000', 'userRoleLine', 'userRoleLines', 'ca_userRoleLine', b'1'),
-(5, '角色资源行', b'1', '2021-02-01 11:27:24.848000', '角色资源行', 'INNODB', '2021-02-03 16:43:36.315000', 'roleResourceLine', 'roleResourceLines', 'ca_roleResourceLine', b'1'),
-(19, '省', b'1', '2021-02-07 11:57:10.121000', '', 'INNODB', '2021-02-07 15:25:57.159000', 'province', 'provinces', 'ca_province', NULL),
-(20, '市', b'1', '2021-02-07 11:59:06.946000', '', 'INNODB', '2021-02-08 16:21:31.003000', 'city', 'cities', 'ca_city', NULL),
-(22, '区', b'1', '2021-02-07 15:25:23.709000', '', 'INNODB', '2021-08-05 10:38:57.082000', 'district', 'districts', 'ca_district', NULL),
-(24, '文件', b'1', '2021-02-08 11:09:32.053000', '', 'INNODB', '2021-02-09 14:33:24.635000', 'file', 'files', 'ca_file', NULL),
-(34, '目录', b'1', '2021-02-09 14:21:40.991000', '', 'INNODB', '2021-02-09 14:21:40.991000', 'folder', 'folders', 'ca_folder', NULL),
-(37, '微信配置', b'1', '2021-07-25 16:41:11.888000', '', 'INNODB', '2021-07-25 16:41:37.914000', 'weixinConfig', 'weixinConfigs', 'ca_weixinConfig', NULL),
-(38, '联盟卡', b'1', '2021-07-25 21:22:30.812000', '', 'INNODB', '2021-07-27 11:24:50.104000', 'unionCard', 'unionCards', 'ca_unionCard', NULL),
-(39, '商户', b'1', '2021-07-25 22:02:23.359000', '', 'INNODB', '2021-07-27 11:26:11.761000', 'merchant', 'merchants', 'ca_merchant', NULL),
-(40, '商户照片', b'1', '2021-07-25 22:07:49.967000', '', 'INNODB', '2021-07-25 22:28:12.813000', 'merchantPhoto', 'merchantPhotos', 'ca_merchantPhoto', NULL),
-(41, '分类', b'1', '2021-07-25 22:23:43.697000', '', 'INNODB', '2021-07-25 22:23:43.697000', 'category', 'categories', 'ca_category', NULL),
-(42, '短信配置', b'1', '2021-07-27 15:46:57.227000', '', 'INNODB', '2021-07-27 15:46:57.227000', 'smsConfig', 'smsConfigs', 'ca_smsConfig', NULL),
-(43, '短信模板', b'1', '2021-07-28 10:56:47.080000', '', 'INNODB', '2021-07-28 10:56:47.080000', 'smsTemplate', 'smsTemplates', 'ca_smsTemplate', NULL);
+INSERT INTO `ca_meta_table` (`id`, `caption`, `createPhysicalTable`, `createdDate`, `description`, `engine`, `lastModifiedDate`, `name`, `pluralName`, `tableName`, `systemable`, `readOnly`) VALUES
+(1, '用户', b'1', '2020-12-23 17:06:29.161000', '用户', 'INNODB', '2021-08-05 10:52:53.955000', 'user', 'users', 'spring_user', b'1', b'0'),
+(2, '角色', b'1', '2021-02-01 10:51:21.324000', '角色', 'INNODB', '2021-08-05 10:53:53.426000', 'role', 'roles', 'spring_role', b'1', b'0'),
+(3, '资源', b'1', '2021-02-01 10:54:05.668000', '资源', 'INNODB', '2021-02-05 17:52:19.025000', 'resource', 'resources', 'spring_resource', b'1', b'0'),
+(4, '用户角色行', b'1', '2021-02-01 11:11:15.312000', '用户角色行', 'INNODB', '2021-02-01 11:11:15.312000', 'userRoleLine', 'userRoleLines', 'ca_userRoleLine', b'1', b'0'),
+(5, '角色资源行', b'1', '2021-02-01 11:27:24.848000', '角色资源行', 'INNODB', '2021-02-03 16:43:36.315000', 'roleResourceLine', 'roleResourceLines', 'ca_roleResourceLine', b'1', b'0'),
+(19, '省', b'1', '2021-02-07 11:57:10.121000', '', 'INNODB', '2021-02-07 15:25:57.159000', 'province', 'provinces', 'ca_province', b'1', b'0'),
+(20, '市', b'1', '2021-02-07 11:59:06.946000', '', 'INNODB', '2021-02-08 16:21:31.003000', 'city', 'cities', 'ca_city', b'1', b'0'),
+(22, '区', b'1', '2021-02-07 15:25:23.709000', '', 'INNODB', '2021-08-05 10:38:57.082000', 'district', 'districts', 'ca_district', b'1', b'0'),
+(24, '文件', b'1', '2021-02-08 11:09:32.053000', '', 'INNODB', '2021-02-09 14:33:24.635000', 'file', 'files', 'ca_file', b'1', b'0'),
+(34, '目录', b'1', '2021-02-09 14:21:40.991000', '', 'INNODB', '2021-02-09 14:21:40.991000', 'folder', 'folders', 'ca_folder', b'1', b'0'),
+(37, '微信配置', b'1', '2021-07-25 16:41:11.888000', '', 'INNODB', '2021-07-25 16:41:37.914000', 'weixinConfig', 'weixinConfigs', 'ca_weixinConfig', b'1', b'0'),
+(42, '短信配置', b'1', '2021-07-27 15:46:57.227000', '', 'INNODB', '2021-07-27 15:46:57.227000', 'smsConfig', 'smsConfigs', 'ca_smsConfig', b'1', b'0'),
+(43, '短信模板', b'1', '2021-07-28 10:56:47.080000', '', 'INNODB', '2021-07-28 10:56:47.080000', 'smsTemplate', 'smsTemplates', 'ca_smsTemplate', b'1', b'0'),
+(62, '模块', b'1', '2021-09-02 15:30:37.082000', '', 'INNODB', '2021-09-06 17:30:59.436000', 'module', 'modules', 'ca_sys_module', b'1', NULL),
+(63, '模块行', b'1', '2021-09-02 15:34:04.944000', '', 'INNODB', '2021-09-02 15:34:04.944000', 'moduleLine', 'moduleLines', 'ca_sys_moduleLine', b'1', b'0'),
+(66, '表', b'1', '2021-09-02 15:59:07.087000', '', 'INNODB', '2021-09-06 16:20:28.729000', 'table', 'tables', 'ca_meta_table', b'1', b'1');
 
 -- --------------------------------------------------------
 
@@ -492,13 +404,9 @@ INSERT INTO `ca_meta_table_relation` (`id`, `caption`, `createdDate`, `descripti
 (7, '头像', '2021-02-08 16:29:32.448000', NULL, '2021-02-08 16:29:32.448000', 'avatar', 'ManyToOne', 219, 1, 192, 24),
 (8, '子目录', '2021-02-09 14:23:10.748000', NULL, '2021-02-09 14:23:10.748000', 'childrenFolders', 'OneToMany', 220, 34, 225, 34),
 (13, '文件', '2021-02-09 14:33:59.185000', NULL, '2021-02-09 14:33:59.185000', 'files', 'OneToMany', 220, 34, 226, 24),
-(14, '用户', '2021-07-25 21:29:35.619000', NULL, '2021-07-25 21:29:35.619000', 'user', 'OneToOneSubToMain', 267, 38, 1, 1),
-(15, '商户图片', '2021-07-25 22:09:17.891000', NULL, '2021-07-25 22:09:23.126000', 'photos', 'OneToMany', 269, 39, 284, 40),
-(16, '商户', '2021-07-25 22:10:21.474000', NULL, '2021-07-25 22:10:21.474000', 'merchant', 'ManyToOne', 284, 40, 269, 39),
-(17, '商户', '2021-07-25 22:26:47.611000', NULL, '2021-07-25 22:26:47.611000', 'merchants', 'OneToMany', 286, 41, 291, 39),
-(18, '分类', '2021-07-25 22:27:10.967000', NULL, '2021-07-25 22:27:10.967000', 'category', 'ManyToOne', 291, 39, 286, 41),
-(19, '用户', '2021-07-26 15:27:34.915000', NULL, '2021-07-26 15:35:01.207000', 'user', 'OneToOneSubToMain', 292, 39, 1, 1),
-(21, '模板', '2021-07-28 10:57:17.116000', NULL, '2021-07-28 11:00:32.970000', 'templates', 'OneToMany', 293, 42, 308, 43);
+(21, '模板', '2021-07-28 10:57:17.116000', NULL, '2021-07-28 11:00:32.970000', 'templates', 'OneToMany', 293, 42, 308, 43),
+(22, '模块行', '2021-09-02 16:03:43.184000', NULL, '2021-09-02 16:03:43.184000', 'moduleLines', 'OneToMany', 432, 62, 442, 63),
+(23, '表', '2021-09-02 16:04:27.912000', NULL, '2021-09-02 16:04:27.912000', 'table', 'ManyToOne', 443, 63, 461, 66);
 
 -- --------------------------------------------------------
 
@@ -514,13 +422,6 @@ CREATE TABLE `ca_province` (
   `lastModifiedDate` datetime DEFAULT NULL,
   `code` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ca_province`
---
-
-INSERT INTO `ca_province` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`, `code`) VALUES
-(5, '江苏', '江苏', '2021-02-08 17:02:05', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -583,22 +484,59 @@ CREATE TABLE `ca_smsTemplate` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ca_unionCard`
+-- Table structure for table `ca_sys_module`
 --
 
-CREATE TABLE `ca_unionCard` (
+CREATE TABLE `ca_sys_module` (
   `id` bigint UNSIGNED NOT NULL COMMENT '编号',
-  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-  `fullTextBody` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
+  `fullTextBody` text COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
+  `createdDate` datetime NOT NULL COMMENT '创建时间',
+  `lastModifiedDate` datetime DEFAULT NULL COMMENT '修改时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模块';
+
+--
+-- Dumping data for table `ca_sys_module`
+--
+
+INSERT INTO `ca_sys_module` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`) VALUES
+(1, '字典', '字典 bg-teal', '2021-09-02 16:05:41', '2021-09-03 16:51:05'),
+(2, '文件', '文件 bg-primary', '2021-09-02 16:07:22', '2021-09-03 16:50:40'),
+(3, '用户管理', '用户管理 bg-purple', '2021-09-03 16:47:49', '2021-09-03 16:49:51'),
+(4, '微信', '微信', '2021-09-03 17:21:09', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ca_sys_moduleLine`
+--
+
+CREATE TABLE `ca_sys_moduleLine` (
+  `id` bigint UNSIGNED NOT NULL COMMENT '编号',
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
+  `fullTextBody` text COLLATE utf8mb4_unicode_ci COMMENT '全文索引',
   `createdDate` datetime NOT NULL COMMENT '创建时间',
   `lastModifiedDate` datetime DEFAULT NULL COMMENT '修改时间',
-  `mobile` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '手机',
-  `membershipNo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '会员卡号',
-  `membershipLevel` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会员等级',
-  `membershipPoints` bigint DEFAULT NULL COMMENT '会员积分',
-  `userId` bigint NOT NULL COMMENT '用户编号',
-  `ExpiresIn` datetime DEFAULT NULL COMMENT '有效期'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='联盟卡';
+  `moduleId` bigint DEFAULT NULL COMMENT '模块编号',
+  `tableId` bigint DEFAULT NULL COMMENT '表编号'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模块行';
+
+--
+-- Dumping data for table `ca_sys_moduleLine`
+--
+
+INSERT INTO `ca_sys_moduleLine` (`id`, `name`, `fullTextBody`, `createdDate`, `lastModifiedDate`, `moduleId`, `tableId`) VALUES
+(1, '省', '省 1 19', '2021-09-02 16:05:42', '2021-09-03 16:51:05', 1, 19),
+(2, '市', '市 1 20', '2021-09-02 16:05:42', '2021-09-03 16:51:05', 1, 20),
+(3, '区', '区 1 22', '2021-09-02 16:05:42', '2021-09-03 16:51:05', 1, 22),
+(4, '文件', '文件 2 24', '2021-09-02 16:07:22', '2021-09-03 16:50:40', 2, 24),
+(5, '目录', '目录 2 34', '2021-09-02 16:07:22', '2021-09-03 16:50:40', 2, 34),
+(6, '用户', '用户 3 1', '2021-09-03 16:47:49', '2021-09-03 16:49:51', 3, 1),
+(7, '角色', '角色 3 2', '2021-09-03 16:47:49', '2021-09-06 16:30:46', 3, 2),
+(8, '资源', '资源 3 3', '2021-09-03 16:47:49', '2021-09-03 16:49:51', 3, 3),
+(9, '用户角色行', '用户角色行 3 4', '2021-09-03 16:47:49', '2021-09-03 16:49:51', 3, 4),
+(10, '角色资源行', '角色资源行 3 5', '2021-09-03 16:47:49', '2021-09-03 16:49:51', 3, 5),
+(11, '微信配置', '微信配置 4 37', '2021-09-03 17:21:09', NULL, 4, 37);
 
 -- --------------------------------------------------------
 
@@ -728,13 +666,6 @@ CREATE TABLE `SPRING_SESSION` (
   `PRINCIPAL_NAME` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
---
--- Dumping data for table `SPRING_SESSION`
---
-
-INSERT INTO `SPRING_SESSION` (`PRIMARY_ID`, `SESSION_ID`, `CREATION_TIME`, `LAST_ACCESS_TIME`, `MAX_INACTIVE_INTERVAL`, `EXPIRY_TIME`, `PRINCIPAL_NAME`) VALUES
-('6d216c27-632c-4667-955d-87d4688c636d', '89f040f1-7e11-445f-9dc6-fefc4bc4465a', 1628139848527, 1628139998837, 3600, 1628143598837, 'superadmin');
-
 -- --------------------------------------------------------
 
 --
@@ -746,13 +677,6 @@ CREATE TABLE `SPRING_SESSION_ATTRIBUTES` (
   `ATTRIBUTE_NAME` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `ATTRIBUTE_BYTES` blob NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
-
---
--- Dumping data for table `SPRING_SESSION_ATTRIBUTES`
---
-
-INSERT INTO `SPRING_SESSION_ATTRIBUTES` (`SESSION_PRIMARY_ID`, `ATTRIBUTE_NAME`, `ATTRIBUTE_BYTES`) VALUES
-('6d216c27-632c-4667-955d-87d4688c636d', 'SPRING_SECURITY_CONTEXT', 0xaced00057372003d6f72672e737072696e676672616d65776f726b2e73656375726974792e636f72652e636f6e746578742e5365637572697479436f6e74657874496d706c00000000000002080200014c000e61757468656e7469636174696f6e7400324c6f72672f737072696e676672616d65776f726b2f73656375726974792f636f72652f41757468656e7469636174696f6e3b78707372004f6f72672e737072696e676672616d65776f726b2e73656375726974792e61757468656e7469636174696f6e2e557365726e616d6550617373776f726441757468656e7469636174696f6e546f6b656e00000000000002080200024c000b63726564656e7469616c737400124c6a6176612f6c616e672f4f626a6563743b4c00097072696e636970616c71007e0004787200476f72672e737072696e676672616d65776f726b2e73656375726974792e61757468656e7469636174696f6e2e416273747261637441757468656e7469636174696f6e546f6b656ed3aa287e6e47640e0200035a000d61757468656e746963617465644c000b617574686f7269746965737400164c6a6176612f7574696c2f436f6c6c656374696f6e3b4c000764657461696c7371007e0004787001737200266a6176612e7574696c2e436f6c6c656374696f6e7324556e6d6f6469666961626c654c697374fc0f2531b5ec8e100200014c00046c6973747400104c6a6176612f7574696c2f4c6973743b7872002c6a6176612e7574696c2e436f6c6c656374696f6e7324556e6d6f6469666961626c65436f6c6c656374696f6e19420080cb5ef71e0200014c00016371007e00067870737200136a6176612e7574696c2e41727261794c6973747881d21d99c7619d03000149000473697a657870000000017704000000017372002b636e2e637275646170692e73656375726974792e64746f2e4772616e746564417574686f7269747944544f00000000000000010200014c0009617574686f726974797400124c6a6176612f6c616e672f537472696e673b7870740010524f4c455f53555045525f41444d494e7871007e000d73720038636e2e637275646170692e73656375726974792e636f6d706f6e656e742e436157656241757468656e7469636174696f6e44657461696c7300000000000000010200015a0010696d616765436f646549735269676874787200486f72672e737072696e676672616d65776f726b2e73656375726974792e7765622e61757468656e7469636174696f6e2e57656241757468656e7469636174696f6e44657461696c7300000000000002080200024c000d72656d6f74654164647265737371007e000f4c000973657373696f6e496471007e000f78707400093132372e302e302e317001707372001f636e2e637275646170692e73656375726974792e64746f2e5573657244544f00000000000000010200115a00116163636f756e744e6f6e457870697265645a00106163636f756e744e6f6e4c6f636b65645a001563726564656e7469616c734e6f6e457870697265645a0007656e61626c65644c000b617574686f72697469657371007e00094c000c636c6561727465787450776471007e000f4c0005656d61696c71007e000f4c000269647400104c6a6176612f6c616e672f4c6f6e673b4c00066d6f62696c6571007e000f4c00046e616d6571007e000f4c00066f70656e496471007e000f4c000870617373776f726471007e000f4c00087265616c6e616d6571007e000f4c00097265736f757263657371007e00094c0005726f6c657371007e00094c0005746f6b656e71007e000f4c0008757365726e616d6571007e000f7870010101017371007e000c0000000177040000000171007e001078707400046e756c6c7372000e6a6176612e6c616e672e4c6f6e673b8be490cc8f23df0200014a000576616c7565787200106a6176612e6c616e672e4e756d62657286ac951d0b94e08b0200007870000000000000000174000b313131313131313131313174000fe8b685e7baa7e7aea1e79086e5919871007e001a74003c24326124313024523948576f747170587a6d4c4f553061596c466b7175786373306a7137663172614b48486e736266543531674d3954462e3271377174000fe8b685e7baa7e7aea1e79086e591987371007e000c00000000770400000000787371007e000c000000017704000000017372001f636e2e637275646170692e73656375726974792e64746f2e526f6c6544544f00000000000000010200034c0004636f646571007e000f4c0002696471007e00174c00046e616d6571007e000f787071007e00117371007e001b000000000000000b74000fe8b685e7baa7e7aea1e79086e5919878740020313039346132633565353763346337666133393232643639623031326366613774000a737570657261646d696e);
 
 -- --------------------------------------------------------
 
@@ -793,13 +717,6 @@ INSERT INTO `spring_user` (`id`, `openId`, `username`, `realname`, `mobile`, `em
 --
 
 --
--- Indexes for table `ca_category`
---
-ALTER TABLE `ca_category`
-  ADD PRIMARY KEY (`id`);
-ALTER TABLE `ca_category` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
-
---
 -- Indexes for table `ca_city`
 --
 ALTER TABLE `ca_city`
@@ -828,71 +745,55 @@ ALTER TABLE `ca_folder`
 ALTER TABLE `ca_folder` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
 
 --
--- Indexes for table `ca_merchant`
---
-ALTER TABLE `ca_merchant`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_phone` (`phone`),
-  ADD UNIQUE KEY `uq_user_id` (`userId`);
-ALTER TABLE `ca_merchant` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
-
---
--- Indexes for table `ca_merchantPhoto`
---
-ALTER TABLE `ca_merchantPhoto`
-  ADD PRIMARY KEY (`id`);
-ALTER TABLE `ca_merchantPhoto` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
-
---
 -- Indexes for table `ca_meta_column`
 --
 ALTER TABLE `ca_meta_column`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_cam_column_name` (`tableId`,`name`),
-  ADD UNIQUE KEY `uq_cam_column_index_name` (`tableId`,`indexName`),
-  ADD KEY `fk_cam_column_seq_id` (`seqId`);
+  ADD UNIQUE KEY `uq_bsm_column_name` (`tableId`,`name`),
+  ADD UNIQUE KEY `uq_bsm_column_index_name` (`tableId`,`indexName`),
+  ADD KEY `fk_bsm_column_seq_id` (`seqId`);
 
 --
 -- Indexes for table `ca_meta_index`
 --
 ALTER TABLE `ca_meta_index`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_cam_index_name` (`tableId`,`name`);
+  ADD UNIQUE KEY `uq_bsm_index_name` (`tableId`,`name`);
 
 --
 -- Indexes for table `ca_meta_index_line`
 --
 ALTER TABLE `ca_meta_index_line`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_cam_index_line_column_id` (`columnId`),
-  ADD KEY `fk_cam_index_line_index_id` (`indexId`);
+  ADD KEY `fk_bsm_index_line_column_id` (`columnId`),
+  ADD KEY `fk_bsm_index_line_index_id` (`indexId`);
 
 --
 -- Indexes for table `ca_meta_sequence`
 --
 ALTER TABLE `ca_meta_sequence`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_cam_sequence_name` (`name`);
+  ADD UNIQUE KEY `uq_bsm_sequence_name` (`name`);
 
 --
 -- Indexes for table `ca_meta_table`
 --
 ALTER TABLE `ca_meta_table`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_cam_table_name` (`name`),
-  ADD UNIQUE KEY `uq_cam_table_plural_name` (`pluralName`),
-  ADD UNIQUE KEY `uq_cam_table_table_name` (`tableName`);
+  ADD UNIQUE KEY `uq_bsm_table_name` (`name`),
+  ADD UNIQUE KEY `uq_bsm_table_plural_name` (`pluralName`),
+  ADD UNIQUE KEY `uq_bsm_table_table_name` (`tableName`);
 
 --
 -- Indexes for table `ca_meta_table_relation`
 --
 ALTER TABLE `ca_meta_table_relation`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_cam_table_relation` (`fromTableId`,`toTableId`,`relationType`) USING BTREE,
-  ADD KEY `fk_cam_table_relation_from_table_id` (`fromTableId`),
-  ADD KEY `fk_cam_table_relation_to_table_id` (`toTableId`),
-  ADD KEY `fk_cam_table_relation_from_column_id` (`fromColumnId`),
-  ADD KEY `fk_cam_table_relation_to_column_id` (`toColumnId`);
+  ADD UNIQUE KEY `uq_bsm_table_relation` (`fromTableId`,`toTableId`,`relationType`) USING BTREE,
+  ADD KEY `fk_bsm_table_relation_from_table_id` (`fromTableId`),
+  ADD KEY `fk_bsm_table_relation_to_table_id` (`toTableId`),
+  ADD KEY `fk_bsm_table_relation_from_column_id` (`fromColumnId`),
+  ADD KEY `fk_bsm_table_relation_to_column_id` (`toColumnId`);
 
 --
 -- Indexes for table `ca_province`
@@ -923,14 +824,18 @@ ALTER TABLE `ca_smsTemplate`
 ALTER TABLE `ca_smsTemplate` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
 
 --
--- Indexes for table `ca_unionCard`
+-- Indexes for table `ca_sys_module`
 --
-ALTER TABLE `ca_unionCard`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_user_id` (`userId`) USING BTREE,
-  ADD UNIQUE KEY `uq_mobile` (`mobile`),
-  ADD UNIQUE KEY `uq_membership_no` (`membershipNo`);
-ALTER TABLE `ca_unionCard` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
+ALTER TABLE `ca_sys_module`
+  ADD PRIMARY KEY (`id`);
+ALTER TABLE `ca_sys_module` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
+
+--
+-- Indexes for table `ca_sys_moduleLine`
+--
+ALTER TABLE `ca_sys_moduleLine`
+  ADD PRIMARY KEY (`id`);
+ALTER TABLE `ca_sys_moduleLine` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
 
 --
 -- Indexes for table `ca_userRoleLine`
@@ -1000,12 +905,6 @@ ALTER TABLE `spring_user` ADD FULLTEXT KEY `ft_fulltext_body` (`fullTextBody`);
 --
 
 --
--- AUTO_INCREMENT for table `ca_category`
---
-ALTER TABLE `ca_category`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=4;
-
---
 -- AUTO_INCREMENT for table `ca_city`
 --
 ALTER TABLE `ca_city`
@@ -1030,34 +929,22 @@ ALTER TABLE `ca_folder`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `ca_merchant`
---
-ALTER TABLE `ca_merchant`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=20;
-
---
--- AUTO_INCREMENT for table `ca_merchantPhoto`
---
-ALTER TABLE `ca_merchantPhoto`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=6;
-
---
 -- AUTO_INCREMENT for table `ca_meta_column`
 --
 ALTER TABLE `ca_meta_column`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=309;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=480;
 
 --
 -- AUTO_INCREMENT for table `ca_meta_index`
 --
 ALTER TABLE `ca_meta_index`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `ca_meta_index_line`
 --
 ALTER TABLE `ca_meta_index_line`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `ca_meta_sequence`
@@ -1069,13 +956,13 @@ ALTER TABLE `ca_meta_sequence`
 -- AUTO_INCREMENT for table `ca_meta_table`
 --
 ALTER TABLE `ca_meta_table`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `ca_meta_table_relation`
 --
 ALTER TABLE `ca_meta_table_relation`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `ca_province`
@@ -1102,10 +989,16 @@ ALTER TABLE `ca_smsTemplate`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `ca_unionCard`
+-- AUTO_INCREMENT for table `ca_sys_module`
 --
-ALTER TABLE `ca_unionCard`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=24;
+ALTER TABLE `ca_sys_module`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `ca_sys_moduleLine`
+--
+ALTER TABLE `ca_sys_moduleLine`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编号', AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `ca_userRoleLine`
@@ -1135,7 +1028,7 @@ ALTER TABLE `spring_role`
 -- AUTO_INCREMENT for table `spring_user`
 --
 ALTER TABLE `spring_user`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Constraints for dumped tables
@@ -1145,30 +1038,30 @@ ALTER TABLE `spring_user`
 -- Constraints for table `ca_meta_column`
 --
 ALTER TABLE `ca_meta_column`
-  ADD CONSTRAINT `fk_cam_column_seq_id` FOREIGN KEY (`seqId`) REFERENCES `ca_meta_sequence` (`id`),
-  ADD CONSTRAINT `fk_cam_column_table_id` FOREIGN KEY (`tableId`) REFERENCES `ca_meta_table` (`id`);
+  ADD CONSTRAINT `fk_bsm_column_seq_id` FOREIGN KEY (`seqId`) REFERENCES `ca_meta_sequence` (`id`),
+  ADD CONSTRAINT `fk_bsm_column_table_id` FOREIGN KEY (`tableId`) REFERENCES `ca_meta_table` (`id`);
 
 --
 -- Constraints for table `ca_meta_index`
 --
 ALTER TABLE `ca_meta_index`
-  ADD CONSTRAINT `fk_cam_index_table_id` FOREIGN KEY (`tableId`) REFERENCES `ca_meta_table` (`id`);
+  ADD CONSTRAINT `fk_bsm_index_table_id` FOREIGN KEY (`tableId`) REFERENCES `ca_meta_table` (`id`);
 
 --
 -- Constraints for table `ca_meta_index_line`
 --
 ALTER TABLE `ca_meta_index_line`
-  ADD CONSTRAINT `fk_cam_index_line_column_id` FOREIGN KEY (`columnId`) REFERENCES `ca_meta_column` (`id`),
-  ADD CONSTRAINT `fk_cam_index_line_index_id` FOREIGN KEY (`indexId`) REFERENCES `ca_meta_index` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_bsm_index_line_column_id` FOREIGN KEY (`columnId`) REFERENCES `ca_meta_column` (`id`),
+  ADD CONSTRAINT `fk_bsm_index_line_index_id` FOREIGN KEY (`indexId`) REFERENCES `ca_meta_index` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ca_meta_table_relation`
 --
 ALTER TABLE `ca_meta_table_relation`
-  ADD CONSTRAINT `fk_cam_table_relation_from_column_id` FOREIGN KEY (`fromColumnId`) REFERENCES `ca_meta_column` (`id`),
-  ADD CONSTRAINT `fk_cam_table_relation_from_table_id` FOREIGN KEY (`fromTableId`) REFERENCES `ca_meta_table` (`id`),
-  ADD CONSTRAINT `fk_cam_table_relation_to_column_id` FOREIGN KEY (`toColumnId`) REFERENCES `ca_meta_column` (`id`),
-  ADD CONSTRAINT `fk_cam_table_relation_to_table_id` FOREIGN KEY (`toTableId`) REFERENCES `ca_meta_table` (`id`);
+  ADD CONSTRAINT `fk_bsm_table_relation_from_column_id` FOREIGN KEY (`fromColumnId`) REFERENCES `ca_meta_column` (`id`),
+  ADD CONSTRAINT `fk_bsm_table_relation_from_table_id` FOREIGN KEY (`fromTableId`) REFERENCES `ca_meta_table` (`id`),
+  ADD CONSTRAINT `fk_bsm_table_relation_to_column_id` FOREIGN KEY (`toColumnId`) REFERENCES `ca_meta_column` (`id`),
+  ADD CONSTRAINT `fk_bsm_table_relation_to_table_id` FOREIGN KEY (`toTableId`) REFERENCES `ca_meta_table` (`id`);
 
 --
 -- Constraints for table `SPRING_SESSION_ATTRIBUTES`
