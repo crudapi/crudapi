@@ -39,6 +39,8 @@ public class TableEntity implements Sqlable, BaseEntity {
     private Boolean reverse;
     
     private Boolean systemable;
+    
+    private Boolean readOnly;
 
     private List<ColumnEntity> columnEntityList;
 
@@ -140,6 +142,14 @@ public class TableEntity implements Sqlable, BaseEntity {
 		this.systemable = systemable;
 	}
 
+	public Boolean getReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(Boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
 	public List<ColumnEntity> getColumnEntityList() {
 		return columnEntityList;
 	}
@@ -156,14 +166,14 @@ public class TableEntity implements Sqlable, BaseEntity {
 		this.indexEntityList = indexEntityList;
 	}
 	
-
+	
 	@Override
 	public String toString() {
 		return "TableEntity [id=" + id + ", name=" + name + ", caption=" + caption + ", description=" + description
 				+ ", createdDate=" + createdDate + ", lastModifiedDate=" + lastModifiedDate + ", pluralName="
 				+ pluralName + ", tableName=" + tableName + ", engine=" + engine + ", createPhysicalTable="
-				+ createPhysicalTable + ", reverse=" + reverse + ", systemable=" + systemable + ", columnEntityList="
-				+ columnEntityList + ", indexEntityList=" + indexEntityList + "]";
+				+ createPhysicalTable + ", reverse=" + reverse + ", systemable=" + systemable + ", readOnly=" + readOnly
+				+ "]";
 	}
 
 	@Override

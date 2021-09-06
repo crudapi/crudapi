@@ -26,6 +26,8 @@ public class TableDTO extends AuditDTO {
 	
 	private Boolean systemable;
 	
+    private Boolean readOnly;
+	
 	@JsonProperty("columns")
 	private List<ColumnDTO> columnDTOList;
 
@@ -81,6 +83,14 @@ public class TableDTO extends AuditDTO {
 
 	public void setSystemable(Boolean systemable) {
 		this.systemable = systemable;
+	}
+
+	public Boolean getReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(Boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 	public List<ColumnDTO> getColumnDTOList() {
@@ -153,12 +163,11 @@ public class TableDTO extends AuditDTO {
 		return this.columnDTOList.stream().filter(t-> Boolean.TRUE.equals(t.getAutoIncrement())).findFirst().isPresent();   	
 	}
 	 
-
 	@Override
 	public String toString() {
 		return "TableDTO [id=" + id + ", engine=" + engine + ", pluralName=" + pluralName + ", tableName=" + tableName
-				+ ", reverse=" + reverse + ", system=" + systemable + ", columnDTOList=" + columnDTOList + ", indexDTOList="
-				+ indexDTOList + "]";
+				+ ", reverse=" + reverse + ", systemable=" + systemable + ", readOnly=" + readOnly + ", columnDTOList="
+				+ columnDTOList + ", indexDTOList=" + indexDTOList + ", primaryNameList=" + primaryNameList + "]";
 	}
 
 	@Override

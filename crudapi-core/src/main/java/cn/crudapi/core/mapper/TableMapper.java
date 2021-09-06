@@ -93,6 +93,7 @@ public class TableMapper {
         tableEntity.setDescription(tableDTO.getDescription());
         tableEntity.setReverse(tableDTO.getReverse());
         tableEntity.setSystemable(tableDTO.getSystemable());
+        tableEntity.setReadOnly(tableDTO.getReadOnly());
 
         List<ColumnEntity> columnEntityList = columnMapper.toEntity(tableDTO.getColumnDTOList());
         tableEntity.setColumnEntityList(columnEntityList);
@@ -131,6 +132,10 @@ public class TableMapper {
         
         if (tableDTO.getSystemable() != null) {
         	tableEntity.setSystemable(tableDTO.getSystemable());
+        }
+        
+        if (tableDTO.getReadOnly() != null) {
+        	tableEntity.setReadOnly(tableDTO.getReadOnly());
         }
         
         List<ColumnEntity> columnEntityList = columnMapper.toEntity(tableDTO.getColumnDTOList());
@@ -173,6 +178,10 @@ public class TableMapper {
         if (tableDTO.getSystemable() != null) {
         	tableEntity.setSystemable(tableDTO.getSystemable());
         }
+        
+        if (tableDTO.getReadOnly() != null) {
+        	tableEntity.setReadOnly(tableDTO.getReadOnly());
+        }
 
         if (tableDTO.getColumnDTOList() != null) {
             ColumnSql columnSql = columnMapper.toEntityIgnoreNull(tableEntity.getTableName(), tableEntity.getColumnEntityList(), tableDTO.getColumnDTOList());
@@ -200,6 +209,7 @@ public class TableMapper {
         tableEntity.setPluralName(tableDTO.getPluralName());
         tableEntity.setCaption(tableDTO.getCaption());
         tableEntity.setSystemable(tableDTO.getSystemable());
+        tableEntity.setReadOnly(tableDTO.getReadOnly());
         
         return tableEntity;
     }
@@ -218,6 +228,7 @@ public class TableMapper {
         tableDTO.setCaption(tableEntity.getCaption());
         tableDTO.setDescription(tableEntity.getDescription());
         tableDTO.setSystemable(tableEntity.getSystemable());
+        tableDTO.setReadOnly(tableEntity.getReadOnly());
         tableDTO.setCreatedDate(DateTimeUtils.toDateTime(tableEntity.getCreatedDate()));
         tableDTO.setLastModifiedDate(DateTimeUtils.toDateTime(tableEntity.getLastModifiedDate()));
 
