@@ -22,6 +22,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.constant.MetaDataConfig;
 import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.MetadataDTO;
+import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
@@ -42,6 +44,7 @@ import cn.crudapi.core.repository.IndexMetadataRepository;
 import cn.crudapi.core.repository.TableMetadataRepository;
 import cn.crudapi.core.repository.TableRelationMetadataRepository;
 import cn.crudapi.core.service.FileService;
+import cn.crudapi.core.service.SequenceMetadataService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
@@ -74,6 +77,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private SequenceMetadataService sequenceMetadataService;
 
     @Override
 	public Map<String, Object> getMeataData(String tableName) {
@@ -281,8 +287,29 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 
 			log.info(file.getAbsolutePath());
 			
+			//table
 			List<TableDTO> tableDTOs = listAll(ids);
-			String body = JsonUtils.toJson(tableDTOs);
+			
+			//sequence
+			List<Long> seqIds = new ArrayList<Long>();
+			for (TableDTO tableDTO : tableDTOs) {
+				for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+					Long seqId = columnDTO.getSeqId();
+					if (seqId != null && seqIds.indexOf(seqId) < 0) {
+						seqIds.add(seqId);
+					}
+				}
+			}
+			List<SequenceDTO> SequenceDTOs = sequenceMetadataService.list(seqIds);
+
+			//relation
+			
+			
+			MetadataDTO metadataDTO = new MetadataDTO();
+			metadataDTO.setSequenceDTOList(SequenceDTOs);
+			metadataDTO.setTableDTOList(tableDTOs);
+			
+			String body = JsonUtils.toJson(metadataDTO);
 			log.info(body);
 			FileUtils.writeStringToFile(file, body, "utf-8");
 			

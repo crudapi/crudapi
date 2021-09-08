@@ -155,4 +155,20 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
 
     	return newCond;
     }
+
+	@Override
+	public List<SequenceDTO> list(List<Long> ids) {
+		if (ids == null || ids.size() == 0) {
+			return new ArrayList<SequenceDTO>();
+		}
+		
+		List<Object> valueList = new ArrayList<Object>();
+		ids.stream().forEach(t -> {
+			valueList.add(t);
+		});
+		
+		Condition cond = ConditionUtils.toCondition("id", valueList);
+		List<SequenceEntity> sequenceEntityList = sequenceMetadataRepository.find(cond, SequenceEntity.class);
+		return sequenceMapper.toDTO(sequenceEntityList);
+	}
 }

@@ -25,4 +25,6 @@ public interface SequenceMetadataService {
 	void delete(List<Long> ids);
 
 	List<SequenceDTO> listAll();
+	
+	List<SequenceDTO> list(List<Long> ids);
 }
