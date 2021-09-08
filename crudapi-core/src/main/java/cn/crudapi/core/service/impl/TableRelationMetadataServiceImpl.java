@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
 import cn.crudapi.core.entity.ColumnEntity;
@@ -326,4 +327,26 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 
     	return newCond;
     }
+
+	@Override
+	public List<TableRelationDTO> list(List<Long> tableIds) {
+		if (tableIds == null || tableIds.size() == 0) {
+			return new ArrayList<TableRelationDTO>();
+		}
+		
+		List<Object> valueList = new ArrayList<Object>();
+		tableIds.stream().forEach(t -> {
+			valueList.add(t);
+		});
+		
+		Condition fromTableCond = ConditionUtils.toCondition("fromTableId", valueList);
+		Condition toTableCond = ConditionUtils.toCondition("toTableId", valueList);
+		
+		Condition cond = ConditionUtils.toCondition(fromTableCond, toTableCond);
+		
+		List<TableRelationEntity> tableRelationEntityList = tableRelationMetadataRepository.find(cond, TableRelationEntity.class);
+	    lazyFetch(tableRelationEntityList);
+	 	    
+	    return tableRelationMapper.toDTO(tableRelationEntityList);
+	}
 }

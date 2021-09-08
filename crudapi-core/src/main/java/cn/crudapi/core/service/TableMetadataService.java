@@ -10,8 +10,6 @@ import cn.crudapi.core.query.Condition;
 public interface TableMetadataService {
     Long create(TableDTO tableDTO);
 
-	void importData(File file);
-	
     void update(Long tableId, TableDTO tableDTO);
 
     TableDTO get(Long tableId);
@@ -34,9 +32,7 @@ public interface TableMetadataService {
 
 	List<Map<String, Object>> getMeataDatas();
 	
-	void repairMeataData(String tableName, List<String> columnNameLsit);
-
 	void checkTable();
 
-	String getExportFile(String name, List<Long> ids);
+	Boolean isExist(String tableName);
 }

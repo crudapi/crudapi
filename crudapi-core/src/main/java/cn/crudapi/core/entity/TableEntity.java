@@ -278,6 +278,8 @@ public class TableEntity implements Sqlable, BaseEntity {
 		columnNames.add("tableName");
 		columnNames.add("engine");
 		columnNames.add("createPhysicalTable");
+		columnNames.add("systemable");
+		columnNames.add("readOnly");
 		return columnNames;
 	}
 
@@ -295,6 +297,8 @@ public class TableEntity implements Sqlable, BaseEntity {
 		columnValues.add(tableName);
 		columnValues.add(engine.toString());
 		columnValues.add(createPhysicalTable);
+		columnValues.add(systemable);
+		columnValues.add(readOnly);
 		return columnValues;
 	}
 
@@ -310,6 +314,8 @@ public class TableEntity implements Sqlable, BaseEntity {
 		if (tableName != null) { columnNames.add("tableName"); }
 		if (engine != null) { columnNames.add("engine"); }
 		if (createPhysicalTable != null) { columnNames.add("createPhysicalTable"); }
+		if (systemable != null) { columnNames.add("systemable"); }
+		if (readOnly != null) { columnNames.add("readOnly"); }
 		return columnNames;
 	}
 
@@ -325,6 +331,8 @@ public class TableEntity implements Sqlable, BaseEntity {
 		if (tableName != null) { columnValues.add(tableName); }
 		if (engine != null) { columnValues.add(engine.toString()); }
 		if (createPhysicalTable != null) { columnValues.add(createPhysicalTable); }
+		if (systemable != null) { columnValues.add(systemable); }
+		if (readOnly != null) { columnValues.add(readOnly); }
 		return columnValues;
 	}
 }

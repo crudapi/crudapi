@@ -37,5 +37,7 @@ public interface TableRelationMetadataService {
 	void update(Long id, TableRelationDTO tableRelationDTO);
 
 	List<TableRelationDTO> listAll();
+	
+	List<TableRelationDTO> list(List<Long> tableIds);
 
 }

@@ -31,6 +31,7 @@ import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.service.FileService;
+import cn.crudapi.core.service.MetadataService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.RequestUtils;
@@ -47,6 +48,9 @@ public class TableMetadataController {
 
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private MetadataService metadataService;
 
 	@ApiOperation(value="创建表")
 	@PostMapping()
@@ -68,18 +72,6 @@ public class TableMetadataController {
 		return new ResponseEntity<List<Long>>(tableIds, HttpStatus.CREATED);
 	}
 	
-    @ApiOperation(value="导入表")
-	@PostMapping(value = "/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Void> importData(@RequestPart MultipartFile file) {
-		Map<String, Object> map = fileService.upload(file);
-		String fileName = map.get("name").toString();
-		File tempFile = fileService.getFile(fileName);
-		tableMetadataService.importData(tempFile);
-		fileService.delete(fileName);
-		
-        return new ResponseEntity<Void>(HttpStatus.CREATED);
-    }
-
 	@ApiOperation(value="修改表")
 	@PatchMapping(value = "/{tableId}")
 	public ResponseEntity<Void> update(@PathVariable("tableId") Long tableId, @RequestBody TableDTO tableDTO) {
@@ -126,15 +118,6 @@ public class TableMetadataController {
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
 	}
 	
-	@ApiOperation(value="修复表元数据")
-	@PatchMapping(value = "/metadata/{tableName}")
-	public ResponseEntity<Void> repairMeataData(@PathVariable("tableName") String tableName, 
-			@RequestBody List<String> columnNameLsit) {
-		tableMetadataService.repairMeataData(tableName, columnNameLsit);
-		
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
-	
     @ApiOperation(value="查询个数")
 	@GetMapping(value = "/count")
 	public ResponseEntity<Long> count(@RequestParam(value = "filter", required = false) String filter,
@@ -162,10 +145,22 @@ public class TableMetadataController {
 		return new ResponseEntity<List<TableDTO>>(tableDTOList, HttpStatus.OK);
 	}
 	
+    @ApiOperation(value="导入表")
+	@PostMapping(value = "/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Void> importData(@RequestPart MultipartFile file) {
+		Map<String, Object> map = fileService.upload(file);
+		String fileName = map.get("name").toString();
+		File tempFile = fileService.getFile(fileName);
+		metadataService.importData(tempFile);
+		fileService.delete(fileName);
+		
+        return new ResponseEntity<Void>(HttpStatus.CREATED);
+    }
+    
 	@ApiOperation(value="导出表")
 	@PostMapping("/export")
     public ResponseEntity<String> getExportFile(@RequestBody(required = false) List<Long> idList) {
-		String fileName = tableMetadataService.getExportFile("crudapi", idList);
+		String fileName = metadataService.getExportFile("crudapi", idList);
         return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
     }
 	

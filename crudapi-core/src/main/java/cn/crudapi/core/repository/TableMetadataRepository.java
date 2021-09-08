@@ -14,7 +14,6 @@ import cn.crudapi.core.entity.TableEntity;
 public class TableMetadataRepository extends CaMetadataRepository<TableEntity> {
 	private static final Logger log = LoggerFactory.getLogger(TableMetadataRepository.class);
 	 
-	
 	public List<Map<String, Object>> getMetaDatas() {
 		return getJdbcTemplate().queryForList("SHOW TABLE STATUS");
 	}
@@ -34,26 +33,5 @@ public class TableMetadataRepository extends CaMetadataRepository<TableEntity> {
 		map.put("indexs", indexLsit);
 		
 		return map;
-	}
-	
-	public void repairMeataData(String tableName, List<String> columnNameLsit) {
-		for (String columnName : columnNameLsit) {
-			String sql = "ALTER TABLE `" + tableName + "`";
-			if (columnName.equals("id")) {
-				sql += " ADD `id` BIGINT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`id`);";
-			} else if (columnName.equals("name")) {
-				sql += " ADD `name` VARCHAR(200) NOT NULL;";
-			} else if (columnName.equals("fullTextBody")) {
-				sql += " ADD `fullTextBody` TEXT NULL, ADD FULLTEXT `ft_fulltext_body` (`fullTextBody`);";
-			} else if (columnName.equals("createdDate")) {
-				sql += " ADD `createdDate` DATETIME NOT NULL;";
-			} else if (columnName.equals("lastModifiedDate")) {
-				sql += " ADD `lastModifiedDate` DATETIME NULL DEFAULT NULL;";
-			}
-			
-			log.info(sql);
-			
-			getJdbcTemplate().execute(sql);
-		}
 	}
 }

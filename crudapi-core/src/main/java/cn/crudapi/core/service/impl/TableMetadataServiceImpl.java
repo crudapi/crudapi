@@ -1,13 +1,11 @@
 package cn.crudapi.core.service.impl;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +15,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.constant.MetaDataConfig;
-import cn.crudapi.core.dto.ColumnDTO;
-import cn.crudapi.core.dto.MetadataDTO;
-import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
@@ -43,12 +37,9 @@ import cn.crudapi.core.repository.IndexLineMetadataRepository;
 import cn.crudapi.core.repository.IndexMetadataRepository;
 import cn.crudapi.core.repository.TableMetadataRepository;
 import cn.crudapi.core.repository.TableRelationMetadataRepository;
-import cn.crudapi.core.service.FileService;
-import cn.crudapi.core.service.SequenceMetadataService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.JsonUtils;
 
 @Service
 public class TableMetadataServiceImpl implements TableMetadataService {
@@ -75,12 +66,6 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	private FileService fileService;
-
-	@Autowired
-	private SequenceMetadataService sequenceMetadataService;
-
     @Override
 	public Map<String, Object> getMeataData(String tableName) {
     	return tableMetadataRepository.getMetaData(tableName);
@@ -90,11 +75,6 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	public List<Map<String, Object>> getMeataDatas() {
     	return tableMetadataRepository.getMetaDatas();
 	}
-    
-	@Override
-    public void repairMeataData(String tableName, List<String> columnNameLsit) { 
-    	tableMetadataRepository.repairMeataData(tableName, columnNameLsit);
-    }
 	
 	@Override
 	public void checkTable() {
@@ -123,25 +103,6 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         return insert(tableEntity);
     }
 
-	@Override
-	public void importData(File file) {
-		try {
-			String body = FileUtils.readFileToString(file, "utf-8");
-			List<TableDTO> tableDTOs = JsonUtils.toObject(body, new TypeReference<List<TableDTO>>(){});
-			List<Long> tableIds = new ArrayList<Long>();
-			for (TableDTO tableDTO : tableDTOs) { 
-				if (Boolean.TRUE.equals(tableDTO.getSystemable())) {
-					log.info("skip system table:" + tableDTO.getName());
-					continue;
-				}
-				Long tableId = create(tableDTO);
-				tableIds.add(tableId);
-			}
-		} catch (Exception e) {
-			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "导入失败！" + e.getMessage()); 
-		}
-	}
-	
     @Override
     //@CacheEvict(value = "tableMetadata", key="#id")
     public void update(Long id, TableDTO tableDTO) {
@@ -278,49 +239,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         return tableDTOs;
     }
     
-    @Override
-    public String getExportFile(String name, List<Long> ids) {
-		String fileName = null;
-		try {
-			fileName = fileService.getRandomFileName(name + ".json");
-			File file = fileService.getFile(fileName);
-
-			log.info(file.getAbsolutePath());
-			
-			//table
-			List<TableDTO> tableDTOs = listAll(ids);
-			
-			//sequence
-			List<Long> seqIds = new ArrayList<Long>();
-			for (TableDTO tableDTO : tableDTOs) {
-				for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
-					Long seqId = columnDTO.getSeqId();
-					if (seqId != null && seqIds.indexOf(seqId) < 0) {
-						seqIds.add(seqId);
-					}
-				}
-			}
-			List<SequenceDTO> SequenceDTOs = sequenceMetadataService.list(seqIds);
-
-			//relation
-			
-			
-			MetadataDTO metadataDTO = new MetadataDTO();
-			metadataDTO.setSequenceDTOList(SequenceDTOs);
-			metadataDTO.setTableDTOList(tableDTOs);
-			
-			String body = JsonUtils.toJson(metadataDTO);
-			log.info(body);
-			FileUtils.writeStringToFile(file, body, "utf-8");
-			
- 			return fileName;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
-		}
-	}
-    
-    private Boolean isExist(String tableName) {
+	@Override
+    public Boolean isExist(String tableName) {
     	Boolean ret = false;
     	try {
     		String sql = "SELECT count(*) FROM `" + tableName + "`";

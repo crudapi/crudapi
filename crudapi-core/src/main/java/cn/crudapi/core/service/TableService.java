@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.crudapi.core.query.Condition;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public interface TableService {
     Map<String, Object> get(String name, String id, String select, String expand);
