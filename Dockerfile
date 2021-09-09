@@ -27,6 +27,7 @@ RUN mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/pro/$version && \
+    cp /crudapi/crudapi-service/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/config/free/MetaDataConfig.java /crudapi/crudapi-core/src/main/java/cn/crudapi/core/constant/MetaDataConfig.java  && \
     mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     tail mvnlog.txt && \
@@ -53,7 +54,7 @@ USER spring:spring
 
 WORKDIR /crudapi
 
-ARG JAR_FILE=/crudapi/crudapi-service/target/*.jar
+ARG JAR_FILE=/crudapi/dist/pro/$version/crudapi-service*.jar
 COPY --from=builder ${JAR_FILE} crudapi-service.jar
 COPY --from=builder /crudapi/dist /crudapi/dist/
 COPY run.sh run.sh
