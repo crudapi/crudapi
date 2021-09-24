@@ -9,15 +9,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataDTO {
-	@JsonProperty("sequences")
 	private List<SequenceDTO> sequenceDTOList;
 	
-	@JsonProperty("tables")
 	private List<TableDTO> tableDTOList;
 
-	@JsonProperty("tableRelations")
 	private List<TableRelationDTO> tableRelationDTOList;
 
+	@JsonProperty("sequences")
 	public List<SequenceDTO> getSequenceDTOList() {
 		return sequenceDTOList;
 	}
@@ -26,21 +24,19 @@ public class MetadataDTO {
 		this.sequenceDTOList = sequenceDTOList;
 	}
 
-
+	@JsonProperty("tables")
 	public List<TableDTO> getTableDTOList() {
 		return tableDTOList;
 	}
-
 
 	public void setTableDTOList(List<TableDTO> tableDTOList) {
 		this.tableDTOList = tableDTOList;
 	}
 
-
+	@JsonProperty("tableRelations")
 	public List<TableRelationDTO> getTableRelationDTOList() {
 		return tableRelationDTOList;
 	}
-
 
 	public void setTableRelationDTOList(List<TableRelationDTO> tableRelationDTOList) {
 		this.tableRelationDTOList = tableRelationDTOList;
