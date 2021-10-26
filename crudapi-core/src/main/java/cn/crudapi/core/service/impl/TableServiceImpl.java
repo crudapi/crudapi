@@ -1032,16 +1032,38 @@ public class TableServiceImpl implements TableService {
 
         // 1. 关联表字段select
         List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
-
+        
+        List<String> mainSelectList = new ArrayList<String>();
+        Map<String, List<String>> subSelectMap = new HashMap<String, List<String>>();
         if (!CollectionUtils.isEmpty(selectColumnNameList)) {
+     	   for (String t : selectColumnNameList) {
+            	if (t.contains(".")) {
+            		String key = getSubExpandKey(t);
+            		String value = getSubExpandValue(t);
+            		List<String> subSelectList = null;
+            		if (subSelectMap.get(key) == null) {
+            			subSelectList = new ArrayList<String>();
+            			subSelectList.add(value);
+            			subSelectMap.put(key, subSelectList);
+            		} else {
+            			subSelectList = subSelectMap.get(key);
+            			subSelectList.add(value);
+            		}
+            	} else {
+            		mainSelectList.add(t);
+            	}
+            }
+        }
+        
+        if (!CollectionUtils.isEmpty(mainSelectList)) {
 		  for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
 		      String relationName = tableRelationDTO.getName();
 
-		      if (selectColumnNameList.contains(relationName)
+		      if (mainSelectList.contains(relationName)
 		    		  && (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
 		    		  || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain)) {
 		          String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
-		          selectColumnNameList.add(fkColumnName);
+		          mainSelectList.add(fkColumnName);
 		      }
 		  }
         }
@@ -1068,16 +1090,16 @@ public class TableServiceImpl implements TableService {
            	}
            }
         }
-     
+        
         // 2. 主表
-        Map<String, Object> map = queryForMap(tableDTO, selectColumnNameList, recId);
+        Map<String, Object> map = queryForMap(tableDTO, mainSelectList, recId);
 
         // 3. 关联表数据
         for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
             Long relationTableId = tableRelationDTO.getToTableDTO().getId();
             String relationName = tableRelationDTO.getName();
 
-            if (!CollectionUtils.isEmpty(selectColumnNameList) && !selectColumnNameList.contains(relationName)) {
+            if (!CollectionUtils.isEmpty(mainSelectList) && !mainSelectList.contains(relationName)) {
             	continue;
             }
 
@@ -1092,7 +1114,7 @@ public class TableServiceImpl implements TableService {
 
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("selectRecursion.relationRecId = " + relationRecId);
-                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, null, subExpandMap.get(relationName));
+                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, subSelectMap.get(relationName), subExpandMap.get(relationName));
                     relationMapList.add(relationMap);
                 }
                 map.put(relationName, relationMapList);
@@ -1103,7 +1125,7 @@ public class TableServiceImpl implements TableService {
                 
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("selectRecursion.relationRecId = " + relationRecId);
-                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, null, subExpandMap.get(relationName));
+                    Map<String, Object> relationMap = selectRecursion(relationTableDTO, relationRecId, subSelectMap.get(relationName), subExpandMap.get(relationName));
                     map.put(relationName, relationMap);
                     break;
                 }
