@@ -567,7 +567,10 @@ public class TableServiceImpl implements TableService {
         List<String> columnNameList = new ArrayList<String>();
         List<Object> valueList = new ArrayList<Object>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
-            if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
+            if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
+                columnNameList.add(t.getName());
+                valueList.add(DateTimeUtils.sqlTimestamp());
+            } else if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
                 columnNameList.add(t.getName());
                 
                 Object value = newMap.get(t.getName());
@@ -576,9 +579,6 @@ public class TableServiceImpl implements TableService {
                 }
                 
                 valueList.add(value);
-            } else if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
-                columnNameList.add(t.getName());
-                valueList.add(DateTimeUtils.sqlTimestamp());
             }
         });
 
