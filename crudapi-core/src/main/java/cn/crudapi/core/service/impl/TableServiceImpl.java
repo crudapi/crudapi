@@ -406,6 +406,21 @@ public class TableServiceImpl implements TableService {
         return maplist;
     }
     
+	@Override
+    public List<Map<String, Object>> listMain(String name, String select, String expand, String filter,
+    		String search, Condition condition, Integer offset, Integer limit, String orderby) {
+        TableDTO tableDTO = tableMetadataService.get(name);
+      
+      	List<String> selectColumnNameList = convertSelect(select);
+    	List<String> expandList = convertExpand(expand);
+
+    	Condition newCond = convertConditon(tableDTO, filter, search, condition);
+
+    	List<Map<String, Object>> mapList = queryForList(tableDTO.getTableName(), tableDTO.getPrimaryNameList(), selectColumnNameList, newCond, offset, limit, orderby);
+        
+        return mapList;
+    }
+    
     @Override
     public Condition convertConditon(String name, String filter, String search, Condition condition) {
         TableDTO tableDTO = tableMetadataService.get(name);

@@ -37,4 +37,7 @@ public interface TableService {
 
 	List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand);
 
+	List<Map<String, Object>> listMain(String name, String select, String expand, String filter, String search,
+			Condition condition, Integer offset, Integer limit, String orderby);
+
 }
