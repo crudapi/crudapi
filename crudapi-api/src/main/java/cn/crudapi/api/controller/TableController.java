@@ -52,6 +52,14 @@ public class TableController {
         return new ResponseEntity<String>(id, HttpStatus.CREATED);
     }
     
+    @ApiOperation(value="批量添加数据")
+    @PostMapping(value = "/{name}/batch")
+    public ResponseEntity<Void> batchCreate(@PathVariable("name") String name, @RequestBody List<Map<String, Object>> mapList) {
+    	tableService.importData(name, mapList);
+
+        return new ResponseEntity<Void>(HttpStatus.CREATED);
+    }
+    
     @ApiOperation(value="导入数据")
 	@PostMapping(value = "/{name}/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Void> importData(@PathVariable("name") String name, @RequestPart MultipartFile file) {
