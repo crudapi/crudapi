@@ -114,7 +114,8 @@ public class LeafCondition implements Condition {
 
 	@Override
 	public List<Object> toQueryValues() {
-		if (OperatorTypeEnum.LIKE.equals(operatorType)) {
+		if (OperatorTypeEnum.LIKE.equals(operatorType)
+			|| OperatorTypeEnum.MLIKE.equals(operatorType)) {
 			List<Object> newValueList = new ArrayList<Object>();
 			valueList.stream().forEach( t-> {
 				newValueList.add("%" +  t + "%");
@@ -153,6 +154,9 @@ public class LeafCondition implements Condition {
                 break;    
             case LIKE:
             	querySql = toQuerySqlForLIKE();
+                break;
+            case MLIKE:
+            	querySql = toQuerySqlForMLIKE();
                 break;
             case BETWEEN:
             	querySql = toQuerySqlForBETWEEN();
@@ -256,6 +260,17 @@ public class LeafCondition implements Condition {
         querySql = DbUtils.toNameSql(columnName) + " LIKE ?";
 
         return querySql;
+    }
+    
+    private String toQuerySqlForMLIKE() {
+    	String querySql = "";
+
+        List<String> likeSqlList = new ArrayList<String>();
+ 	    valueList.stream().forEach(t -> {
+ 	    	likeSqlList.add("(" + toQuerySqlForLIKE() + ")");
+        });
+        
+        return String.join(" OR ", likeSqlList);
     }
 
     private String toQuerySqlForIN() {

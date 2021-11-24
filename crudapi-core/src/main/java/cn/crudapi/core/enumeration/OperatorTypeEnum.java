@@ -10,6 +10,7 @@ public enum OperatorTypeEnum {
 	EQ,
 	NE,
 	LIKE,
+	MLIKE,
 	IN,
 	INSELECT,
 	SEARCH,
