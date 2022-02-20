@@ -1,9 +1,9 @@
 DROP TABLE IF EXISTS "ca_meta_table_relation";
 DROP TABLE IF EXISTS "ca_meta_index_line";
 DROP TABLE IF EXISTS "ca_meta_index";
-DROP TABLE IF EXISTS "ca_meta_sequence";
 DROP TABLE IF EXISTS "ca_meta_column";
 DROP TABLE IF EXISTS "ca_meta_table";
+DROP TABLE IF EXISTS "ca_meta_sequence";
 
 DROP TABLE IF EXISTS "ca_userRoleLine";
 DROP TABLE IF EXISTS "ca_roleResourceLine";
