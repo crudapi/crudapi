@@ -13,24 +13,32 @@ mvn clean install -Dmaven.test.skip=true -s settings.xml
 mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true -s settings.xml
 ```
 
-### mysql config
-/etc/mysql/conf.d/mysql.cnf
+## Mysql
 
-```bash
-[mysqld]
-ft_min_word_len=1
-innodb_ft_min_token_size=1
-```
-
-### Import database
-./mysql/crudapi.sql
+### Import database to crudapi
+./database/mysql/crudapi-mysql.sql
 
 ### Config MySql properties
 src/main/resources/application.properties
 ```bash
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/crudapi?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
 spring.datasource.username=root
 spring.datasource.password=root
+```
+
+## Postgresql
+### Import database to crudapi.public
+
+./database/postgresql/crudapi-pgsql.sql
+
+### Config Postgresql properties
+src/main/resources/application.properties
+```bash
+spring.datasource.driverClassName=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5432/crudapi
+spring.datasource.username=postgres
+spring.datasource.password=postgres
 ```
 
 ### run
@@ -50,6 +58,4 @@ superadmin
 ### docker
 ```bash
 docker build -t crudapi-service:latest .
-
-docker run -v ~/crudapi-pro/maven:/crudapi/maven -ti --rm crudapi-service /bin/sh
 ```
