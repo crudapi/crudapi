@@ -1,11 +1,14 @@
 package cn.crudapi.core.query;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import cn.crudapi.core.enumeration.DataTypeEnum;
 
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,4 +22,8 @@ public interface Condition {
 	String toQuerySql();
 
 	List<Object> toQueryValues();
+
+	Map<String, Object> toQueryValueMap();
+
+	int build(String sqlQuotation, int seq, Map<String, DataTypeEnum> dataTypeMap);
 }

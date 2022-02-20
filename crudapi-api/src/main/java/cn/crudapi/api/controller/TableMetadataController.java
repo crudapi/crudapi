@@ -105,7 +105,7 @@ public class TableMetadataController {
 	@ApiOperation(value="获取表元数据")
 	@GetMapping(value = "/metadata/{tableName}")
 	public ResponseEntity<Map<String, Object>> getMetaData(@PathVariable("tableName") String tableName) {
-		Map<String, Object> map = tableMetadataService.getMeataData(tableName);
+		Map<String, Object> map = tableMetadataService.getMetaData(tableName);
 		
 		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
 	}
@@ -113,7 +113,7 @@ public class TableMetadataController {
 	@ApiOperation(value="获取表元数据列表")
 	@GetMapping(value = "/metadatas")
 	public ResponseEntity<List<Map<String, Object>>> getMetaDatas() {
-		List<Map<String, Object>> mapList = tableMetadataService.getMeataDatas();
+		List<Map<String, Object>> mapList = tableMetadataService.getMetaDatas();
 		
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
 	}

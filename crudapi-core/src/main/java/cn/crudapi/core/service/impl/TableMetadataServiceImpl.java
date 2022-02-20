@@ -11,10 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.constant.MetaDataConfig;
@@ -23,7 +21,6 @@ import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
 import cn.crudapi.core.entity.IndexLineEntity;
 import cn.crudapi.core.entity.TableEntity;
-import cn.crudapi.core.entity.TableRelationEntity;
 import cn.crudapi.core.enumeration.ConditionTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
@@ -32,11 +29,7 @@ import cn.crudapi.core.model.TableSql;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
-import cn.crudapi.core.repository.ColumnMetadataRepository;
-import cn.crudapi.core.repository.IndexLineMetadataRepository;
-import cn.crudapi.core.repository.IndexMetadataRepository;
-import cn.crudapi.core.repository.TableMetadataRepository;
-import cn.crudapi.core.repository.TableRelationMetadataRepository;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
@@ -44,36 +37,27 @@ import cn.crudapi.core.util.DateTimeUtils;
 @Service
 public class TableMetadataServiceImpl implements TableMetadataService {
 	private static final Logger log = LoggerFactory.getLogger(TableMetadataServiceImpl.class);
+   
+	private static final String TABLE_TABLE_NAME = "ca_meta_table";
+	private static final String COLUMN_TABLE_NAME = "ca_meta_column";
+	private static final String INDEX_TABLE_NAME = "ca_meta_index";
+	private static final String INDEX_LINE_TABLE_NAME = "ca_meta_index_line";
+	private static final String RELATION_TABLE_NAME = "ca_meta_table_relation";
 	
+	@Autowired
+    private CrudService crudService;
+	    
     @Autowired
     private TableMapper tableMapper;
 
-    @Autowired
-    private TableMetadataRepository tableMetadataRepository;
-
-    @Autowired
-    private ColumnMetadataRepository columnMetadataRepository;
-
-    @Autowired
-    private IndexMetadataRepository indexMetadataRepository;
-
-    @Autowired
-    private IndexLineMetadataRepository indexLineMetadataRepository;
-
-    @Autowired
-    private TableRelationMetadataRepository tableRelationMetadataRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Override
-	public Map<String, Object> getMeataData(String tableName) {
-    	return tableMetadataRepository.getMetaData(tableName);
-	}
-    
 	@Override
-	public List<Map<String, Object>> getMeataDatas() {
-    	return tableMetadataRepository.getMetaDatas();
+	public List<Map<String, Object>> getMetaDatas() {
+		return crudService.getMetaDatas();
+	}
+	
+	@Override
+	public Map<String, Object> getMetaData(String tableName) {
+		return crudService.getMetaData(tableName);
 	}
 	
 	@Override
@@ -176,7 +160,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     @Override
     @CacheEvict(value = "tableMetadata", allEntries= true)
     public void delete(Long id, Boolean isDropPhysicalTable) {
-    	TableEntity tableEntity = tableMetadataRepository.getOne(id, TableEntity.class);
+    	TableEntity tableEntity = crudService.get(TABLE_TABLE_NAME, id, TableEntity.class);
         if (tableEntity == null) {
   			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, id);
   		}
@@ -193,8 +177,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 		});
 		
 		Condition cond = ConditionUtils.toCondition("id", valueList);
-		List<TableEntity> tableEntityList = tableMetadataRepository.find(cond, TableEntity.class);
-		
+		List<TableEntity> tableEntityList = crudService.list(TABLE_TABLE_NAME, cond, null, null, null, TableEntity.class);
+				
     	for (TableEntity tableEntity : tableEntityList) {
     		deleteTableCascade(tableEntity.getId(), tableEntity.getTableName(), isDropPhysicalTable);
         }
@@ -203,7 +187,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     @Override
     @CacheEvict(value = "tableMetadata", allEntries= true)
     public void deleteAll(Boolean isDropPhysicalTable) {
-    	List<TableEntity> tableEntityList = tableMetadataRepository.findAll(TableEntity.class);
+    	List<TableEntity> tableEntityList = crudService.list(TABLE_TABLE_NAME, TableEntity.class);
     	
     	for (TableEntity tableEntity : tableEntityList) {
     		deleteTableCascade(tableEntity.getId(), tableEntity.getTableName(), isDropPhysicalTable);
@@ -214,8 +198,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     public List<TableDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby) {
     	Condition newCond = convertConditon(filter, search, condition);
 
-    	List<TableEntity> tableEntityList = tableMetadataRepository.find(newCond, offset, limit, orderby, TableEntity.class);
-        
+    	List<TableEntity> tableEntityList =  crudService.list(TABLE_TABLE_NAME, newCond, orderby == null ? "id DESC": orderby, offset, limit, TableEntity.class);
+    			
         for (TableEntity tableEntity : tableEntityList) {
         	List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
      	    tableEntity.setColumnEntityList(columnEntityList);
@@ -241,25 +225,19 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     
 	@Override
     public Boolean isExist(String tableName) {
-    	Boolean ret = false;
-    	try {
-    		String sql = "SELECT count(*) FROM `" + tableName + "`";
-        	List<Object> values = new ArrayList<Object>();
-        	jdbcTemplate.queryForObject(sql, values.toArray(), Long.class);
-        	ret = true;
-    	} catch(Exception e) {
-    		log.info(e.getMessage());
-    		if (e.getMessage().contains("doesn't exist")) {
-    			ret = false;
-    		}
-    	}
-    	
-    	return ret;
+    	return crudService.isExistTable(tableName);
     }
 
+    @Override
+	public Long count(String filter, String search, Condition condition) {
+		Condition newCond = convertConditon(filter, search, condition);
+
+		return crudService.count(TABLE_TABLE_NAME, newCond);
+	}
+	
     private void execute(String sql) {
         log.info(sql);
-        jdbcTemplate.execute(sql);
+        crudService.execute(sql);
     }
 
     private Long insert(TableEntity tableEntity) {
@@ -271,7 +249,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             tableEntity.setCreatePhysicalTable(true);
             
             //插入表
-            tableId = tableMetadataRepository.insert(tableEntity);
+            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
             for (ColumnEntity columnEntity : columnEntityList) {
          	   columnEntity.setTableId(tableId);
          	   columnEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
@@ -279,7 +257,10 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             }
             
             //批量插入列
-            int[] ret = columnMetadataRepository.batchInsert(columnEntityList);
+            List<Object> columnObjList = new ArrayList<Object>();
+            columnEntityList.stream().forEach(t -> columnObjList.add(t));
+            int[] ret = crudService.batchCreateObj(COLUMN_TABLE_NAME, columnObjList);
+            
             log.info(ret.toString());
            
             TableEntity newTableEntity = getTableEntityIncludeChildren(tableId);
@@ -288,9 +269,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             batchInsertIndex(tableEntity.getIndexEntityList(), newTableEntity);
             
             if (!Boolean.TRUE.equals(tableEntity.getReverse())) {
-            	execute(tableEntity.toSql());
+            	execute(crudService.toCreateTableSql(tableEntity));
             	
-            	List<String> sqlList = tableEntity.toIndexSqlList();
+            	List<String> sqlList = crudService.toCreateIndexSqlList(tableEntity);
             	for (String sql: sqlList) {
             		execute(sql);
         		}
@@ -298,7 +279,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         } else {
         	//仅插入表
             tableEntity.setCreatePhysicalTable(false);
-            tableId = tableMetadataRepository.insert(tableEntity);
+            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
         }
 
         return tableId;
@@ -311,7 +292,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             tableEntity.setCreatePhysicalTable(true);
             
             //编辑表
-            tableMetadataRepository.patch(tableEntity);
+            crudService.patch(TABLE_TABLE_NAME, tableId, tableEntity);
             for (ColumnEntity columnEntity : columnEntityList) {
          	   columnEntity.setTableId(tableId);
          	   columnEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
@@ -319,16 +300,19 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             }
             
             //批量插入列
-            int[] ret = columnMetadataRepository.batchInsert(columnEntityList);
+            List<Object> columnObjList = new ArrayList<Object>();
+            columnEntityList.stream().forEach(t -> columnObjList.add(t));
+            int[] ret = crudService.batchCreateObj(COLUMN_TABLE_NAME, columnObjList);
+            
             log.info(ret.toString());
 
             if (CollectionUtils.isNotEmpty(tableEntity.getColumnEntityList())) {
-                execute(tableEntity.toSql());
+                execute(crudService.toCreateTableSql(tableEntity));
             }
         } else {
         	//仅编辑表
             tableEntity.setCreatePhysicalTable(false);
-            tableMetadataRepository.patch(tableEntity);
+            crudService.patch(TABLE_TABLE_NAME, tableId, tableEntity);
         }
 
         return tableId;
@@ -337,8 +321,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     private void patch(TableEntity tableEntity, List<Long> deleteColumnIdList, List<Long>  deleteIndexIdList) {
     	Long tableId = tableEntity.getId();
     	
-        tableMetadataRepository.patch(tableEntity);
-     
+    	crudService.patch(TABLE_TABLE_NAME, tableId, tableEntity);
+    	
         patchColumn(tableId, tableEntity.getColumnEntityList(), deleteColumnIdList);
         
         patchIndex(tableId, tableEntity.getIndexEntityList(), deleteIndexIdList);
@@ -370,15 +354,20 @@ public class TableMetadataServiceImpl implements TableMetadataService {
              });
              
              Condition cond = ConditionUtils.toCondition("id", values);
-             columnMetadataRepository.deleteByCondition(cond, ColumnEntity.class);
+             crudService.delete(COLUMN_TABLE_NAME, cond);
          }
          
          //批量编辑列
-         int[] ret = columnMetadataRepository.batchUpdate(updateColumnEntityList);
+         List<Object> updateColumnObjList = new ArrayList<Object>();
+         updateColumnEntityList.stream().forEach(t -> updateColumnObjList.add(t));
+         int[] ret = crudService.batchPutObj(COLUMN_TABLE_NAME, updateColumnObjList);
+          
          log.info(ret.toString());
          
          //批量插入列
-         ret = columnMetadataRepository.batchInsert(insertColumnEntityList);
+         List<Object> insertColumnObjList = new ArrayList<Object>();
+         insertColumnEntityList.stream().forEach(t -> insertColumnObjList.add(t));
+         ret = crudService.batchCreateObj(COLUMN_TABLE_NAME, insertColumnObjList);
          
          log.info(ret.toString());
     }
@@ -410,11 +399,11 @@ public class TableMetadataServiceImpl implements TableMetadataService {
              
              //先删除IndexLineEntity
              Condition cond = ConditionUtils.toCondition("indexId", values);
-             indexLineMetadataRepository.deleteByCondition(cond, IndexLineEntity.class);
+             crudService.delete(INDEX_LINE_TABLE_NAME, cond);
              
              //删除IndexEntity
              cond = ConditionUtils.toCondition("id", values);
-             indexMetadataRepository.deleteByCondition(cond, IndexEntity.class);
+             crudService.delete(INDEX_TABLE_NAME, cond);
          }
          
          //批量编辑索引
@@ -437,7 +426,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	indexEntity.setCreatedDate(now);
     	indexEntity.setLastModifiedDate(now);
 		
-    	Long indexId = indexMetadataRepository.insert(indexEntity);
+    	Long indexId = crudService.create(INDEX_TABLE_NAME, indexEntity);
     	
     	List<IndexLineEntity> indexLineEntityList = indexEntity.getIndexLineEntityList();
     	
@@ -446,8 +435,11 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     		for (IndexLineEntity indexLineEntity : indexLineEntityList) {
         		indexLineEntity.setIndexId(indexId);
             }
+    		
+    		List<Object> indexLineObjList = new ArrayList<Object>();
+    		indexLineEntityList.stream().forEach(t -> indexLineObjList.add(t));
+        	int[] ret = crudService.batchCreateObj(INDEX_LINE_TABLE_NAME, indexLineObjList);
         	
-        	int[] ret = indexLineMetadataRepository.batchInsert(indexLineEntityList);
         	log.info(ret.toString());
         	
     	}
@@ -469,8 +461,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	indexEntity.setLastModifiedDate(now);
     	indexEntity.setTableId(newTbleEntity.getId());
     	
-    	Long indexId = indexMetadataRepository.insert(indexEntity);
-    	
+    	Long indexId = crudService.create(INDEX_TABLE_NAME, indexEntity);
     	List<IndexLineEntity> indexLineEntityList = indexEntity.getIndexLineEntityList();
     	
     	if (CollectionUtils.isNotEmpty(indexLineEntityList)) { 
@@ -483,7 +474,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         		indexLineEntity.setColumnEntity(columnEntity);
             }
         	
-        	int[] ret = indexLineMetadataRepository.batchInsert(indexLineEntityList);
+    	    List<Object> indexLineObjList = new ArrayList<Object>();
+    	    indexLineEntityList.stream().forEach(t -> indexLineObjList.add(t));
+        	int[] ret = crudService.batchCreateObj(INDEX_LINE_TABLE_NAME, indexLineObjList);
         	log.info(ret.toString());
         	
     	}
@@ -503,20 +496,23 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	Long indexId = indexEntity.getId();
     	Timestamp now = DateTimeUtils.sqlTimestamp();
     	indexEntity.setLastModifiedDate(now);
-    	indexMetadataRepository.patch(indexEntity);
+    	crudService.patch(INDEX_TABLE_NAME, indexId, indexEntity);
     	
     	List<IndexLineEntity> indexLineEntityList = indexEntity.getIndexLineEntityList();
     	
     	if (CollectionUtils.isNotEmpty(indexLineEntityList)) {
-             //先删除IndexLineEntity
-             Condition cond = ConditionUtils.toCondition("indexId", indexId);
-             indexLineMetadataRepository.deleteByCondition(cond, IndexLineEntity.class);
+            //先删除IndexLineEntity
+            Condition cond = ConditionUtils.toCondition("indexId", indexId);
+            crudService.delete(INDEX_LINE_TABLE_NAME, cond);
              
     		for (IndexLineEntity indexLineEntity : indexLineEntityList) {
         		indexLineEntity.setIndexId(indexId);
             }
         	
-        	int[] ret = indexLineMetadataRepository.batchInsert(indexLineEntityList);
+    		List<Object> indexLineObjList = new ArrayList<Object>();
+    		indexLineEntityList.stream().forEach(t -> indexLineObjList.add(t));
+        	int[] ret = crudService.batchCreateObj(INDEX_LINE_TABLE_NAME, indexLineObjList);
+        	
         	log.info(ret.toString());
     	}
     	 
@@ -524,7 +520,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     }
 
     private TableEntity getTableEntityIncludeChildren(Long id) {
-        TableEntity tableEntity = tableMetadataRepository.getOne(id, TableEntity.class);
+        TableEntity tableEntity = crudService.get(TABLE_TABLE_NAME, id, TableEntity.class);
         if (tableEntity == null) {
         	return null;
 		}
@@ -548,11 +544,13 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	compositeCondition.add(condition2);
     	compositeCondition.add(condition3);
     	
-        TableEntity tableEntity = tableMetadataRepository.getOne(compositeCondition, TableEntity.class);
-        if (tableEntity == null) {
+        List<TableEntity> tableEntityList = crudService.list(TABLE_TABLE_NAME, compositeCondition, null, null, null, TableEntity.class);
+        if (tableEntityList.size() == 0) {
 			return null;
 		}
-
+        
+        TableEntity tableEntity = tableEntityList.get(0);
+       
 	    List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());
 	    tableEntity.setColumnEntityList(columnEntityList);
 	    
@@ -568,8 +566,11 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    cond.setValue(tableId);
 	    cond.setOperatorType(OperatorTypeEnum.EQ);
 	    
-	    List<ColumnEntity> columnEntityList = columnMetadataRepository.find(cond, "`displayOrder` ASC", ColumnEntity.class);
-	  
+	    String sqlQuotation = crudService.getSqlQuotation();
+	    String orderby = sqlQuotation + "displayOrder" + sqlQuotation +  " ASC";
+	    
+	    List<ColumnEntity> columnEntityList = crudService.list(COLUMN_TABLE_NAME, cond, orderby, null, null, ColumnEntity.class);
+	    
         return columnEntityList;
     }
     
@@ -579,14 +580,15 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    cond.setValue(tableId);
 	    cond.setOperatorType(OperatorTypeEnum.EQ);
 	    
-	    List<IndexEntity> indexEntityList = indexMetadataRepository.find(cond,  IndexEntity.class);
+	    List<IndexEntity> indexEntityList = crudService.list(INDEX_TABLE_NAME, cond, null, null, null, IndexEntity.class);
+	    
 	    for (IndexEntity indexEntity : indexEntityList) {
 	    	LeafCondition subCond = new LeafCondition();
 	    	subCond.setColumnName("indexId");
 	    	subCond.setValue(indexEntity.getId());
 	    	subCond.setOperatorType(OperatorTypeEnum.EQ);
 		    
-		    List<IndexLineEntity> indexLineEntityList = indexLineMetadataRepository.find(subCond, IndexLineEntity.class);
+		    List<IndexLineEntity> indexLineEntityList = crudService.list(INDEX_LINE_TABLE_NAME, subCond, null, null, null, IndexLineEntity.class);		
 		    for (IndexLineEntity indexLineEntity : indexLineEntityList) {
 		    	ColumnEntity columnEntity = columnEntityList.stream().filter(t -> t.getId().equals(indexLineEntity.getColumnId())).findFirst().get();
 		    	indexLineEntity.setColumnEntity(columnEntity);
@@ -604,7 +606,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    cond.setValue(tableId);
 	    cond.setOperatorType(OperatorTypeEnum.EQ);
 	    
-	    columnMetadataRepository.deleteByCondition(cond, ColumnEntity.class);
+	    crudService.delete(COLUMN_TABLE_NAME, cond);
     }
     
     private void deleteIndexEntity(Long tableId) {
@@ -613,7 +615,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    cond.setValue(tableId);
 	    cond.setOperatorType(OperatorTypeEnum.EQ);
 	    
-	    indexMetadataRepository.deleteByCondition(cond, IndexEntity.class);
+	    crudService.delete(INDEX_TABLE_NAME, cond);
     }
     
 	@CacheEvict(value = "tableRelationMetadata", allEntries= true)
@@ -632,7 +634,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
  	    compositeCondition.add(cond1);
  	    compositeCondition.add(cond2);
  	    
-    	tableRelationMetadataRepository.deleteByCondition(compositeCondition, TableRelationEntity.class);
+ 	    crudService.delete(RELATION_TABLE_NAME, compositeCondition);
 	}
 	
    private void deleteTableCascade(Long id, String tableName, Boolean isDropPhysicalTable) {
@@ -642,23 +644,16 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         
     	deleteColumnEntity(id);
     	
-    	tableMetadataRepository.deleteById(id, TableEntity.class);
+    	crudService.delete(TABLE_TABLE_NAME, id);
     	
     	dropPhysicalTable(tableName, isDropPhysicalTable);
     }
    
     private void dropPhysicalTable(String tableName, Boolean isDropPhysicalTable) {
     	if (Boolean.TRUE.equals(isDropPhysicalTable) ) {
-       		execute("DROP TABLE IF EXISTS `" + tableName +"`");
+    		crudService.dropTable(tableName);
     	}
     }
-	
-    @Override
-	public Long count(String filter, String search, Condition condition) {
-		Condition newCond = convertConditon(filter, search, condition);
-
-		return tableMetadataRepository.count(newCond, TableEntity.class);
-	}
 	
     private Condition convertConditon(String filter, String search, Condition condition) {
     	Condition newCond = null;

@@ -5,7 +5,7 @@
   <parent>
     <groupId>cn.crudapi</groupId>
     <artifactId>crudapi-parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
   </parent>
   <artifactId>crudapi-weixin</artifactId>
   <name>crudapi-weixin</name>
@@ -105,6 +105,11 @@
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <scope>runtime</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
   </dependency>
   <dependency>
       <groupId>cn.crudapi</groupId>

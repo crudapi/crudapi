@@ -22,8 +22,8 @@ import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.model.ColumnSql;
 import cn.crudapi.core.model.IndexSql;
 import cn.crudapi.core.model.TableSql;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.DbUtils;
 
 @Service
 public class TableMapper {
@@ -33,6 +33,9 @@ public class TableMapper {
     @Autowired
     private IndexMapper indexMapper;
 
+	@Autowired
+    private CrudService crudService;
+	 
     public void check(TableEntity tableEntity) {
 		if (StringUtils.isEmpty(tableEntity.getName())) {
 			throw new BusinessException(ApiErrorCode.TABLE_NAME_NOT_EMPTY, "表名不能为空！");
@@ -150,12 +153,12 @@ public class TableMapper {
         List<String> sqlList = tableSql.getSqlList();
 
         if (tableDTO.getTableName() != null && !StringUtils.equals(tableEntity.getTableName(), tableDTO.getTableName())) {
-            sqlList.add(DbUtils.toRenameTableSql(tableEntity.getTableName(), tableDTO.getTableName()));
+            sqlList.add(crudService.toRenameTableSql(tableEntity.getTableName(), tableDTO.getTableName()));
             tableEntity.setTableName(tableDTO.getTableName());
         }
 
         if (tableDTO.getEngine() != null && !Objects.equals(tableEntity.getEngine(), tableDTO.getEngine())) {
-            sqlList.add(DbUtils.toSetTableEngineSql(tableEntity.getTableName(), tableDTO.getEngine()));
+            sqlList.add(crudService.toSetTableEngineSql(tableEntity.getTableName(), tableDTO.getEngine()));
             tableEntity.setEngine(tableDTO.getEngine());
         }
 

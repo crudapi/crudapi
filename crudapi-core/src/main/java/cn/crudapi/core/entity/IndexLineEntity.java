@@ -1,11 +1,7 @@
 package cn.crudapi.core.entity;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class IndexLineEntity implements Sqlable, BaseEntity {
-	private static final String TABLE_NAME = "ca_meta_index_line";
-	
+public class IndexLineEntity {
 	private Long id;
 	
 	private Long columnId;
@@ -47,10 +43,6 @@ public class IndexLineEntity implements Sqlable, BaseEntity {
 		this.indexId = indexId;
 	}
 
-	public static String getTableName() {
-		return TABLE_NAME;
-	}
-	
 
 	@Override
 	public int hashCode() {
@@ -83,50 +75,4 @@ public class IndexLineEntity implements Sqlable, BaseEntity {
 				+ indexId + "]";
 	}
 
-	@Override
-	public String toSql() {
-		return null;
-	}
-	
-	@Override
-	public String getDataBaseTableName() {
-		return TABLE_NAME;
-	}
-
-	@Override
-	public Long getRecId() {
-		return id;
-	}
-
-	@Override
-	public List<String> getColumnNames(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add("columnId"); 
-		columnNames.add("indexId");
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValues(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		columnValues.add(columnId);
-		columnValues.add(indexId);
-		return columnValues;
-	}
-
-	@Override
-	public List<String> getColumnNamesIgnoreNull(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add("columnId"); 
-		columnNames.add("indexId");
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValuesIgnoreNull(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		columnValues.add(columnId);
-		columnValues.add(indexId);
-		return columnValues;
-	}
 }

@@ -1,7 +1,9 @@
 package cn.crudapi.core.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ import cn.crudapi.core.mapper.SequenceMapper;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
-import cn.crudapi.core.repository.SequenceMetadataRepository;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.service.SequenceMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
@@ -30,12 +32,14 @@ import cn.crudapi.core.util.DateTimeUtils;
 public class SequenceMetadataServiceImpl implements SequenceMetadataService {
 	private static final Logger log = LoggerFactory.getLogger(SequenceMetadataServiceImpl.class);
 	
+	private static final String SEQUENCE_TABLE_NAME = "ca_meta_sequence";
+	
+    @Autowired
+    private CrudService crudService;
+    
     @Autowired
     private SequenceMapper sequenceMapper;
 
-    @Autowired
-    private SequenceMetadataRepository sequenceMetadataRepository;
-    
     @Override
     public Long create(SequenceDTO sequenceDTO) {
         SequenceEntity sequenceEntity = sequenceMapper.toEntity(sequenceDTO);
@@ -43,7 +47,7 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
         sequenceEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
         sequenceEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
         
-        Long id = sequenceMetadataRepository.insert(sequenceEntity);
+        Long id = crudService.create(SEQUENCE_TABLE_NAME, sequenceEntity);
 
         return id;
     }
@@ -55,48 +59,35 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
         sequenceEntity.setId(sequenceId);
         sequenceEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
 
-        sequenceMetadataRepository.patch(sequenceEntity);
+        crudService.patch(SEQUENCE_TABLE_NAME, sequenceId, sequenceEntity);
     }
 
 	@Override
-	public List<SequenceDTO>  list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby){
-		Condition newCond = convertConditon(filter, search, condition);
-
-		List<SequenceEntity> sequenceEntityList = sequenceMetadataRepository.find(newCond, offset, limit, orderby, SequenceEntity.class);
-		return sequenceMapper.toDTO(sequenceEntityList);
-	}
-	
-	@Override
-	public List<SequenceDTO> listAll() {
-		List<SequenceEntity> sequenceEntityList = sequenceMetadataRepository.findAll(SequenceEntity.class);
-		return sequenceMapper.toDTO(sequenceEntityList);
-	}
-
-	
-	@Override
 	@Cacheable(value = "sequenceMetadata", key="#id")
 	public SequenceDTO get(Long id) {
-		SequenceEntity sequenceEntity = sequenceMetadataRepository.getOne(id, SequenceEntity.class);
+		SequenceEntity sequenceEntity = crudService.get(SEQUENCE_TABLE_NAME, id, SequenceEntity.class);
 		return sequenceMapper.toDTO(sequenceEntity);
 	}
 
 	@Override
 	@Cacheable(value = "sequenceMetadata", key="#name")
 	public SequenceDTO get(String name) {
-		SequenceEntity sequenceEntity = sequenceMetadataRepository.getOne(name, SequenceEntity.class);
+		Map<String, Object> keyMap = new HashMap<String, Object>();
+		keyMap.put("name", name);
+		SequenceEntity sequenceEntity = crudService.get(SEQUENCE_TABLE_NAME, keyMap, SequenceEntity.class);
 		return sequenceMapper.toDTO(sequenceEntity);
 	}
 
 	@Override
     @CacheEvict(value = "sequenceMetadata", allEntries= true)
 	public void deleteAll() {
-		sequenceMetadataRepository.deleteAll(SequenceEntity.class);
+		crudService.delete(SEQUENCE_TABLE_NAME);
 	}
 
 	@Override
     @CacheEvict(value = "sequenceMetadata", key="#id")
 	public void delete(Long id) {
-		sequenceMetadataRepository.deleteById(id, SequenceEntity.class);
+		crudService.delete(SEQUENCE_TABLE_NAME, id);
 	}
 	
 	@Override
@@ -108,14 +99,46 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
 		});
 		
 		Condition cond = ConditionUtils.toCondition("id", valueList);
-		sequenceMetadataRepository.deleteByCondition(cond, SequenceEntity.class);
+		crudService.delete(SEQUENCE_TABLE_NAME, cond);
 	}
 
 	@Override
 	public Long count(String filter, String search, Condition condition) {
 		Condition newCond = convertConditon(filter, search, condition);
 
-		return sequenceMetadataRepository.count(newCond, SequenceEntity.class);
+		return crudService.count(SEQUENCE_TABLE_NAME, newCond);
+	}
+	
+	@Override
+	public List<SequenceDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby){
+		Condition newCond = convertConditon(filter, search, condition);
+
+		return this.list(newCond, orderby, offset, limit);
+	}
+	
+	@Override
+	public List<SequenceDTO> listAll() {
+		return this.list(null, null, null, null);
+	}
+
+	@Override
+	public List<SequenceDTO> list(List<Long> ids) {
+		if (ids == null || ids.size() == 0) {
+			return new ArrayList<SequenceDTO>();
+		}
+		
+		List<Object> valueList = new ArrayList<Object>();
+		ids.stream().forEach(t -> {
+			valueList.add(t);
+		});
+		
+		Condition cond = ConditionUtils.toCondition("id", valueList);
+		return this.list(cond, null, null, null);
+	}
+	
+	private List<SequenceDTO> list(Condition condition, String orderby, Integer offset, Integer limit){
+		List<SequenceEntity> sequenceEntityList = crudService.list(SEQUENCE_TABLE_NAME, condition, orderby == null ? "id DESC" : orderby, offset, limit, SequenceEntity.class);
+		return sequenceMapper.toDTO(sequenceEntityList);
 	}
 	
     private Condition convertConditon(String filter, String search, Condition condition) {
@@ -155,20 +178,4 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
 
     	return newCond;
     }
-
-	@Override
-	public List<SequenceDTO> list(List<Long> ids) {
-		if (ids == null || ids.size() == 0) {
-			return new ArrayList<SequenceDTO>();
-		}
-		
-		List<Object> valueList = new ArrayList<Object>();
-		ids.stream().forEach(t -> {
-			valueList.add(t);
-		});
-		
-		Condition cond = ConditionUtils.toCondition("id", valueList);
-		List<SequenceEntity> sequenceEntityList = sequenceMetadataRepository.find(cond, SequenceEntity.class);
-		return sequenceMapper.toDTO(sequenceEntityList);
-	}
 }

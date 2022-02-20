@@ -3,7 +3,6 @@ package cn.crudapi.core.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
-import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
 import cn.crudapi.core.entity.ColumnEntity;
@@ -29,30 +27,27 @@ import cn.crudapi.core.mapper.TableRelationMapper;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
-import cn.crudapi.core.repository.ColumnMetadataRepository;
-import cn.crudapi.core.repository.TableMetadataRepository;
-import cn.crudapi.core.repository.TableRelationMetadataRepository;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.service.TableRelationMetadataService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
 
-
 @Service
 public class TableRelationMetadataServiceImpl implements TableRelationMetadataService {
 	private static final Logger log = LoggerFactory.getLogger(TableRelationMetadataServiceImpl.class);
 	
+	private static final String TABLE_TABLE_NAME = "ca_meta_table";
+	
+	private static final String COLUMN_TABLE_NAME = "ca_meta_column";
+	
+	private static final String RELATION_TABLE_NAME = "ca_meta_table_relation";
+	
+	@Autowired
+    private CrudService crudService;
+	  
 	@Autowired
     private TableRelationMapper tableRelationMapper;
-
-    @Autowired
-    private TableRelationMetadataRepository tableRelationMetadataRepository;
-
-    @Autowired
-    private TableMetadataRepository tableMetadataRepository;
-
-    @Autowired
-    private ColumnMetadataRepository columnMetadataRepository;
 
     @Autowired
     private TableMetadataService tableMetadataService;
@@ -60,7 +55,8 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     @Transactional
 	@Override
 	public void set(List<TableRelationDTO> tableRelationDTOList) {
-		List<TableRelationEntity> oldTableRelationEntityList = tableRelationMetadataRepository.findAll(TableRelationEntity.class);
+		List<TableRelationEntity> oldTableRelationEntityList = crudService.list(RELATION_TABLE_NAME, TableRelationEntity.class);
+		
 		lazyFetch(oldTableRelationEntityList);
 		 
 		List<TableRelationEntity> deleteTableRelationEntityList = new ArrayList<TableRelationEntity>();
@@ -71,11 +67,15 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 				deleteTableRelationEntityList.add(tableRelationEntity);
 			}
 		}
-		tableRelationMetadataRepository.deleteAll(TableRelationEntity.class);
-
-		//2. update and add
-		List<TableRelationEntity> tableRelationEntityList = tableRelationMapper.toEntity(tableRelationDTOList);
-		tableRelationMetadataRepository.batchInsert(tableRelationEntityList);
+		
+		crudService.delete(RELATION_TABLE_NAME);
+	
+	    //2. update and add
+	    List<TableRelationEntity> tableRelationEntityList = tableRelationMapper.toEntity(tableRelationDTOList);
+		
+	    List<Object> tableRelationObjList = new ArrayList<Object>();
+	    tableRelationEntityList.stream().forEach(t -> tableRelationObjList.add(t));
+        crudService.batchCreateObj(RELATION_TABLE_NAME, tableRelationObjList); 
 	}
     
     @Override
@@ -85,7 +85,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     	tableRelationEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
     	tableRelationEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
          
-		Long id = tableRelationMetadataRepository.insert(tableRelationEntity);
+		Long id = crudService.create(RELATION_TABLE_NAME, tableRelationEntity);
 
         return id;
 	}
@@ -137,7 +137,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     	tableRelationEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
          
     	
-		Long id = tableRelationMetadataRepository.insert(tableRelationEntity);
+		Long id = crudService.create(RELATION_TABLE_NAME, tableRelationEntity);
 		
 		return id;
 	}
@@ -149,7 +149,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     	tableRelationEntity.setId(id);
     	tableRelationEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
 
-    	tableRelationMetadataRepository.patch(tableRelationEntity);
+    	crudService.patch(RELATION_TABLE_NAME, id, tableRelationEntity);
     }
 	
 	@Override
@@ -188,8 +188,8 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
  	    cond.setColumnName("fromTableId");
  	    cond.setValue(fromTableId);
  	    cond.setOperatorType(OperatorTypeEnum.EQ);
-    	tableRelationMetadataRepository.deleteByCondition(cond, TableRelationEntity.class);
-		
+ 	    
+    	crudService.delete(RELATION_TABLE_NAME, cond);
 	}
 	
 	@Override
@@ -199,12 +199,13 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
  	    cond.setColumnName("toTableId");
  	    cond.setValue(toTableId);
  	    cond.setOperatorType(OperatorTypeEnum.EQ);
-    	tableRelationMetadataRepository.deleteByCondition(cond, TableRelationEntity.class);
+ 	    
+ 	    crudService.delete(RELATION_TABLE_NAME, cond);
 	}
 
     @Override
     public void delete(Long id) {
-    	tableRelationMetadataRepository.deleteById(id, TableRelationEntity.class);
+    	crudService.delete(RELATION_TABLE_NAME, id);
     }
     
     @Override
@@ -216,17 +217,67 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 		});
 		
 		Condition cond = ConditionUtils.toCondition("id", valueList);
-		tableRelationMetadataRepository.deleteByCondition(cond, TableRelationEntity.class);
+		
+		crudService.delete(RELATION_TABLE_NAME, cond);
 	}
 
     @Override
     @CacheEvict(value = "tableRelationMetadata", allEntries= true)
     public void deleteAll() {
-    	tableRelationMetadataRepository.deleteAll(TableRelationEntity.class);
+    	crudService.delete(RELATION_TABLE_NAME);
     }
     
+	@Override
+	public Long count(String filter, String search, Condition condition) {
+		Condition newCond = convertConditon(filter, search, condition);
+
+		return crudService.count(RELATION_TABLE_NAME, newCond);
+	}
+	
+	@Override
+	public List<TableRelationDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit,
+			String orderby) {
+		Condition newCond = convertConditon(filter, search, condition);
+		
+		return this.list(newCond, null, offset, limit);
+	}
+	
+	@Override
+	public List<TableRelationDTO> listAll() {
+	    return this.list(null, null, null, null);
+	}
+	
+	@Override
+	public List<TableRelationDTO> list(List<Long> tableIds) {
+		if (tableIds == null || tableIds.size() == 0) {
+			return new ArrayList<TableRelationDTO>();
+		}
+		
+		List<Object> valueList = new ArrayList<Object>();
+		tableIds.stream().forEach(t -> {
+			valueList.add(t);
+		});
+		
+		Condition fromTableCond = ConditionUtils.toCondition("fromTableId", valueList);
+		Condition toTableCond = ConditionUtils.toCondition("toTableId", valueList);
+		
+		Condition cond = ConditionUtils.toCondition(fromTableCond, toTableCond);
+		
+	    return this.list(cond, null, null, null);
+	}
+
+	private List<TableRelationDTO> list(Condition condition, String orderby, Integer offset, Integer limit) {
+		List<TableRelationEntity> tableRelationEntityList = 
+				crudService.list(RELATION_TABLE_NAME, condition, orderby == null ? "id DESC": orderby, offset, limit, TableRelationEntity.class);
+ 	    
+		lazyFetch(tableRelationEntityList);
+	 	    
+	    return tableRelationMapper.toDTO(tableRelationEntityList);
+	}
+	
     private TableRelationEntity getTableRelationEntity(Long id) {
-   	    TableRelationEntity tableRelationEntity = tableRelationMetadataRepository.getOne(id, TableRelationEntity.class);
+   	    TableRelationEntity tableRelationEntity = crudService.get(RELATION_TABLE_NAME, id, TableRelationEntity.class);
+   	    
    	    lazyFetch(tableRelationEntity);
    	    
    	    return tableRelationEntity;
@@ -239,7 +290,9 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
  	    cond.setValue(fromTableId);
  	    cond.setOperatorType(OperatorTypeEnum.EQ);
  	    
- 	    List<TableRelationEntity> tableRelationEntityList = tableRelationMetadataRepository.find(cond, TableRelationEntity.class);
+ 	    List<TableRelationEntity> tableRelationEntityList = 
+ 	    		crudService.list(RELATION_TABLE_NAME, cond, null, null, null, TableRelationEntity.class);
+ 	    
  	    lazyFetch(tableRelationEntityList);
  	    
  	    return tableRelationEntityList;
@@ -252,43 +305,16 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
     
     private void lazyFetch(TableRelationEntity tableRelationEntity) {
-    	TableEntity fromTableEntity = tableMetadataRepository.getBasicOne(tableRelationEntity.getFromTableId(),  TableEntity.class);
-    	TableEntity toTableEntity = tableMetadataRepository.getBasicOne(tableRelationEntity.getToTableId(), TableEntity.class);
-    	ColumnEntity fromColumnEntity = columnMetadataRepository.getBasicOne(tableRelationEntity.getFromColumnId(), ColumnEntity.class);
-    	ColumnEntity toColumnEntity = columnMetadataRepository.getBasicOne(tableRelationEntity.getToColumnId(), ColumnEntity.class);
+    	TableEntity fromTableEntity = crudService.get(TABLE_TABLE_NAME, tableRelationEntity.getFromTableId(),  TableEntity.class);
+    	TableEntity toTableEntity = crudService.get(TABLE_TABLE_NAME, tableRelationEntity.getToTableId(), TableEntity.class);
+    	ColumnEntity fromColumnEntity = crudService.get(COLUMN_TABLE_NAME, tableRelationEntity.getFromColumnId(), ColumnEntity.class);
+    	ColumnEntity toColumnEntity = crudService.get(COLUMN_TABLE_NAME, tableRelationEntity.getToColumnId(), ColumnEntity.class);
+    	
     	tableRelationEntity.setFromTableEntity(fromTableEntity);
     	tableRelationEntity.setFromColumnEntity(fromColumnEntity);
     	tableRelationEntity.setToTableEntity(toTableEntity);
     	tableRelationEntity.setToColumnEntity(toColumnEntity);
   	}
-
-
-	@Override
-	public List<TableRelationDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit,
-			String orderby) {
-		Condition newCond = convertConditon(filter, search, condition);
-		
-		List<TableRelationEntity> tableRelationEntityList = tableRelationMetadataRepository.find(newCond, offset, limit, orderby, TableRelationEntity.class);
-	    lazyFetch(tableRelationEntityList);
-	 	    
-	    return tableRelationMapper.toDTO(tableRelationEntityList);
-	}
-	
-	@Override
-	public List<TableRelationDTO> listAll() {
-		List<TableRelationEntity> tableRelationEntityList = tableRelationMetadataRepository.findAll(TableRelationEntity.class);
-	    lazyFetch(tableRelationEntityList);
-	 	    
-	    return tableRelationMapper.toDTO(tableRelationEntityList);
-	}
-
-	@Override
-	public Long count(String filter, String search, Condition condition) {
-		Condition newCond = convertConditon(filter, search, condition);
-
-		return tableRelationMetadataRepository.count(newCond, TableRelationEntity.class);
-	}
-	
 
     private Condition convertConditon(String filter, String search, Condition condition) {
     	Condition newCond = null;
@@ -327,26 +353,4 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 
     	return newCond;
     }
-
-	@Override
-	public List<TableRelationDTO> list(List<Long> tableIds) {
-		if (tableIds == null || tableIds.size() == 0) {
-			return new ArrayList<TableRelationDTO>();
-		}
-		
-		List<Object> valueList = new ArrayList<Object>();
-		tableIds.stream().forEach(t -> {
-			valueList.add(t);
-		});
-		
-		Condition fromTableCond = ConditionUtils.toCondition("fromTableId", valueList);
-		Condition toTableCond = ConditionUtils.toCondition("toTableId", valueList);
-		
-		Condition cond = ConditionUtils.toCondition(fromTableCond, toTableCond);
-		
-		List<TableRelationEntity> tableRelationEntityList = tableRelationMetadataRepository.find(cond, TableRelationEntity.class);
-	    lazyFetch(tableRelationEntityList);
-	 	    
-	    return tableRelationMapper.toDTO(tableRelationEntityList);
-	}
 }

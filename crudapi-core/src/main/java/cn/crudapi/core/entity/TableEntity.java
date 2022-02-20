@@ -1,21 +1,11 @@
 package cn.crudapi.core.entity;
 
 import java.sql.Timestamp;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import cn.crudapi.core.enumeration.EngineEnum;
-import cn.crudapi.core.util.DbUtils;
-import cn.crudapi.core.util.ToolUtils;
 
-
-
-public class TableEntity implements Sqlable, BaseEntity {
-	private static final String TABLE_NAME = "ca_meta_table";
-
+public class TableEntity {
 	private Long id;
 
 	private String name;
@@ -199,140 +189,5 @@ public class TableEntity implements Sqlable, BaseEntity {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
-	}
-
-	@Override
-    public String toSql() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE {0} (");
-        sb.append(ToolUtils.getLineSeparator());
-
-        List<String> sqlList = new ArrayList<String>();
-        for (ColumnEntity columnEntity : columnEntityList) {
-            sqlList.add(columnEntity.toSql());
-        }
-
-        for (ColumnEntity columnEntity : columnEntityList) {
-        	String indexSql = columnEntity.toIndexSql();
-            if (StringUtils.isNotBlank(indexSql)) {
-                sqlList.add(indexSql);
-            }
-        }
-
-        String delimiter = "," + ToolUtils.getLineSeparator();
-
-        sb.append(String.join(delimiter, sqlList));
-        sb.append(ToolUtils.getLineSeparator());
-        sb.append(") ENGINE={1} DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-        
-        sb.append(" COMMENT ''");
-		sb.append(StringUtils.isEmpty(caption) ? name : caption );
-		sb.append("''");
-
-        String pattern = sb.toString();
-        Object[] arguments = { DbUtils.toNameSql(tableName), engine.getCode() };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
-    }
-	
-	public List<String> toIndexSqlList() {
-		List<String> sqlList = new ArrayList<String>();
-		
-		if (indexEntityList != null) {
-			for (IndexEntity indexEntity : indexEntityList) {
-				String sql = DbUtils.toAddIndexSql(tableName, indexEntity);
-				
-				if (!StringUtils.isBlank(sql)) {
-					sqlList.add(sql);
-				}
-			}	
-		}
-		
-		
-		return sqlList;
-	}
-	
-	@Override
-	public String getDataBaseTableName() {
-		return TABLE_NAME;
-	}
-
-	@Override
-	public Long getRecId() {
-		return id;
-	}
-
-	@Override
-	public List<String> getColumnNames(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add("name");
-		columnNames.add("caption");
-		columnNames.add("description");
-		if (isUpdate == false) {
-			columnNames.add("createdDate");
-		}
-		columnNames.add("lastModifiedDate");
-		columnNames.add("pluralName");
-		columnNames.add("tableName");
-		columnNames.add("engine");
-		columnNames.add("createPhysicalTable");
-		columnNames.add("systemable");
-		columnNames.add("readOnly");
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValues(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		columnValues.add(name);
-		columnValues.add(caption);
-		columnValues.add(description);
-		if (isUpdate == false) {
-			columnValues.add(createdDate);
-		}
-		columnValues.add(lastModifiedDate);
-		columnValues.add(pluralName);
-		columnValues.add(tableName);
-		columnValues.add(engine.toString());
-		columnValues.add(createPhysicalTable);
-		columnValues.add(systemable);
-		columnValues.add(readOnly);
-		return columnValues;
-	}
-
-	@Override
-	public List<String> getColumnNamesIgnoreNull(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		if (name != null) { columnNames.add("name"); }
-		if (caption != null) { columnNames.add("caption"); }
-		if (description != null) { columnNames.add("description"); }
-		if (createdDate != null && isUpdate == false) { columnNames.add("createdDate"); }
-		if (lastModifiedDate != null) { columnNames.add("lastModifiedDate"); }
-		if (pluralName != null) { columnNames.add("pluralName"); }
-		if (tableName != null) { columnNames.add("tableName"); }
-		if (engine != null) { columnNames.add("engine"); }
-		if (createPhysicalTable != null) { columnNames.add("createPhysicalTable"); }
-		if (systemable != null) { columnNames.add("systemable"); }
-		if (readOnly != null) { columnNames.add("readOnly"); }
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValuesIgnoreNull(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		if (name != null) { columnValues.add(name); }
-		if (caption != null) { columnValues.add(caption); }
-		if (description != null) { columnValues.add(description); }
-		if (createdDate != null && isUpdate == false) { columnValues.add(createdDate); }
-		if (lastModifiedDate != null) { columnValues.add(lastModifiedDate); }
-		if (pluralName != null) { columnValues.add(pluralName); }
-		if (tableName != null) { columnValues.add(tableName); }
-		if (engine != null) { columnValues.add(engine.toString()); }
-		if (createPhysicalTable != null) { columnValues.add(createPhysicalTable); }
-		if (systemable != null) { columnValues.add(systemable); }
-		if (readOnly != null) { columnValues.add(readOnly); }
-		return columnValues;
 	}
 }

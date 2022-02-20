@@ -20,7 +20,6 @@ import cn.crudapi.core.dto.MetadataDTO;
 import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
-import cn.crudapi.core.enumeration.TableRelationTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.service.FileService;

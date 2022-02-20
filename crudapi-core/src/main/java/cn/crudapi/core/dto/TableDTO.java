@@ -1,13 +1,17 @@
 package cn.crudapi.core.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.EngineEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 
@@ -193,5 +197,15 @@ public class TableDTO extends AuditDTO {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+	
+	public Map<String, DataTypeEnum> toDataTypeMap() {
+		 Map<String, DataTypeEnum> dataTypeMap = new HashMap<String, DataTypeEnum>();
+		 
+		 for (ColumnDTO columnDTO : columnDTOList) {
+			 dataTypeMap.put(columnDTO.getName(), columnDTO.getDataType());
+		 }
+		 
+		 return dataTypeMap;
 	}
 }

@@ -1,6 +1,5 @@
 package cn.crudapi.core.service;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -28,11 +27,12 @@ public interface TableMetadataService {
 
 	List<TableDTO> listAll(List<Long> idList);
 
-	Map<String, Object> getMeataData(String tableName);
+	Map<String, Object> getMetaData(String tableName);
 
-	List<Map<String, Object>> getMeataDatas();
+	List<Map<String, Object>> getMetaDatas();
 	
 	void checkTable();
 
 	Boolean isExist(String tableName);
+
 }

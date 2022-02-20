@@ -1,11 +1,15 @@
 package cn.crudapi.core.query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
 import cn.crudapi.core.enumeration.ConditionTypeEnum;
+import cn.crudapi.core.enumeration.DataTypeEnum;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -87,5 +91,24 @@ public class CompositeCondition implements Condition {
         });
 
         return queryValues;
+	}
+
+	@Override
+	public Map<String, Object> toQueryValueMap() {
+		Map<String, Object> queryValueMap = new HashMap<String, Object>();
+        conditionList.stream().forEach(t -> {
+        	queryValueMap.putAll(t.toQueryValueMap());
+        });
+
+        return queryValueMap;
+	}
+
+	@Override
+	public int build(String sqlQuotation, int seq, Map<String, DataTypeEnum> dataTypeMap) {
+		for (Condition condition: conditionList) {
+			seq = condition.build(sqlQuotation, seq, dataTypeMap);
+		}
+		
+		return seq;
 	}
 }

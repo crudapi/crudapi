@@ -3,10 +3,7 @@ package cn.crudapi.core.service.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,12 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +44,7 @@ import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.service.FileService;
 import cn.crudapi.core.service.SequenceService;
 import cn.crudapi.core.service.TableMetadataService;
@@ -60,7 +52,6 @@ import cn.crudapi.core.service.TableRelationMetadataService;
 import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.DbUtils;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -86,8 +77,8 @@ public class TableServiceImpl implements TableService {
     private TableRelationMetadataService tableRelationService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    
+    private CrudService crudService;
+
     @Autowired
     private ApplicationContext applicationContext;
     
@@ -396,7 +387,7 @@ public class TableServiceImpl implements TableService {
 
     	Condition newCond = convertConditon(tableDTO, filter, search, condition);
 
-    	List<Map<String, Object>> recIdList = queryIds(tableDTO.getTableName(), tableDTO.getPrimaryNameList(), newCond, offset, limit, orderby);
+    	List<Map<String, Object>> recIdList = queryIds(tableDTO.getTableName(), tableDTO.toDataTypeMap(), tableDTO.getPrimaryNameList(), newCond, offset, limit, orderby);
         for (Map<String, Object> recId : recIdList) {
             log.info("list->recId = " + recId);
             Map<String, Object> map = selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
@@ -412,11 +403,10 @@ public class TableServiceImpl implements TableService {
         TableDTO tableDTO = tableMetadataService.get(name);
       
       	List<String> selectColumnNameList = convertSelect(select);
-    	List<String> expandList = convertExpand(expand);
-
+    	
     	Condition newCond = convertConditon(tableDTO, filter, search, condition);
 
-    	List<Map<String, Object>> mapList = queryForList(tableDTO.getTableName(), tableDTO.getPrimaryNameList(), selectColumnNameList, newCond, offset, limit, orderby);
+    	List<Map<String, Object>> mapList = queryForList(tableDTO.getTableName(),  tableDTO.toDataTypeMap(), tableDTO.getPrimaryNameList(), selectColumnNameList, newCond, offset, limit, orderby);
         
         return mapList;
     }
@@ -436,7 +426,7 @@ public class TableServiceImpl implements TableService {
 
 		Condition newCond = convertConditon(tableDTO, filter, search, condition);
 
-		return queryForCount(tableDTO.getTableName(), newCond);
+		return queryForCount(tableDTO.getTableName(), tableDTO.toDataTypeMap(), newCond);
 	}
 
     @Override
@@ -444,7 +434,7 @@ public class TableServiceImpl implements TableService {
         for (String name : nameList) {
         	TableDTO tableDTO = tableMetadataService.get(name);
         	if (tableDTO != null) {
-        		jdbcTemplate.execute("DROP TABLE IF EXISTS `" + tableDTO.getTableName() + "`");
+        		crudService.delete(tableDTO.getTableName());
         	}
         }
     }
@@ -588,39 +578,39 @@ public class TableServiceImpl implements TableService {
             } else if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
                 columnNameList.add(t.getName());
                 
-                Object value = newMap.get(t.getName());
-                if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
-                	value = encodePassword(value);
-                }
+                Object obj = newMap.get(t.getName());
+                Object newObj = obj;
+        		if (obj != null && !obj.toString().isEmpty()) {
+        			String objStr = obj.toString();
+        			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
+            			newObj = Long.parseLong(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
+            			newObj = Integer.parseInt(objStr);
+            		}  else if (t.getDataType().equals(DataTypeEnum.TINYINT)) {
+            			newObj = Integer.parseInt(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DOUBLE)) {
+            			newObj = Double.parseDouble(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.FLOAT)) {
+            			newObj = Float.parseFloat(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
+            			newObj = new BigDecimal(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
+            			newObj = encodePassword(objStr);
+                    }
+        		}
                 
-                valueList.add(value);
+                valueList.add(newObj);
             }
         });
 
         String physicalTableName = tableDTO.getTableName();
-        String sql = DbUtils.toUpdateSql(physicalTableName, columnNameList);
-        log.info(sql);
         
-        Condition cond = ConditionUtils.toCondition(recId);
-        sql += " WHERE " + cond.toQuerySql();
-        valueList.addAll(cond.toQueryValues());
-        log.info(sql);
-       
-        int row = jdbcTemplate.update(sql, new PreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps) throws SQLException {
-                int index = 0;
-                for (index = 0; index < valueList.size(); ++index) {
-                    ps.setObject(index + 1, valueList.get(index));
-                } 
-            }
-        });
-
-        log.info("row = " + row);
-
-        if (row == 0) {
-            throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, recId);
-        }    	
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+    	for (int i = 0; i < columnNameList.size(); ++i) {
+    		dataMap.put(columnNameList.get(i), valueList.get(i));
+    	}
+        
+    	crudService.patch(physicalTableName, recId, dataMap);
     }
     
     private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap) {
@@ -784,7 +774,7 @@ public class TableServiceImpl implements TableService {
 		        	searchCond = new LeafCondition();
 		        	searchCond.setColumnName(fullTextColumnOptional.get().getName());
 		        	searchCond.setOperatorType(OperatorTypeEnum.SEARCH);
-		        	searchCond.addValue(search + "*");
+		        	searchCond.addValue(search);
 		        }
 			}
 	    	
@@ -922,32 +912,20 @@ public class TableServiceImpl implements TableService {
     }
 
     private Map<String, Object> insert(String tableName, List<String> primaryNameList,  boolean autoIncrement, List<String> columnNameList, List<Object> valueList) {
-        String sql = DbUtils.toInserSql(tableName, columnNameList, false);
-        log.info(sql);
-        log.info(valueList.toString());
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        int row = jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-                for (int index = 0; index < valueList.size(); ++index) {
-                    ps.setObject(index + 1, valueList.get(index));
-                }
-
-                return ps;
-            }
-
-        }, keyHolder);
-
-        if (row > 0 && autoIncrement) {
-        	 Map<String, Object> recId = new HashMap<String, Object>();
-        	 recId.put(primaryNameList.get(0),  keyHolder.getKey().longValue());
-             return recId;
-        } else {
-            return null;
-        }
+    	Map<String, Object> dataMap = new HashMap<String, Object>();
+    	for (int i = 0; i < columnNameList.size(); ++i) {
+    		dataMap.put(columnNameList.get(i), valueList.get(i));
+    	}
+    	
+    	Map<String, Object> keyMap = new HashMap<String, Object>();
+    	if (autoIncrement) {
+    		Long id = crudService.create(tableName, dataMap);
+    		keyMap.put(primaryNameList.get(0), id);
+    	} else {
+    		keyMap = crudService.create(tableName, dataMap, primaryNameList.toArray(new String[0]));
+    	}
+    	
+    	return keyMap;
     }
 
     private int[] batchInsert(TableDTO tableDTO, List<Map<String, Object>> mapList) {
@@ -959,43 +937,26 @@ public class TableServiceImpl implements TableService {
     }
 
     private int[] batchInsert(String tableName, List<String> columnNameList, List<List<Object>> valueListList) {
-        String sql = DbUtils.toInserSql(tableName, columnNameList, true);
-        log.info(sql);
-        
-        int[] ret = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                List<Object> valueList = valueListList.get(i);
-                
-                log.info(valueList.toString());
-                for (int index = 0; index < valueList.size(); ++index) {
-                    ps.setObject(index + 1, valueList.get(index));
-                }
-            }
-
-            @Override
-            public int getBatchSize() {
-                return valueListList.size();
-            }
-        });
-
-        return ret;
+    	List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+    	
+    	for (List<Object> valueList : valueListList) {
+    		Map<String, Object> dataMap = new HashMap<String, Object>();
+        	for (int i = 0; i < columnNameList.size(); ++i) {
+        		dataMap.put(columnNameList.get(i), valueList.get(i));
+        	}
+    		
+        	mapList.add(dataMap);
+    	}
+    	
+    	return crudService.batchCreateMap(tableName, mapList);
     }
 
     private int delete(String tableName, Condition cond) {
-        String sql = DbUtils.toDeleteSql(tableName);
-        log.info(sql);
-
-        sql += " WHERE " + cond.toQuerySql();
-        log.info(sql);
-        
-        int row = jdbcTemplate.update(sql, cond.toQueryValues().toArray());
-
-        return row;
+        return crudService.delete(tableName, cond);
     }
     
     private int deleteMainOnly(String tableName, Map<String, Object> recId) {
-    	return delete(tableName, ConditionUtils.toCondition(recId));	
+    	return this.delete(tableName, ConditionUtils.toCondition(recId));	
     }
 
     private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId) {
@@ -1013,7 +974,7 @@ public class TableServiceImpl implements TableService {
             	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
             	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
                 String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
-                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.toDataTypeMap(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("relationRecId = " + relationRecId);
                     deleteRecursion(relationTableDTO, relationRecId);
@@ -1124,7 +1085,7 @@ public class TableServiceImpl implements TableService {
             	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
                 String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
 
-                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.toDataTypeMap(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
                 List<Map<String, Object>> relationMapList = new ArrayList<Map<String, Object>>();
 
                 for (Map<String, Object> relationRecId : relationRecIdList) {
@@ -1136,7 +1097,7 @@ public class TableServiceImpl implements TableService {
             } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub) {
             	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
                 String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
-                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
+                List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.toDataTypeMap(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
                 
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("selectRecursion.relationRecId = " + relationRecId);
@@ -1176,58 +1137,33 @@ public class TableServiceImpl implements TableService {
         return map;
     }
    
-    private List<Map<String, Object>> queryIds(String tableName, List<String> primaryNameList, Condition cond) {
-        List<Map<String, Object>> ids = queryForList(tableName, primaryNameList, cond);
+    private List<Map<String, Object>> queryIds(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> primaryNameList, Condition cond) {
+        List<Map<String, Object>> ids = queryForList(tableName, dataTypeMap, primaryNameList, cond);
         
         return ids;
     }
 
-    private List<Map<String, Object>> queryIds(String tableName, List<String> primaryNameList, Condition cond, Integer offset, Integer limit, String orderby) {
-        List<Map<String, Object>> ids = queryForList(tableName, primaryNameList, primaryNameList, cond, offset, limit, orderby);
+    private List<Map<String, Object>> queryIds(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> primaryNameList, Condition cond, Integer offset, Integer limit, String orderby) {
+        List<Map<String, Object>> ids = queryForList(tableName, dataTypeMap, primaryNameList, primaryNameList, cond, offset, limit, orderby);
        
         return ids;
     }
 
-    private List<Map<String, Object>> queryForList(String tableName, List<String> selectColumnNameList, Condition cond) {
-    	 String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
-         log.info(sql);
-
-         List<Object> values = new ArrayList<Object>();
-
-         if (cond != null) {
-         	sql += " WHERE " + cond.toQuerySql();
-         	log.info(sql);
-
-         	values = cond.toQueryValues();
-         }
-
-         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
-
-         return mapList;
+    private List<Map<String, Object>> queryForList(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> selectColumnNameList, Condition cond) {
+    	 return crudService.list(tableName, dataTypeMap, selectColumnNameList, cond, null, null, null);
     }
 
-    private List<Map<String, Object>> queryForList(String tableName, List<String> primaryNameList, List<String> selectColumnNameList, Condition cond, Integer offset, Integer limit, String orderby) {
-        String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
-        log.info(sql);
-
-        List<Object> values = new ArrayList<Object>();
-
-        if (cond != null) {
-        	sql += " WHERE " + cond.toQuerySql();
-        	log.info(sql);
-
-        	values = cond.toQueryValues();
-        }
-
+    private List<Map<String, Object>> queryForList(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> primaryNameList, List<String> selectColumnNameList, Condition cond, Integer offset, Integer limit, String orderby) {
+        String newOrderby = null;
         if (StringUtils.isEmpty(orderby)) {
-        	sql += " ORDER BY " + String.join(",", primaryNameList) +" DESC LIMIT ?, ?";
+        	newOrderby = String.join(",", primaryNameList) + " DESC";
         } else {
         	log.info(orderby);
         	String[] orderbys = orderby.replaceAll(" +", ";").split(";");
         	
-        	List<String> newOrderbys  = new ArrayList<String>();
+        	List<String> newOrderbys = new ArrayList<String>();
         	
-        	List<String> orderbyNames  = new ArrayList<String>();
+        	List<String> orderbyNames = new ArrayList<String>();
         	for (String t : orderbys) {
         		if (t.equalsIgnoreCase("ASC") || t.equalsIgnoreCase("DESC")) {
         			newOrderbys.add(t);
@@ -1238,50 +1174,16 @@ public class TableServiceImpl implements TableService {
         			}
         		}
         	}
-        	String newOrderby = String.join(",", orderbyNames) + " " +  String.join(" ", newOrderbys);
+        	newOrderby = String.join(",", orderbyNames) + " " +  String.join(" ", newOrderbys);
         	
         	log.info(newOrderby);
-        	sql += " ORDER BY " + newOrderby + " LIMIT ?, ?";
         }
 
-        if (offset == null) {
-        	offset = 0;
-        }
-
-        if (limit == null) {
-        	limit = 10;
-        }
-
-        values.add(offset);
-        values.add(limit);
-
-        log.info(sql);
-        log.info(values.toString());
-
-        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
-
-        return mapList;
+        return crudService.list(tableName, dataTypeMap, selectColumnNameList, cond, newOrderby, offset, limit);
     }
 
-    private Long queryForCount(String tableName, Condition cond) {
-        String sql = DbUtils.toCountSql(tableName);
-        log.info(sql);
-
-        List<Object> values = new ArrayList<Object>();
-
-        if (cond != null) {
-        	sql += " WHERE " + cond.toQuerySql();
-        	log.info(sql);
-
-        	values = cond.toQueryValues();
-        }
-
-        log.info(sql);
-        log.info(values.toString());
-
-        Long count =  jdbcTemplate.queryForObject(sql, values.toArray(), Long.class);
-
-        return count;
+    private Long queryForCount(String tableName,  Map<String, DataTypeEnum> dataTypeMap, Condition cond) {
+        return crudService.count(tableName, dataTypeMap, cond);
     }
 
     private Map<String, Object> queryForMap(TableDTO tableDTO, List<String> selectColumnNameList, Map<String, Object> recId) {
@@ -1298,22 +1200,11 @@ public class TableServiceImpl implements TableService {
     	
     	Condition cond = ConditionUtils.toCondition(recId);
 
-    	return queryForMap(tableDTO.getTableName(), fullSelectColumnNameList, cond);
+    	return queryForMap(tableDTO.getTableName(), tableDTO.toDataTypeMap(), fullSelectColumnNameList, cond);
     }
 
-    private Map<String, Object> queryForMap(String tableName, List<String> selectColumnNameList, Condition cond) {
-        String sql = DbUtils.toSelectSql(tableName, selectColumnNameList);
-        log.info(sql);
-        
-        List<Object> values = new ArrayList<Object>();
-        if (cond != null) {
-        	sql += " WHERE " + cond.toQuerySql();
-        	log.info(sql);
-
-        	values = cond.toQueryValues();
-        }
-        
-        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql, values.toArray());
+    private Map<String, Object> queryForMap(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> selectColumnNameList, Condition cond) {
+        List<Map<String, Object>> mapList = crudService.list(tableName, dataTypeMap, selectColumnNameList, cond, null, null, null);
         int count = mapList.size();
         if (count > 0) {
         	 if (count > 1) {
@@ -1328,7 +1219,9 @@ public class TableServiceImpl implements TableService {
     private List<String> getColumnNameList(TableDTO tableDTO) {
         List<String> columnNameList = new ArrayList<String>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
-            columnNameList.add(t.getName());
+        	if (!Boolean.TRUE.equals(t.getAutoIncrement())) {
+        		columnNameList.add(t.getName());
+        	}
         });
         return columnNameList;
     }
@@ -1347,7 +1240,29 @@ public class TableServiceImpl implements TableService {
     private List<Object> getColumnValueList(TableDTO tableDTO, Map<String, Object> paramMap, Map<Long, List<Object>> seqValueListMap) {
         List<Object> valueList = new ArrayList<Object>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
-            valueList.add(getColumnValue(t, paramMap, seqValueListMap));
+        	if (!Boolean.TRUE.equals(t.getAutoIncrement())) {
+        		Object obj = getColumnValue(t, paramMap, seqValueListMap);
+        		Object newObj = obj;
+        		
+        		if (obj != null && !obj.toString().isEmpty()) {
+        			String objStr = obj.toString();
+        			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
+            			newObj = Long.parseLong(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
+            			newObj = Integer.parseInt(objStr);
+            		}  else if (t.getDataType().equals(DataTypeEnum.TINYINT)) {
+            			newObj = Integer.parseInt(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DOUBLE)) {
+            			newObj = Double.parseDouble(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.FLOAT)) {
+            			newObj = Float.parseFloat(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
+            			newObj = new BigDecimal(objStr);
+            		}
+        		}
+        		
+        		valueList.add(newObj);
+        	}
         });
 
         return valueList;

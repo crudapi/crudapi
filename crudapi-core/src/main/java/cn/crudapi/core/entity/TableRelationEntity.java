@@ -1,14 +1,10 @@
 package cn.crudapi.core.entity;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 import cn.crudapi.core.enumeration.TableRelationTypeEnum;
 
-
-public class TableRelationEntity implements BaseEntity {
-	private static final String TABLE_NAME = "ca_meta_table_relation";
+public class TableRelationEntity {
 	
 	private Long id;
 
@@ -195,91 +191,5 @@ public class TableRelationEntity implements BaseEntity {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String getDataBaseTableName() {
-		return TABLE_NAME;
-	}
-
-	@Override
-	public Long getRecId() {
-		return id;
-	}
-
-	@Override
-	public List<String> getColumnNames(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add("name");
-		columnNames.add("caption"); 
-		columnNames.add("description");
-		if (isUpdate == false) { 
-			columnNames.add("createdDate"); 
-		}
-		columnNames.add("lastModifiedDate");
-		columnNames.add("relationType");
-		columnNames.add("fromTableId");
-		columnNames.add("toTableId");
-		columnNames.add("fromColumnId");
-		columnNames.add("toColumnId");
-		
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValues(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		columnValues.add(name);
-		columnValues.add(caption);
-		columnValues.add(description);
-		if (isUpdate == false) { 
-			columnValues.add(createdDate); 
-		}
-		columnValues.add(lastModifiedDate);
-		columnValues.add(relationType != null ? relationType.toString() : null);
-		columnValues.add(fromTableId);
-		columnValues.add(toTableId);
-		columnValues.add(fromColumnId);
-		columnValues.add(toColumnId);
-		
-		return columnValues;
-	}
-
-	@Override
-	public List<String> getColumnNamesIgnoreNull(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		if (name != null) { columnNames.add("name"); }
-		if (caption != null) { columnNames.add("caption"); } 
-		if (description != null) { columnNames.add("description"); }
-		if (createdDate != null && isUpdate == false) { 
-			columnNames.add("createdDate");
-		}
-		if (lastModifiedDate != null) {columnNames.add("lastModifiedDate"); }
-		if (relationType != null) {columnNames.add("relationType"); }
-		if (fromTableId != null) {columnNames.add("fromTableId"); }
-		if (toTableId != null) {columnNames.add("toTableId"); }
-		if (fromColumnId != null) {columnNames.add("fromColumnId"); }
-		if (toColumnId != null) {columnNames.add("toColumnId"); }
-		
-		return columnNames;
-	}
-
-	@Override
-	public List<Object> getColumnValuesIgnoreNull(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		if (name != null) {columnValues.add(name); }
-		if (caption != null) {columnValues.add(caption); }
-		if (description != null) {columnValues.add(description); }
-		if (createdDate != null && isUpdate == false) { 
-			columnValues.add(createdDate); 
-		}
-		if (lastModifiedDate != null) {columnValues.add(lastModifiedDate); }
-		if (relationType != null) {columnValues.add(relationType != null ? relationType.toString() : null); }
-		if (fromTableId != null) {columnValues.add(fromTableId); }
-		if (toTableId != null) {columnValues.add(toTableId); }
-		if (fromColumnId != null) {columnValues.add(fromColumnId); }
-		if (toColumnId != null) {columnValues.add(toColumnId); }
-		
-		return columnValues;
 	}
 }

@@ -1,13 +1,19 @@
 package cn.crudapi.core.query;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
-import cn.crudapi.core.util.DbUtils;
+import cn.crudapi.core.exception.BusinessException;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -17,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class LeafCondition implements Condition {
 	private String name = "L";
 
+	private Map<String, DataTypeEnum> dataTypeMap;
+	
 	private String columnName;
 	
 	private String funcName;
@@ -33,7 +41,46 @@ public class LeafCondition implements Condition {
 	@JsonProperty("values")
 	private List<Object> valueList = new ArrayList<Object>();
 
+	private List<String> valueParamNameList = null;
 	
+	private boolean namedParameter = false;
+	
+	private String sqlQuotation = "`";
+	
+	@Override
+	public int build(String sqlQuotation, int seq, Map<String, DataTypeEnum> dataTypeMap) {
+		this.namedParameter = true;
+		this.sqlQuotation = sqlQuotation;
+		this.dataTypeMap = dataTypeMap;
+		this.valueParamNameList = new ArrayList<String>();
+		for (int i = 0; i < valueList.size(); ++i) {
+			this.valueParamNameList.add("LeafCondition" + seq++);
+		}
+		return seq;
+	}
+	public String toSqlName(String colunmName) {
+        StringBuilder sb = new StringBuilder();
+
+        if (colunmName.equals("*")) {
+          return colunmName;
+        } else {
+    	  sb.append(sqlQuotation);
+          sb.append(colunmName);
+          sb.append(sqlQuotation);
+        }
+       
+        return sb.toString();
+    }
+	
+	public String toSqlValue(String colunmName) {
+		if (!namedParameter) {
+			return "?";
+		}
+        StringBuilder sb = new StringBuilder();
+	    sb.append(":");
+        sb.append(colunmName);
+        return sb.toString();
+    }
 	
 	public String getName() {
 		return name;
@@ -127,36 +174,75 @@ public class LeafCondition implements Condition {
 		}
 		return valueList == null ? new ArrayList<Object>() : valueList;
 	}
+	
+	@Override
+	public Map<String, Object> toQueryValueMap() {
+		if (namedParameter && valueParamNameList == null) {
+			throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "condition is not init");
+		}
+		
+		if (OperatorTypeEnum.INSELECT.equals(operatorType)) {
+			return inCondition.toQueryValueMap();
+		}
+		
+		List<Object> newValueList = valueList;
+		if (OperatorTypeEnum.LIKE.equals(operatorType)
+			|| OperatorTypeEnum.SEARCH.equals(operatorType)) {
+			newValueList = new ArrayList<Object>();
+			for (Object t : valueList) {
+				newValueList.add("%" +  t + "%");
+			}
+		}
+		
+		Map<String, Object> queryValueMap = new HashMap<String, Object>();
+		for (int i = 0; i < newValueList.size(); ++i) {
+			Object obj = newValueList.get(i);
+			
+			DataTypeEnum dataType = (dataTypeMap != null) ? dataTypeMap.get(columnName): null;
+			
+			Object newObj = obj;
+			if (dataType != null) {
+				String objStr = obj.toString();
+				if (dataType.equals(DataTypeEnum.BIGINT)) {
+					newObj = Long.parseLong(objStr);
+				} else if (dataType.equals(DataTypeEnum.INT)) {
+        			newObj = Integer.parseInt(objStr);
+        		}  else if (dataType.equals(DataTypeEnum.TINYINT)) {
+        			newObj = Integer.parseInt(objStr);
+        		} else if (dataType.equals(DataTypeEnum.DOUBLE)) {
+        			newObj = Double.parseDouble(objStr);
+        		}  else if (dataType.equals(DataTypeEnum.FLOAT)) {
+        			newObj = Float.parseFloat(objStr);
+        		}  else if (dataType.equals(DataTypeEnum.DECIMAL)) {
+        			newObj = new BigDecimal(objStr);
+        		} else if (dataType.equals(DataTypeEnum.BOOL)) {
+        			newObj = Boolean.parseBoolean(objStr);
+        		}
+			} 
+			queryValueMap.put(valueParamNameList.get(i), newObj);
+		}
+		
+		return queryValueMap;
+	}
 
 	@Override
 	public String toQuerySql() {
+		if (namedParameter && valueParamNameList == null) {
+			throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "condition is not init");
+		}
 		String querySql = "";
 
         switch (operatorType)
         {
             case EQ:
-            	querySql = toQuerySqlForEQ();
-                break;
             case NE:
-            	querySql = toQuerySqlForNE();
-                break;
             case GE:
-            	querySql = toQuerySqlForGE();
-                break;
             case GT:
-            	querySql = toQuerySqlForGT();
-                break;
             case LE:
-            	querySql = toQuerySqlForLE();
-                break;
-            case LT:
-            	querySql = toQuerySqlForLT();
-                break;    
+            case LT:   
             case LIKE:
-            	querySql = toQuerySqlForLIKE();
-                break;
-            case MLIKE:
-            	querySql = toQuerySqlForMLIKE();
+            case SEARCH:
+            	querySql = toBasicQuerySql();
                 break;
             case BETWEEN:
             	querySql = toQuerySqlForBETWEEN();
@@ -173,9 +259,6 @@ public class LeafCondition implements Condition {
             case INSELECT:
             	querySql = toQuerySqlForINSELECT();
                 break;
-            case SEARCH:
-            	querySql = toQuerySqlForSEARCH();
-                break;
             default:
                 break;
         }
@@ -183,115 +266,109 @@ public class LeafCondition implements Condition {
         return  "(" + querySql + ")";
 	}
 
-    private String toQuerySqlForEQ() {
-    	String querySql = "";
-    	
-    	if (StringUtils.isAllBlank(funcName)) {
-    		querySql = DbUtils.toNameSql(columnName) + " = ?";
-    	} else {
-    		querySql = funcName + "(" + DbUtils.toNameSql(columnName) + ")" + " = ?";
-    	}
+	private String toBasicQuerySql() {
+		StringBuilder sb = new StringBuilder();
+		    
+		String operatorTypeStr = "";
+		
+        switch (operatorType)
+        {
+            case EQ:
+            	operatorTypeStr = "=";
+                break;
+            case NE:
+            	operatorTypeStr = "!=";
+                break;
+            case GE:
+            	operatorTypeStr = ">=";
+                break;
+            case GT:
+            	operatorTypeStr = ">";
+                break;
+            case LE:
+            	operatorTypeStr = "<=";
+                break;
+            case LT:
+            	operatorTypeStr = "<";
+                break;    
+            case LIKE:
+            case SEARCH:
+            	operatorTypeStr = "LIKE";
+                break;
+            default:
+                break;
+        }
        
-        return querySql;
-    }
-    
-    private String toQuerySqlForNE() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " != ?";
-
-        return querySql;
-    }
-    
-    private String toQuerySqlForGE() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " >= ?";
-
-        return querySql;
-    }
-    
-    private String toQuerySqlForGT() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " > ?";
-
-        return querySql;
-    }
-    
-    private String toQuerySqlForLE() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " <= ?";
-
-        return querySql;
-    }
-    
-    private String toQuerySqlForLT() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " < ?";
-
-        return querySql;
+        if (!StringUtils.isAllBlank(funcName)) {
+        	sb.append(funcName);
+        	sb.append("(");
+    	}
+        
+        sb.append(toSqlName(columnName));
+        
+        if (!StringUtils.isAllBlank(funcName)) {
+        	sb.append(")");
+    	}
+        
+        sb.append(" ");
+        sb.append(operatorTypeStr);
+        sb.append(" ");
+        sb.append(namedParameter ? toSqlValue(valueParamNameList.get(0)) : "?");
+        
+        return sb.toString();
     }
 
+   
     private String toQuerySqlForBETWEEN() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " BETWEEN ? AND ?";
-
-        return querySql;
+    	StringBuilder sb = new StringBuilder();
+    	sb.append(toSqlName(columnName));
+        sb.append(" BETWEEN ");
+        sb.append(namedParameter ? toSqlValue(valueParamNameList.get(0)) : "?");
+        sb.append(" AND ");
+        sb.append(namedParameter ? toSqlValue(valueParamNameList.get(1)) : "?");
+        
+        return sb.toString();
     }
     
     private String toQuerySqlForSEARCH() {
     	StringBuilder sb = new StringBuilder();
-        sb.append("MATCH({0}) AGAINST(? IN BOOLEAN MODE)");
+        sb.append("MATCH({0}) AGAINST({1} IN BOOLEAN MODE)");
         String pattern = sb.toString();
-        Object[] arguments = { DbUtils.toNameSql(columnName) };
+        Object[] arguments = { toSqlName(columnName), namedParameter ? toSqlValue(valueParamNameList.get(0)) : "?"};
 
         String querySql = MessageFormat.format(pattern, arguments);
 
         return querySql;
     }
 
-    private String toQuerySqlForLIKE() {
-    	String querySql = "";
-
-        querySql = DbUtils.toNameSql(columnName) + " LIKE ?";
-
-        return querySql;
-    }
-    
-    private String toQuerySqlForMLIKE() {
-    	String querySql = "";
-
-        List<String> likeSqlList = new ArrayList<String>();
- 	    valueList.stream().forEach(t -> {
- 	    	likeSqlList.add("(" + toQuerySqlForLIKE() + ")");
-        });
-        
-        return String.join(" OR ", likeSqlList);
-    }
-
     private String toQuerySqlForIN() {
-    	String querySql = "";
-
 	   List<String> whereValueList = new ArrayList<String>();
-	   valueList.stream().forEach(t -> {
-		   whereValueList.add("?");
-       });
-
+	   
+	   if (namedParameter) {
+		   for (String valueParamName : valueParamNameList) {
+			   whereValueList.add(toSqlValue(valueParamName));
+		   }
+	   } else {
+		   for (Object value : valueList) {
+			   whereValueList.add("?");
+		   }
+	   }
+	   
 	   String whereValues = String.join(",", whereValueList);
 
-       querySql = DbUtils.toNameSql(columnName) + " IN (" + whereValues + ")";
-
-       return querySql;
+       StringBuilder sb = new StringBuilder();
+   	   sb.append(toSqlName(columnName));
+       sb.append(" IN (");
+       sb.append(whereValues);
+       sb.append(")");
+       
+       return sb.toString();
     }
     
     private String toQuerySqlForISNULL() {
     	String querySql = "";
 
-        querySql = DbUtils.toNameSql(columnName) + " IS NULL";
+        querySql = toSqlName(columnName) + " IS NULL";
 
         return querySql;
     }
@@ -299,7 +376,7 @@ public class LeafCondition implements Condition {
     private String toQuerySqlForISNOTNULL() {
     	String querySql = "";
 
-        querySql = DbUtils.toNameSql(columnName) + " IS NOT NULL";
+        querySql = toSqlName(columnName) + " IS NOT NULL";
 
         return querySql;
     }
@@ -309,11 +386,11 @@ public class LeafCondition implements Condition {
     private String toQuerySqlForINSELECT() {
        String querySql = "";
 
-       String selectSql = "SELECT `id` FROM " + DbUtils.toNameSql(inTableName);
+       String selectSql = "SELECT " + toSqlName("id") + " FROM " + toSqlName(inTableName);
        selectSql += "where ";
        selectSql += inCondition.toQuerySql();
        
-       querySql = DbUtils.toNameSql(columnName) + " IN (" + selectSql + ")";
+       querySql = toSqlName(columnName) + " IN (" + selectSql + ")";
 
        return querySql;
     }

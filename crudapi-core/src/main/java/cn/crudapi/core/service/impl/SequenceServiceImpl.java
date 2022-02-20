@@ -16,9 +16,9 @@ import cn.crudapi.core.util.DateTimeUtils;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.SequenceDTO;
-import cn.crudapi.core.entity.SequenceEntity;
 import cn.crudapi.core.enumeration.SequenceTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.service.SequenceMetadataService;
 import cn.crudapi.core.service.SequenceService;
 
@@ -26,12 +26,14 @@ import cn.crudapi.core.service.SequenceService;
 public class SequenceServiceImpl implements SequenceService {
 	private static final Logger log = LoggerFactory.getLogger(SequenceServiceImpl.class);
 	
+	private static final String SEQUENCE_TABLE_NAME = "ca_meta_sequence";
+	
     @Autowired
     private SequenceMetadataService sequenceMetadataService;
 
-	@Autowired
-    private JdbcTemplate jdbcTemplate;
-
+    @Autowired
+    private CrudService crudService;
+  
 	@Override
 	public Object getNextValue(String sequenceName) {
 		SequenceDTO sequenceDTO = sequenceMetadataService.get(sequenceName);
@@ -69,10 +71,10 @@ public class SequenceServiceImpl implements SequenceService {
 	}
 
 	private List<Object> getNextValueById(Long sequenceId, int size) throws SQLException {
+		JdbcTemplate jdbcTemplate = crudService.getJdbcTemplate();
 		Connection conn = null;
 		List<Object> retValueList = new ArrayList<Object>();
-		SequenceEntity sequenceEntity = new SequenceEntity();
-		String dataBaseTableName = sequenceEntity.getDataBaseTableName();
+		String dataBaseTableName = SEQUENCE_TABLE_NAME;
 
 		try {
 			conn = jdbcTemplate.getDataSource().getConnection();

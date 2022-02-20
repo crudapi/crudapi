@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.crudapi.core.constant.ApiErrorCode;
@@ -18,13 +19,16 @@ import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.model.ColumnSql;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.DbUtils;
 
 @Service
 public class ColumnMapper {
 	private static final Logger log = LoggerFactory.getLogger(ColumnMapper.class);
 	
+	@Autowired
+    private CrudService crudService;
+	 
 	public void check(ColumnEntity columnEntity) {
 		//列名称不能为空
 		if (StringUtils.isEmpty(columnEntity.getName()) ) {
@@ -237,14 +241,14 @@ public class ColumnMapper {
 		}
 		
 		if (isChanged) {
-			sql = DbUtils.toUpdateColumnSql(tableName, oldColumnName, columnEntity);
+			sql = crudService.toUpdateColumnSql(tableName, oldColumnName, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
 				sqlList.add(sql);
 			}
 		}
 
 		if (isIndexChanged) {
-			sql = DbUtils.toUpdateColumnIndexSql(tableName, oldIndexName, columnEntity);
+			sql = crudService.toUpdateColumnIndexSql(tableName, oldIndexName, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
 				sqlList.add(sql);
 			}
@@ -265,7 +269,7 @@ public class ColumnMapper {
 			if (!columnDTOList.stream().anyMatch(t -> Objects.equals(t.getId(), columnEntity.getId()))) {
 				deleteColumnIdList.add(columnEntity.getId());
 
-				deleteSqlList.add(DbUtils.toDeleteColumnSql(tableName, columnEntity.getName()));
+				deleteSqlList.add(crudService.toDeleteColumnSql(tableName, columnEntity.getName()));
 			}
 		}
 		columnSql.setDeleteColumnIdList(deleteColumnIdList);
@@ -284,7 +288,7 @@ public class ColumnMapper {
 				columnEntity = toEntity(columnDTO);
 				columnEntityList.add(columnEntity);
 
-				addSqlList.add(DbUtils.toAddColumnSql(tableName, columnEntity));
+				addSqlList.add(crudService.toAddColumnSql(tableName, columnEntity));
 			}
 		}
 

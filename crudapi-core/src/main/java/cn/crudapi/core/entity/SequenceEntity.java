@@ -2,13 +2,13 @@ package cn.crudapi.core.entity;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.crudapi.core.enumeration.SequenceTypeEnum;
 
-public class SequenceEntity implements BaseEntity {
-	private static final String TABLE_NAME = "ca_meta_sequence";
-	
+public class SequenceEntity {
 	private Long id;
 
 	private String name;
@@ -185,94 +185,5 @@ public class SequenceEntity implements BaseEntity {
 			return false;
 		return true;
 	}
-
-	@Override
-	public List<String> getColumnNamesIgnoreNull(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		if (name != null) { columnNames.add("name"); }
-		if (caption != null) { columnNames.add("caption"); }
-		if (description != null) { columnNames.add("description"); }
-		if (createdDate != null && isUpdate == false) { columnNames.add("createdDate"); }
-		if (lastModifiedDate != null) { columnNames.add("lastModifiedDate"); }
-		if (minValue != null) { columnNames.add("minValue"); }
-		if (maxValue != null) { columnNames.add("maxValue"); }
-		if (nextValue != null) { columnNames.add("nextValue"); }
-		if (incrementBy != null) { columnNames.add("incrementBy"); }
-		if (cycle != null) { columnNames.add("cycle"); }
-		if (currentTime != null) { columnNames.add("currentTime"); }
-		if (sequenceType != null) { columnNames.add("sequenceType"); }
-		if (format != null) { columnNames.add("format"); }
-		return columnNames;
-	}
 	
-	@Override
-	public List<String> getColumnNames(Boolean isUpdate) {
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add("name");
-		columnNames.add("caption"); 
-		columnNames.add("description");
-		if (isUpdate == false) { 
-			columnNames.add("createdDate"); 
-		}
-		columnNames.add("lastModifiedDate");
-		columnNames.add("minValue");
-		columnNames.add("maxValue");
-		columnNames.add("nextValue");
-		columnNames.add("incrementBy");
-		columnNames.add("cycle");
-		columnNames.add("currentTime");
-		columnNames.add("sequenceType");
-		columnNames.add("format");
-		return columnNames;
-	}
-	
-	@Override
-	public List<Object> getColumnValues(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		columnValues.add(name);
-		columnValues.add(caption);
-		columnValues.add(description);
-		if (isUpdate == false) { 
-			columnValues.add(createdDate); 
-		}
-		columnValues.add(lastModifiedDate);
-		columnValues.add(minValue);
-		columnValues.add(maxValue);
-		columnValues.add(nextValue);
-		columnValues.add(incrementBy);
-		columnValues.add(cycle);
-		columnValues.add(currentTime);
-		columnValues.add(sequenceType != null ? sequenceType.toString() : null);
-		columnValues.add(format);
-		return columnValues;
-	}
-	
-	@Override
-	public List<Object> getColumnValuesIgnoreNull(Boolean isUpdate) {
-		List<Object> columnValues = new ArrayList<Object>();
-		if (name != null) { columnValues.add(name); }
-		if (caption != null) { columnValues.add(caption); }
-		if (description != null) { columnValues.add(description); }
-		if (createdDate != null && isUpdate == false) { columnValues.add(createdDate); }
-		if (lastModifiedDate != null) { columnValues.add(lastModifiedDate); }
-		if (minValue != null) { columnValues.add(minValue); }
-		if (maxValue != null) { columnValues.add(maxValue); }
-		if (nextValue != null) { columnValues.add(nextValue); }
-		if (incrementBy != null) { columnValues.add(incrementBy); }
-		if (cycle != null) { columnValues.add(cycle); }
-		if (currentTime != null) { columnValues.add(currentTime); }
-		if (sequenceType != null) { columnValues.add(sequenceType.toString()); }
-		if (format != null) { columnValues.add(format); }
-		return columnValues;
-	}
-
-	@Override
-	public String getDataBaseTableName() {
-		return TABLE_NAME;
-	}
-
-	@Override
-	public Long getRecId() {
-		return id;
-	}
 }

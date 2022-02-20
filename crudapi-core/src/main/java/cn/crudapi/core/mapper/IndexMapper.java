@@ -21,13 +21,16 @@ import cn.crudapi.core.entity.IndexLineEntity;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.model.IndexSql;
+import cn.crudapi.core.service.CrudService;
 import cn.crudapi.core.util.DateTimeUtils;
-import cn.crudapi.core.util.DbUtils;
 
 @Service
 public class IndexMapper {
 	private static final Logger log = LoggerFactory.getLogger(IndexMapper.class);
-	
+
+	@Autowired
+    private CrudService crudService;
+	 
 	@Autowired
 	private IndexLineMapper indexLineMapper;
 
@@ -136,7 +139,7 @@ public class IndexMapper {
 		}
 
 		if (isChanged) {
-			sql = DbUtils.toUpdateIndexSql(tableName, oldIndexName, indexEntity);
+			sql = crudService.toUpdateIndexSql(tableName, oldIndexName, indexEntity);
 			if (StringUtils.isNotBlank(sql)) {
 				sqlList.add(sql);
 			}
@@ -158,7 +161,7 @@ public class IndexMapper {
 			if (!indexDTOList.stream().anyMatch(t -> Objects.equals(t.getId(), indexEntity.getId()))) {
 				deleteIndexIdList.add(indexEntity.getId());
 
-				deleteSqlList.add(DbUtils.toDeleteIndexSql(tableName, indexEntity.getName()));
+				deleteSqlList.add(crudService.toDeleteIndexSql(tableName, indexEntity.getName()));
 			}
 		}
 		indexSql.setDeleteIndexIdList(deleteIndexIdList);
@@ -176,7 +179,7 @@ public class IndexMapper {
 			} else {
 				indexEntity = toEntity(indexDTO);
 				indexEntityList.add(indexEntity);
-				sql = DbUtils.toAddIndexSql(tableName, indexEntity);
+				sql = crudService.toAddIndexSql(tableName, indexEntity);
 				if (!StringUtils.isBlank(sql)) {
 					addSqlList.add(sql);
 				}
