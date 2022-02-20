@@ -19,7 +19,7 @@ mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true -s setting
 ./database/mysql/crudapi-mysql.sql
 
 ### Config MySql properties
-src/main/resources/application.properties
+src/crudapi-service/main/resources/application.properties
 ```bash
 spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/crudapi?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
@@ -33,7 +33,7 @@ spring.datasource.password=root
 ./database/postgresql/crudapi-pgsql.sql
 
 ### Config Postgresql properties
-src/main/resources/application.properties
+src/crudapi-service/main/resources/application.properties
 ```bash
 spring.datasource.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5432/crudapi
