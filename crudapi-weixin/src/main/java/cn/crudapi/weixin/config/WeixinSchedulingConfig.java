@@ -18,8 +18,8 @@ public class WeixinSchedulingConfig {
 	@Autowired
 	private WeixinService weixinService;
 
-	@Scheduled(cron = "${job.weixin.cron}") // 每隔50秒执行一次
-	public void weixinAliyunSync() {
+	//@Scheduled(cron = "${job.weixin.cron}") // 每隔50秒执行一次
+	public void weixinSync() {
 		try {
 			//log.info("任务扫描定时任务：开始……");
 			if (weixinService.isExpires()) {
