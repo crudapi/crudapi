@@ -2,7 +2,7 @@ FROM maven:3.8-openjdk-8 as builder
 
 COPY settings.xml /crudapi/settings.xml
 COPY pom.xml /crudapi/pom.xml
-COPY crudapi-core/pom.xml /crudapi/crudapi-core/pom.xml
+COPY crudapi-core/pom-proguard.xml /crudapi/crudapi-core/pom.xml
 COPY crudapi-api/pom.xml /crudapi/crudapi-api/pom.xml
 COPY crudapi-rest/pom.xml /crudapi/crudapi-rest/pom.xml
 COPY crudapi-security/pom.xml /crudapi/crudapi-security/pom.xml
@@ -16,7 +16,9 @@ RUN mvn dependency:go-offline -s settings.xml > mvnlog.txt && \
 COPY . /crudapi/
 
 #pro and free
-RUN mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
+RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml && \
+    mv /crudapi/crudapi-core/pom.proguard.xml /crudapi/crudapi-core/pom.xml && \
+    mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     tail mvnlog.txt && \
     rm -rf mvnlog.txt && \
     version=`awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' pom.xml` && \
