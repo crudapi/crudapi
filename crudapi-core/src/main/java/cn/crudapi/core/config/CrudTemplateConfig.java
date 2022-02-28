@@ -23,6 +23,7 @@ public class CrudTemplateConfig {
 		{
 			put("com.mysql.cj.jdbc.Driver", "cn.crudapi.core.repository.mysql.MySqlCrudFactory");
 			put("org.postgresql.Driver", "cn.crudapi.core.repository.postsql.PostSqlCrudFactory");
+			put("com.microsoft.sqlserver.jdbc.SQLServerDriver", "cn.crudapi.core.repository.mssql.MsSqlCrudFactory");
 		}
 	};
 
