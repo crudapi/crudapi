@@ -17,7 +17,7 @@ COPY . /crudapi/
 
 #pro and free
 RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml && \
-    mv /crudapi/crudapi-core/pom.proguard.xml /crudapi/crudapi-core/pom.xml && \
+    mv /crudapi/crudapi-core/pom-proguard.xml /crudapi/crudapi-core/pom.xml && \
     mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
     tail mvnlog.txt && \
     rm -rf mvnlog.txt && \
