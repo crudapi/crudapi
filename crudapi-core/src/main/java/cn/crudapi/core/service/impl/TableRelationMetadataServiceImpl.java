@@ -267,8 +267,11 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 
 	private List<TableRelationDTO> list(Condition condition, String orderby, Integer offset, Integer limit) {
+		String sqlQuotation = crudService.getSqlQuotation();
+    String idOrderby = sqlQuotation + "id" + sqlQuotation +  " DESC";
+        
 		List<TableRelationEntity> tableRelationEntityList = 
-				crudService.list(RELATION_TABLE_NAME, condition, orderby == null ? "id DESC": orderby, offset, limit, TableRelationEntity.class);
+				crudService.list(RELATION_TABLE_NAME, condition, orderby == null ? idOrderby: orderby, offset, limit, TableRelationEntity.class);
  	    
 		lazyFetch(tableRelationEntityList);
 	 	    

@@ -137,7 +137,10 @@ public class SequenceMetadataServiceImpl implements SequenceMetadataService {
 	}
 	
 	private List<SequenceDTO> list(Condition condition, String orderby, Integer offset, Integer limit){
-		List<SequenceEntity> sequenceEntityList = crudService.list(SEQUENCE_TABLE_NAME, condition, orderby == null ? "id DESC" : orderby, offset, limit, SequenceEntity.class);
+		String sqlQuotation = crudService.getSqlQuotation();
+	    String idOrderby = sqlQuotation + "id" + sqlQuotation +  " DESC";
+	    
+		List<SequenceEntity> sequenceEntityList = crudService.list(SEQUENCE_TABLE_NAME, condition, orderby == null ? idOrderby : orderby, offset, limit, SequenceEntity.class);
 		return sequenceMapper.toDTO(sequenceEntityList);
 	}
 	

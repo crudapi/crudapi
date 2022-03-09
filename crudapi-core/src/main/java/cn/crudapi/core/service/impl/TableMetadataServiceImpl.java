@@ -198,7 +198,10 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     public List<TableDTO> list(String filter, String search, Condition condition, Integer offset, Integer limit, String orderby) {
     	Condition newCond = convertConditon(filter, search, condition);
 
-    	List<TableEntity> tableEntityList =  crudService.list(TABLE_TABLE_NAME, newCond, orderby == null ? "id DESC": orderby, offset, limit, TableEntity.class);
+        String sqlQuotation = crudService.getSqlQuotation();
+        String idOrderby = sqlQuotation + "id" + sqlQuotation +  " DESC";
+        
+    	List<TableEntity> tableEntityList =  crudService.list(TABLE_TABLE_NAME, newCond, orderby == null ? idOrderby: orderby, offset, limit, TableEntity.class);
     			
         for (TableEntity tableEntity : tableEntityList) {
         	List<ColumnEntity> columnEntityList = getColumnEntityList(tableEntity.getId());

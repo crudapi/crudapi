@@ -1154,9 +1154,16 @@ public class TableServiceImpl implements TableService {
     }
 
     private List<Map<String, Object>> queryForList(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> primaryNameList, List<String> selectColumnNameList, Condition cond, Integer offset, Integer limit, String orderby) {
-        String newOrderby = null;
+    	String sqlQuotation = crudService.getSqlQuotation();
+        
+    	String newOrderby = null;
         if (StringUtils.isEmpty(orderby)) {
-        	newOrderby = String.join(",", primaryNameList) + " DESC";
+        	List<String> primaryNameWithQuotationList = new ArrayList<String>();
+        	for (String t : primaryNameList) {
+        		primaryNameWithQuotationList.add(sqlQuotation + t + sqlQuotation);
+        	}
+        	
+        	newOrderby = String.join(",", primaryNameWithQuotationList) + " DESC";
         } else {
         	log.info(orderby);
         	String[] orderbys = orderby.replaceAll(" +", ";").split(";");
@@ -1170,7 +1177,7 @@ public class TableServiceImpl implements TableService {
         		} else {
         			String[] orderbyNameArr = t.split(",");
         			for (String n : orderbyNameArr) { 
-        				orderbyNames.add("`" + n + "`");
+        				orderbyNames.add(sqlQuotation + n + sqlQuotation);
         			}
         		}
         	}
