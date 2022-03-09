@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import cn.crudapi.core.entity.ColumnEntity;
@@ -405,8 +406,10 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	
 	@Override
 	public Long create(String tableName, Map<String, Object> map) {
-		log.info("MsSqlCrudRepository->create {}", tableName);
-	
-		return super.create(tableName, map);
+		log.info("OracleCrudRepository->create {}", tableName);
+		
+		KeyHolder keyHolder = insert(tableName, map,  new String[] { getSqlQuotation() + COLUMN_ID + getSqlQuotation() });
+		
+		return Long.parseLong(keyHolder.getKeyList().get(0).get(COLUMN_ID).toString());
 	}
 }

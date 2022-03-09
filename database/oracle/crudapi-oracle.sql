@@ -1,3 +1,26 @@
+drop sequence "ca_meta_sequence_id";
+drop sequence "ca_meta_table_id";
+drop sequence "ca_meta_column_id";
+drop sequence "ca_meta_index_id";
+drop sequence "ca_meta_index_line_id";
+drop sequence "ca_meta_table_relation_id";
+drop sequence "spring_user_id";
+drop sequence "spring_resource_id";
+drop sequence "spring_role_id";
+drop sequence "ca_roleResourceLine_id";
+drop sequence "ca_userRoleLine_id";
+drop sequence "ca_weixinConfig_id";
+drop sequence "ca_smsTemplate_id";
+drop sequence "ca_smsConfig_id";
+drop sequence "ca_folder_id";
+drop sequence "ca_file_id";
+drop sequence "ca_district_id";
+drop sequence "ca_city_id";
+drop sequence "ca_province_id";
+drop sequence "ca_tableFormBuilder_id";
+drop sequence "ca_sys_module_id";
+drop sequence "ca_sys_moduleLine_id";
+
 DROP TABLE "ca_meta_table_relation";
 DROP TABLE "ca_meta_index_line";
 DROP TABLE "ca_meta_index";
@@ -808,3 +831,161 @@ CREATE TABLE "ca_weixinConfig" (
   "log" VARCHAR(4000),
   "jsapiTicket" VARCHAR(400) DEFAULT NULL
 );
+
+create sequence "ca_meta_sequence_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_meta_table_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_meta_column_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_meta_index_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_meta_index_line_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_meta_table_relation_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "spring_user_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "spring_resource_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "spring_role_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_roleResourceLine_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_userRoleLine_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_weixinConfig_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_smsTemplate_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_smsConfig_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_folder_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_file_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_district_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_city_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_province_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_tableFormBuilder_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_sys_module_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+create sequence "ca_sys_moduleLine_id" minvalue 1 nomaxvalue increment by 1 start with 10000 nocache;
+
+create or replace trigger "ca_meta_sequence_tg_insert" before insert on "ca_meta_sequence" for each row
+begin
+  select "ca_meta_sequence_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_meta_table_tg_insert" before insert on "ca_meta_table" for each row
+begin
+  select "ca_meta_table_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_meta_column_tg_insert" before insert on "ca_meta_column" for each row
+begin
+  select "ca_meta_column_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_meta_index_tg_insert" before insert on "ca_meta_index" for each row
+begin
+  select "ca_meta_index_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_meta_index_line_tg_insert" before insert on "ca_meta_index_line" for each row
+begin
+  select "ca_meta_index_line_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_meta_table_relation_tg_insert" before insert on "ca_meta_table_relation" for each row
+begin
+  select "ca_meta_table_relation_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "spring_user_tg_insert" before insert on "spring_user" for each row
+begin
+  select "spring_user_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "spring_resource_tg_insert" before insert on "spring_resource" for each row
+begin
+  select "spring_resource_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "spring_role_tg_insert" before insert on "spring_role" for each row
+begin
+  select "spring_role_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_roleResourceLine_tg_insert" before insert on "ca_roleResourceLine" for each row
+begin
+  select "ca_roleResourceLine_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_userRoleLine_tg_insert" before insert on "ca_userRoleLine" for each row
+begin
+  select "ca_userRoleLine_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_weixinConfig_tg_insert" before insert on "ca_weixinConfig" for each row
+begin
+  select "ca_weixinConfig_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_smsTemplate_tg_insert" before insert on "ca_smsTemplate" for each row
+begin
+  select "ca_smsTemplate_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_smsConfig_tg_insert" before insert on "ca_smsConfig" for each row
+begin
+  select "ca_smsConfig_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_folder_tg_insert" before insert on "ca_folder" for each row
+begin
+  select "ca_folder_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_file_tg_insert" before insert on "ca_file" for each row
+begin
+  select "ca_file_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_district_tg_insert" before insert on "ca_district" for each row
+begin
+  select "ca_district_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_city_tg_insert" before insert on "ca_city" for each row
+begin
+  select "ca_city_id".nextval into:new."id" from dual;
+end;
+/
+
+
+create or replace trigger "ca_province_tg_insert" before insert on "ca_province" for each row
+begin
+  select "ca_province_id".nextval into:new."id" from dual;
+end;
+/
+
+
+create or replace trigger "ca_tableFormBuilder_tg_insert" before insert on "ca_tableFormBuilder" for each row
+begin
+  select "ca_tableFormBuilder_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_sys_module_tg_insert" before insert on "ca_sys_module" for each row
+begin
+  select "ca_sys_module_id".nextval into:new."id" from dual;
+end;
+/
+
+create or replace trigger "ca_sys_moduleLine_tg_insert" before insert on "ca_sys_moduleLine" for each row
+begin
+  select "ca_sys_moduleLine_id".nextval into:new."id" from dual;
+end;
+/
+
