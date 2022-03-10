@@ -2,6 +2,7 @@ package cn.crudapi.core.repository.oracle;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +61,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
         List<String> indexSqlList = new ArrayList<String>();
         for (ColumnEntity columnEntity : columnEntityList) {
         	String indexSql = toColumnIndexSql(tableName, columnEntity);
-            if (StringUtils.isNotBlank(indexSql)) {
+            if (indexSql != null && !indexSql.equals("null") && StringUtils.isNotBlank(indexSql)) {
             	 indexSqlList.add(indexSql);
             }
         }
@@ -69,17 +70,17 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 
         sb.append(String.join(delimiter, sqlList));
         sb.append(ToolUtils.getLineSeparator());
-        sb.append(");");
+        sb.append(")");
         
         
         //index
-        if (indexSqlList.size() > 0) {
-           sb.append(ToolUtils.getLineSeparator());
-           delimiter = ";" + ToolUtils.getLineSeparator();
-    	   sb.append(String.join(delimiter, indexSqlList));
-           sb.append(";");
-           sb.append(ToolUtils.getLineSeparator());
-        }
+//        if (indexSqlList.size() > 0) {
+//           sb.append(ToolUtils.getLineSeparator());
+//           delimiter = ";" + ToolUtils.getLineSeparator();
+//    	   sb.append(String.join(delimiter, indexSqlList));
+//           sb.append(";");
+//           sb.append(ToolUtils.getLineSeparator());
+//        }
        
 //        sb.append(ToolUtils.getLineSeparator());
 //        sb.append(" COMMENT ON TABLE ");
@@ -163,19 +164,25 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 		String dbDataType = dataType.toString();
 		
 		if (dbDataType.equals("BOOL")) {
-			dbDataType = "BOOL";
+			dbDataType = "NUMBER(1)";
 		} else if (dbDataType.equals("ATTACHMENT")) {
 			dbDataType = "VARCHAR";
 		} else if (dbDataType.equals("PASSWORD")) {
 			dbDataType = "VARCHAR";
 		} else if (dbDataType.equals("DATETIME")) {
-			dbDataType = "DATETIME";
+			dbDataType = "DATE";
 		} else if (dbDataType.equals("DOUBLE")) {
-			dbDataType = "DOUBLE PRECISION";
+			dbDataType = "DOUBLE";
 		} else if (dbDataType.equals("FLOAT")) {
-			dbDataType = "real";
+			dbDataType = "FLOAT";
 		} else if (dbDataType.equals("TINYINT")) {
-			dbDataType = "smallint";
+			dbDataType = "INT";
+		} else if (dbDataType.equals("TEXT")) {
+			dbDataType = "LONG";
+		} else if (dbDataType.equals("BIGINT")) {
+			dbDataType = "INT";
+		} else if (dbDataType.equals("DECIMAL")) {
+			dbDataType = "NUMBER";
 		}
 		
 		Object[] arguments = { toSqlName(name), dbDataType };
@@ -188,7 +195,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 
 		// autoIncrement
 		if (Objects.equals(autoIncrement, true)) {
-			sb.append(" IDENTITY(1, 1) NOT NULL");
+			sb.append(" NOT NULL");
 		} else {
 			if (Objects.equals(nullable, true)) {
 				sb.append(" NULL");
@@ -211,7 +218,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	
 	@Override
 	public String toFullIndexSql(String tableName, IndexTypeEnum indexType, IndexStorageEnum indexStorage, String indexName,  String indexCaption, List<String> columnNameList) {
-        if (indexType == null || indexType.equals(IndexTypeEnum.NONE)) {
+        if (indexType == null || indexType.equals(IndexTypeEnum.NONE) || indexType.equals(IndexTypeEnum.FULLTEXT)) {
             return null;
         }
         
@@ -287,22 +294,16 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	   
 	@Override
 	public boolean isExistTable(String tableName) {
-		//select   * from sysObjects where Id=OBJECT_ID(N'ca_file') and xtype='U'
+		//select count(*) from user_tables where table_name =upper('表名')
 		LeafCondition condition1 = new LeafCondition();
-		condition1.setColumnName("name");
+		condition1.setColumnName("TABLE_NAME");
 		condition1.setValue(tableName);
 		condition1.setOperatorType(OperatorTypeEnum.EQ);
 		
-		LeafCondition condition2 = new LeafCondition();
-		condition2.setColumnName("type");
-		condition2.setValue("U");
-		condition2.setOperatorType(OperatorTypeEnum.EQ);
-		
 		CompositeCondition condition = new CompositeCondition();
 		condition.add(condition1);
-		condition.add(condition2);
 		
-		Long count = this.count("sysObjects", condition);
+		Long count = this.count("USER_TABLES", condition);
 		
         return count > 0;
 	}
@@ -408,8 +409,29 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	public Long create(String tableName, Map<String, Object> map) {
 		log.info("OracleCrudRepository->create {}", tableName);
 		
-		KeyHolder keyHolder = insert(tableName, map,  new String[] { getSqlQuotation() + COLUMN_ID + getSqlQuotation() });
-		
+		KeyHolder keyHolder = null;
+		if (map.get(COLUMN_ID) != null) {
+			keyHolder = insert(tableName, map, null);
+		} else {
+			keyHolder = insert(tableName, map,  new String[] { getSqlQuotation() + COLUMN_ID + getSqlQuotation() });
+		}
+				
 		return Long.parseLong(keyHolder.getKeyList().get(0).get(COLUMN_ID).toString());
+	}
+	
+	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames) {
+		log.info("OracleCrudRepository->create {}", tableName);
+		
+		KeyHolder keyHolder = insert(tableName, map, null);
+		
+		Map<String, Object> key = keyHolder.getKeys();
+		if (key == null || key.get(COLUMN_ID) == null) {
+			key = new HashMap<String, Object>();
+			for (String keyColumnName : keyColumnNames) {
+				key.put(keyColumnName, map.get(keyColumnName));
+			}
+		}
+		
+		return key;
 	}
 }
