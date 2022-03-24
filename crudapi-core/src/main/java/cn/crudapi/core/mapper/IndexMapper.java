@@ -46,14 +46,21 @@ public class IndexMapper {
     		&& StringUtils.isBlank(indexEntity.getName())) {
     		throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "非主键索引名称不能为空！");
     	}
-
-     	//主键index_name必须为null
-    	if (indexEntity.getIndexType() == IndexTypeEnum.PRIMARY
-    		&& indexEntity.getName() != null
-    		&& !indexEntity.getName().equals("PRIMARY")) {
-        	throw new BusinessException(ApiErrorCode.PRIMARY_INDEX_NAME_MUST_EMPTY, "主键索引名称必须为空或者PRIMARY！");
-        }
-
+    	
+    	//主键索引名称必须为空！
+    	if (indexEntity.getIndexType() == IndexTypeEnum.PRIMARY) {
+    		if (crudService.getDateBaseName().equals("mssql") 
+    		|| crudService.getDateBaseName().equals("postsql")) {
+	    		if (StringUtils.isBlank(indexEntity.getName())) {
+    	        	throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "主键索引名称不能为空！");
+    	        }
+	    	} else {
+	    		if (!StringUtils.isBlank(indexEntity.getName())) {
+    	        	throw new BusinessException(ApiErrorCode.PRIMARY_INDEX_NAME_MUST_EMPTY, "主键索引名称必须为空!");
+    	        }
+	    	}
+		}
+     	
     	if (CollectionUtils.isEmpty(indexEntity.getIndexLineEntityList())) {
     		throw new BusinessException(ApiErrorCode.INDEX_LINE_NOT_EMPTY, "索引至少选择一个字段！");
     	}
@@ -87,11 +94,10 @@ public class IndexMapper {
 		String sql = null;
 
 		String oldIndexName = indexEntity.getName();
+		IndexTypeEnum oldIndexType = indexEntity.getIndexType();
 		if (indexEntity.getIndexType() == null
 			|| IndexTypeEnum.NONE.equals(indexEntity.getIndexType())) {
 			oldIndexName = null;
-		} else if (IndexTypeEnum.PRIMARY.equals(indexEntity.getIndexType())) {
-			oldIndexName = "PRIMARY";
 		}
 
 		List<Long> oldColumnIdLongList = new ArrayList<Long>();
@@ -139,9 +145,15 @@ public class IndexMapper {
 		}
 
 		if (isChanged) {
-			sql = crudService.toUpdateIndexSql(tableName, oldIndexName, indexEntity);
+			sql = crudService.toUpdateIndexSql(tableName, oldIndexType, oldIndexName, indexEntity);
 			if (StringUtils.isNotBlank(sql)) {
-				sqlList.add(sql);
+				String[] subSqls = sql.split(";");
+				for (String t : subSqls) {
+					String subSql = t.trim();
+					if (!subSql.isEmpty()) {
+						sqlList.add(t);
+					}
+				}
 			}
 		}
 
@@ -161,7 +173,7 @@ public class IndexMapper {
 			if (!indexDTOList.stream().anyMatch(t -> Objects.equals(t.getId(), indexEntity.getId()))) {
 				deleteIndexIdList.add(indexEntity.getId());
 
-				deleteSqlList.add(crudService.toDeleteIndexSql(tableName, indexEntity.getName()));
+				deleteSqlList.add(crudService.toDeleteIndexSql(tableName, indexEntity.getIndexType(), indexEntity.getName()));
 			}
 		}
 		indexSql.setDeleteIndexIdList(deleteIndexIdList);

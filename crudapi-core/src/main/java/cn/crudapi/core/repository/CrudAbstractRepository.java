@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +18,19 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
-import cn.crudapi.core.entity.IndexLineEntity;
 import cn.crudapi.core.entity.TableEntity;
 import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.EngineEnum;
-import cn.crudapi.core.enumeration.IndexStorageEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
-import cn.crudapi.core.util.ToolUtils;
+import cn.crudapi.core.template.TemplateParse;
+import cn.crudapi.core.exception.BusinessException;
 
 public abstract class CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(CrudAbstractRepository.class);
@@ -41,6 +40,14 @@ public abstract class CrudAbstractRepository {
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+	@Autowired
+	private TemplateParse templateParse;
+	
+	
+	public String getDateBaseName() {
+		return "sql";
+	}
+	
 	public String getSqlQuotation() {
 		return "`";
 	}
@@ -49,491 +56,137 @@ public abstract class CrudAbstractRepository {
 		return "LIMIT :offset, :limit";
 	}
 	
-    public String toSql(DataTypeEnum dataType, Integer length, Integer precision, Integer scale) {
-        StringBuilder sb = new StringBuilder();
-
-        switch (dataType) {
-        case BIT:    
-        case TINYINT:
-        case SMALLINT:
-        case MEDIUMINT:
-        case INT:
-        case BIGINT:
-            if (length != null) {
-                sb.append("(");
-                sb.append(length.toString());
-                sb.append(")");
-            }
-            break;
-        case FLOAT:
-        case DOUBLE:
-        case DECIMAL:
-            if (precision != null && scale != null) {
-                sb.append("(");
-                sb.append(precision.toString());
-                sb.append(",");
-                sb.append(scale.toString());
-                sb.append(")");
-            }
-            break;
-        case DATE:
-        case TIME:
-        case YEAR:
-        case DATETIME:
-        case TIMESTAMP:
-            break;
-        case CHAR:
-        case VARCHAR:
-        case TINYTEXT:
-        case TEXT:
-        case MEDIUMTEXT:
-        case LONGTEXT:
-        case PASSWORD:
-        case ATTACHMENT:
-            if (length != null) {
-                sb.append("(");
-                sb.append(length.toString());
-                sb.append(")");
-            }
-            break;
-        default:
-            break;
-        }
-
-        return sb.toString();
+	public List<String> toCreateTableSql(TableEntity tableEntity) {
+		String createTableSql = processTemplateToString("create-table.sql.ftl", tableEntity);
+		String createSequenceSql = processTemplateToString("create-sequence.sql.ftl", tableEntity);
+		String createTriggerSql = processTemplateToString("create-trigger.sql.ftl", tableEntity);
+		
+		if (createTableSql == null) {
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "create-table.sql is empty!");
+		}
+		
+		List<String> sqls = new ArrayList<String>();
+		String[] subSqls = createTableSql.split(";");
+		for (String t : subSqls) {
+			String subSql = t.trim();
+			if (!subSql.isEmpty()) {
+				sqls.add(t);
+			}
+		}
+		
+		if (createSequenceSql != null && !createSequenceSql.isEmpty())  {
+			sqls.add(createSequenceSql);
+		}
+		
+		if (createSequenceSql != null && !createTriggerSql.isEmpty())  {
+			sqls.add(createTriggerSql);
+		}
+		
+		return sqls;
     }
-	public Boolean isNumber(DataTypeEnum dataType) {
-        Boolean ret = false;
-
-        switch (dataType) {
-        case BIT:
-        case TINYINT:
-        case SMALLINT:
-        case MEDIUMINT:
-        case INT:
-        case BIGINT:
-        case FLOAT:
-        case DOUBLE:
-        case DECIMAL:
-        case BOOL:
-            ret = true;
-            break;
-        default:
-            break;
-        }
-
-        return ret;
+	
+	public List<String> toDropTableSql(TableEntity tableEntity) {
+		String  sql = processTemplateToString("drop-table.sql.ftl", tableEntity);
+		List<String> sqls = new ArrayList<String>();
+		String[] subSqls = sql.split(";");
+		for (String t : subSqls) {
+			String subSql = t.trim();
+			if (!subSql.isEmpty()) {
+				sqls.add(t);
+			}
+		}
+		
+		return sqls;
     }
-
-    public String toDefaultValueSql(DataTypeEnum dataType, String defaultValue) {
-        StringBuilder sb = new StringBuilder();
-
-        switch (dataType) {
-        case BIT:    
-        case TINYINT:
-        case SMALLINT:
-        case MEDIUMINT:
-        case INT:
-        case BIGINT:
-        case FLOAT:
-        case DOUBLE:
-        case DECIMAL:
-        case BOOL:
-            sb.append(defaultValue.toString());
-            break;
-        case DATE:
-        case TIME:
-        case YEAR:
-        case DATETIME:
-        case TIMESTAMP:
-            sb.append("''");
-            sb.append(defaultValue.toString());
-            sb.append("''");
-            break;
-        case CHAR:
-        case VARCHAR:
-        case TINYTEXT:
-        case TEXT:
-        case MEDIUMTEXT:
-        case LONGTEXT:
-        case PASSWORD:
-        case ATTACHMENT:
-            sb.append("''");
-            sb.append(defaultValue.toString());
-            sb.append("''");
-            break;
-        default:
-            break;
-        }
-
-        return sb.toString();
-    }
-
-    public String toIndexSql(String tableName, IndexTypeEnum indexType, IndexStorageEnum indexStorage, String columnName, String indexName, String indexCaption) {
-        List<String> columnNameList = new ArrayList<String>();
-        columnNameList.add(columnName);
-
-        return toFullIndexSql(tableName, indexType, indexStorage, indexName, indexCaption, columnNameList);
-    }
-
-    public String toIndexSql(String tableName, IndexTypeEnum indexType, IndexStorageEnum indexStorage, List<IndexLineEntity> indexLineEntityList, String indexName, String indexCaption) {
-        List<String> columnNameList = new ArrayList<String>();
-        indexLineEntityList.stream().forEach(t -> columnNameList.add(t.getColumnEntity().getName()));
-
-        return toFullIndexSql(tableName, indexType, indexStorage, indexName, indexCaption, columnNameList);
-    }
-
+	
     public String toRenameTableSql(String oldTableName, String newTableName) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} RENAME {1}");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(oldTableName), toSqlName(newTableName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("oldTableName", oldTableName);
+		map.put("newTableName", newTableName);
+		
+		return processTemplateToString("rename-table.sql.ftl", map);
     }
 
     public String toSetTableEngineSql(String tableName, EngineEnum engine) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} ENGINE={1}");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), engine.getCode() };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+        Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("engine",  engine.getCode());
+		
+		return processTemplateToString("rename-engine.sql.ftl", map);
     }
 
     public String toDeleteColumnSql(String tableName, String columnName) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} DROP {1}");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), toSqlName(columnName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+        Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("columnName", columnName);
+		
+		return processTemplateToString("drop-column.sql.ftl", map);
     }
 
-    public String toDeleteIndexSql(String tableName, String oldIndexName) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} DROP INDEX {1}");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), toSqlName(oldIndexName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
-    }
-
-    public String toFullIndexSql(String tableName, IndexTypeEnum indexType, IndexStorageEnum indexStorage, String indexName,  String indexCaption, List<String> columnNameList) {
-        if (indexType == null || indexType.equals(IndexTypeEnum.NONE)) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        List<String> newColumnNameList = new ArrayList<String>();
-        columnNameList.stream().forEach(t -> newColumnNameList.add(toSqlName(t)));
-
-        String columnNames = "(" + String.join(",", newColumnNameList) + ")";
-        String newIndeName = StringUtils.isBlank(indexName) ? "" : toSqlName(indexName) + " ";
-
-        switch (indexType) {
-        case PRIMARY:
-            sb.append("PRIMARY KEY ");
-            sb.append(columnNames);
-            break;
-        case UNIQUE:
-            sb.append("UNIQUE ");
-            sb.append(newIndeName);
-            sb.append(columnNames);
-            break;
-        case INDEX:
-            sb.append("INDEX ");
-            sb.append(newIndeName);
-            sb.append(columnNames);
-            break;
-        case FULLTEXT:
-            sb.append("FULLTEXT ");
-            sb.append(newIndeName);
-            sb.append(columnNames);
-            break;
-        default:
-            break;
-        }
-
-        if (indexStorage != null) {
-            sb.append(" USING ");
-            sb.append(indexStorage.toString());
-        }
-        
-        
-        if (!StringUtils.isEmpty(indexCaption)) {
-        	sb.append(" COMMENT ''");
-     		sb.append(indexCaption);
-     		sb.append("''");
-        }
-       
-        return sb.toString();
+    public String toDeleteIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+ 		map.put("tableName", tableName);
+ 		map.put("oldIndexType", oldIndexType);
+ 		map.put("oldIndexName", oldIndexName);
+ 		
+ 		return processTemplateToString("drop-index.sql.ftl", map);
     }
     
-	public String toColumnSql(ColumnEntity columnEntity) {
-		DataTypeEnum dataType = columnEntity.getDataType();
-		String name = columnEntity.getName();
-		String caption = columnEntity.getCaption();
-		Integer length = columnEntity.getLength();
-		Integer precision = columnEntity.getPrecision();
-		Integer scale = columnEntity.getScale();
-		Boolean unsigned = columnEntity.getUnsigned();
-		Boolean autoIncrement = columnEntity.getAutoIncrement();
-		Boolean nullable = columnEntity.getNullable();
-		String defaultValue = columnEntity.getDefaultValue();
+	public List<String> toAddColumnSql(String tableName, ColumnEntity columnEntity) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("columnEntity", columnEntity);
 		
-		String pattern = "{0} {1}";
-		String dbDataType = dataType.toString();
+		String sql = processTemplateToString("add-column.sql.ftl", map);
 		
-		if (dbDataType.equals("BOOL")) {
-			dbDataType = "BIT";
-		} else if (dbDataType.equals("ATTACHMENT")) {
-			dbDataType = "VARCHAR";
-		} else if (dbDataType.equals("PASSWORD")) {
-			dbDataType = "VARCHAR";
-		}
-		
-		Object[] arguments = { toSqlName(name), dbDataType };
-
-		// name, dataType
-		StringBuilder sb = new StringBuilder(MessageFormat.format(pattern, arguments));
-		
-		// length, precision, scale
-		sb.append(toSql(dataType, length, precision, scale));
-
-		// unsigned
-		if (Objects.equals(unsigned, true) && isNumber(dataType)) {
-			sb.append(" UNSIGNED");
-		}
-
-		// autoIncrement
-		if (Objects.equals(autoIncrement, true)) {
-			sb.append(" NOT NULL AUTO_INCREMENT");
-		} else {
-			if (Objects.equals(nullable, true)) {
-				sb.append(" NULL");
-			} else {
-				sb.append(" NOT NULL");
-			}
-
-			if (defaultValue != null) {
-				sb.append(" DEFAULT ");
-				sb.append(toDefaultValueSql(dataType, defaultValue));
+		List<String> sqls = new ArrayList<String>();
+		String[] subSqls = sql.split(";");
+		for (String t : subSqls) {
+			String subSql = t.trim();
+			if (!subSql.isEmpty()) {
+				sqls.add(t);
 			}
 		}
 		
-		sb.append(" COMMENT ''");
-		sb.append(StringUtils.isEmpty(caption) ? name : caption );
-		sb.append("''");
-		
-		System.out.println(sb.toString());
-		
-		return sb.toString();
-	}
-	
-	public String toColumnIndexSql(String tableName, ColumnEntity columnEntity) {
-		String name = columnEntity.getName();
-		IndexTypeEnum indexType = columnEntity.getIndexType();
-		IndexStorageEnum indexStorage = columnEntity.getIndexStorage();
-		String indexName = columnEntity.getIndexName();
-		
-		if (indexType == null || indexType.equals(IndexTypeEnum.NONE)) {
-			return null;
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(toIndexSql(tableName, indexType, indexStorage, name, indexName, null));
-
-		return sb.toString();
-	}
-	
-	public String toIndexSql(String tableName, IndexEntity indexEntity) {
-		return toIndexSql(tableName,
-				indexEntity.getIndexType(), 
-				indexEntity.getIndexStorage(), 
-				indexEntity.getIndexLineEntityList(), 
-				indexEntity.getName(), 
-				indexEntity.getName());
-	}
-	
-	public String toCreateTableSql(TableEntity tableEntity) {
-        List<ColumnEntity> columnEntityList = tableEntity.getColumnEntityList();
-        String caption = tableEntity.getCaption();
-        String name = tableEntity.getName();
-        String tableName = tableEntity.getTableName();
-        EngineEnum engine = tableEntity.getEngine();
-        
-		StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE {0} (");
-        sb.append(ToolUtils.getLineSeparator());
-
-        List<String> sqlList = new ArrayList<String>();
-        for (ColumnEntity columnEntity : columnEntityList) {
-            sqlList.add(toColumnSql(columnEntity));
-        }
-
-        for (ColumnEntity columnEntity : columnEntityList) {
-        	String indexSql = toColumnIndexSql(tableName, columnEntity);
-            if (StringUtils.isNotBlank(indexSql)) {
-                sqlList.add(indexSql);
-            }
-        }
-
-        String delimiter = "," + ToolUtils.getLineSeparator();
-
-        sb.append(String.join(delimiter, sqlList));
-        sb.append(ToolUtils.getLineSeparator());
-        sb.append(") ENGINE={1} DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-        
-        sb.append(" COMMENT ''");
-		sb.append(StringUtils.isEmpty(caption) ? name : caption );
-		sb.append("''");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), engine.getCode() };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
-	}
-	
-	public List<String> toCreateIndexSqlList(TableEntity tableEntity) {
-		String tableName = tableEntity.getTableName();
-		List<IndexEntity> indexEntityList = tableEntity.getIndexEntityList();
-		
-		List<String> sqlList = new ArrayList<String>();
-		if (indexEntityList != null) {
-			for (IndexEntity indexEntity : indexEntityList) {
-				String sql = toAddIndexSql(tableName, indexEntity);
-				
-				if (!StringUtils.isBlank(sql)) {
-					sqlList.add(sql);
-				}
-			}	
-		}
-		
-		return sqlList;
-	}
-
-	public String toAddColumnSql(String tableName, ColumnEntity columnEntity) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} ADD ");
-        sb.append(toColumnSql(columnEntity));
-
-        String indexSql = toColumnIndexSql(tableName, columnEntity);
-        if (!StringUtils.isBlank(indexSql)) {
-            sb.append(", ADD ");
-            sb.append(indexSql);
-        }
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+		return sqls;
     }
 
-    public String toUpdateColumnSql(String tableName, String oldColumnName, ColumnEntity columnEntity) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} CHANGE {1} ");
-        sb.append(toColumnSql(columnEntity));
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), toSqlName(oldColumnName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+    public String toUpdateColumnSql(String tableName, String oldColumnName, Boolean oldColumnNullable, ColumnEntity columnEntity) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("oldColumnName", oldColumnName);
+		map.put("oldColumnNullable", oldColumnNullable);
+		map.put("columnEntity", columnEntity);
+		
+		return processTemplateToString("update-column.sql.ftl", map);
     }
 
-    public String toUpdateColumnIndexSql(String tableName, String oldIndexName, ColumnEntity columnEntity) {
-        StringBuilder sb = new StringBuilder();
-
-        String indexSql = toColumnIndexSql(tableName, columnEntity);
-        if (StringUtils.isAllEmpty(oldIndexName)) {
-        	 if (!StringUtils.isBlank(indexSql)) {
-        		 sb.append("ALTER TABLE {0} ADD ");
-            	 sb.append(indexSql);
-             }
-        } else {
-        	 sb.append("ALTER TABLE {0} DROP INDEX {1}");
-        	 if (!StringUtils.isBlank(indexSql)) {
-                 sb.append(", ADD ");
-                 sb.append(indexSql);
-             }
-        }
-        
-        String sql = "";
-    	String pattern = sb.toString();
-        if (StringUtils.isAllEmpty(oldIndexName)) {
-            Object[] arguments = { toSqlName(tableName)};
-            sql = MessageFormat.format(pattern, arguments);
-        } else {
-            Object[] arguments = { toSqlName(tableName), toSqlName(oldIndexName) };
-            sql = MessageFormat.format(pattern, arguments);
-        }
-        
-        return sql;
+    public String toUpdateColumnIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, ColumnEntity columnEntity) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("oldIndexType", oldIndexType);
+		map.put("oldIndexName", oldIndexName);
+		map.put("columnEntity", columnEntity);
+		
+		return processTemplateToString("update-column-index.sql.ftl", map);
     }
 
     public String toAddIndexSql(String tableName, IndexEntity indexEntity) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} ADD ");
-       
-        String indexSql = toIndexSql(tableName, indexEntity);
-
-        if (StringUtils.isBlank(indexSql)) {
-            return null;
-        }
-        sb.append(indexSql);
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("indexEntity", indexEntity);
+		
+		return processTemplateToString("add-index.sql.ftl", map);
     }
 
-    public String toUpdateIndexSql(String tableName, String oldIndexName, IndexEntity indexEntity) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("ALTER TABLE {0} DROP INDEX {1}");
-
-        String indexSql = toIndexSql(tableName, indexEntity);
-        if (!StringUtils.isBlank(indexSql)) {
-            sb.append(", ADD ");
-            sb.append(indexSql);
-        }
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName), toSqlName(oldIndexName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
+    public String toUpdateIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, IndexEntity indexEntity) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableName);
+		map.put("oldIndexType", oldIndexType);
+		map.put("oldIndexName", oldIndexName);
+		map.put("indexEntity", indexEntity);
+		
+		return processTemplateToString("update-index.sql.ftl", map);
     }
 
 	public String toSqlName(String colunmName) {
@@ -650,18 +303,6 @@ public abstract class CrudAbstractRepository {
 	public String toDeleteSql(String tableName) {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM {0}");
-
-        String pattern = sb.toString();
-        Object[] arguments = { toSqlName(tableName) };
-
-        String sql = MessageFormat.format(pattern, arguments);
-
-        return sql;
-    }
-	
-	public String toDropTableSql(String tableName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DROP TABLE IF EXISTS {0}");
 
         String pattern = sb.toString();
         Object[] arguments = { toSqlName(tableName) };
@@ -1047,10 +688,11 @@ public abstract class CrudAbstractRepository {
         return count > 0;
 	}
 	
-	public void dropTable(String tableName) {
-		String sql = toDropTableSql(tableName); 
-		log.info(sql);
-		execute(sql);
+	public void dropTable(TableEntity tableEntity) {
+		List<String> sqls = toDropTableSql(tableEntity); 
+		for (String sql : sqls) {
+			execute(sql);
+		}
 	}
 	
 	public List<Map<String, Object>> list(String tableName, Map<String, DataTypeEnum> dataTypeMap, List<String> selectNameList, Condition condition, String orderby, Integer offset, Integer limit) {
@@ -1142,6 +784,9 @@ public abstract class CrudAbstractRepository {
 		return map;
 	}
 	
+	public TableDTO reverseMetaData(String tableName) { 
+		throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "method reverseMetaData is not Override");
+	}
 	
 	protected KeyHolder insert(String tableName, Map<String, Object> map, String[] keyColumnNames) {
 		log.info("CrudAbstractRepository->insert {}", tableName);
@@ -1162,6 +807,14 @@ public abstract class CrudAbstractRepository {
 	    log.info("CrudAbstractRepository->insert->rows, {}", rows);
 	    
 		return keyHolder;
+	}
+	
+	public String processTemplateToString(String templateName, String key, Object value) {
+		return templateParse.processTemplateToString(getDateBaseName(), templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateName, Object dataModel) {
+		return templateParse.processTemplateToString(getDateBaseName(), templateName, dataModel);
 	}
 	
 	private Map<String, Object> convertToKeyMap(Long id) { 
@@ -1226,27 +879,27 @@ public abstract class CrudAbstractRepository {
 		            Object value = f.get(obj);
 		            
 		            if (!isUpdate && key.equals("id")) { 
-		            	log.info(key);
+		            	log.debug(key);
 		            	continue;
 		            }
 		            
 		            if (key.equals("reverse")) { 
-		            	log.info(key);
+		            	log.debug(key);
 		            	continue;
 		            }
 		            
 		            if (type.equals("List")) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
 		            if (type.indexOf("ColumnEntity") >= 0) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
 		            if (type.indexOf("TableEntity") >= 0) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
@@ -1277,23 +930,28 @@ public abstract class CrudAbstractRepository {
 		            String key = f.getName();
 		            Object value = f.get(obj);
 		            
+		            if (key.equals("id")) { 
+		            	log.debug(key);
+		            	continue;
+		            }
+		            
 		            if (key.equals("reverse")) { 
-		            	log.info(key);
+		            	log.debug(key);
 		            	continue;
 		            }
 		            
 		            if (type.equals("List")) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
 		            if (type.indexOf("ColumnEntity") >= 0) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
 		            if (type.indexOf("TableEntity") >= 0) { 
-		            	log.info(type);
+		            	log.debug(type);
 		            	continue;
 		            }
 		            
@@ -1338,7 +996,9 @@ public abstract class CrudAbstractRepository {
 		//需要更新的字段名称列表
 		List<String> columnNameList = new ArrayList<String>();
 		for (String key : dataMap.keySet()) {
-			columnNameList.add(key);
+			if (!keyMap.containsKey(key)) {
+				columnNameList.add(key);
+			}
         }
 
 		//主键或者唯一性索引字段列表
@@ -1369,7 +1029,9 @@ public abstract class CrudAbstractRepository {
 		//需要更新的字段名称列表
 		List<String> columnNameList = new ArrayList<String>();
 		for (String key : mapList.get(0).keySet()) {
-			columnNameList.add(key);
+			if (!key.equals(COLUMN_ID)) {
+				columnNameList.add(key);
+			}
         }
 
 		String sql = toUpdateSql(tableName, columnNameList, COLUMN_ID);

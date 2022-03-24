@@ -59,6 +59,7 @@ public class TableMetadataController {
 
 		return new ResponseEntity<Long>(tableId, HttpStatus.CREATED);
 	}
+
 	
 	@ApiOperation(value="批量创建表")
 	@PostMapping("/batch")
@@ -103,7 +104,7 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="获取表元数据")
-	@GetMapping(value = "/metadata/{tableName}")
+	@GetMapping(value = "/metadatas/{tableName}")
 	public ResponseEntity<Map<String, Object>> getMetaData(@PathVariable("tableName") String tableName) {
 		Map<String, Object> map = tableMetadataService.getMetaData(tableName);
 		
@@ -116,6 +117,28 @@ public class TableMetadataController {
 		List<Map<String, Object>> mapList = tableMetadataService.getMetaDatas();
 		
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
+	}
+	
+
+	@ApiOperation(value="逆向表")
+	@PostMapping("/metadatas/reverse/{tableName}")
+	public ResponseEntity<Long> reverseMetaData(@PathVariable("tableName") String tableName) {
+		Long tableId = tableMetadataService.reverseMetaData(tableName);
+
+		return new ResponseEntity<Long>(tableId, HttpStatus.CREATED);
+	}
+	
+	@ApiOperation(value="批量逆向表")
+	@PostMapping("/metadatas/reverse")
+	public ResponseEntity<List<Long>> batchReverseMetaData(@RequestBody(required = false) List<String> tableNameList) {
+		List<Long> ids = new ArrayList<>();
+		if (tableNameList == null || tableNameList.size() == 0) {
+			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, "至少选择一个");
+		} else {
+			ids = tableMetadataService.batchReverseMetaData(tableNameList);
+		}
+		
+		return new ResponseEntity<List<Long>>(ids, HttpStatus.CREATED);
 	}
 	
     @ApiOperation(value="查询个数")

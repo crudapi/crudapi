@@ -158,7 +158,10 @@ public class TableMapper {
         }
 
         if (tableDTO.getEngine() != null && !Objects.equals(tableEntity.getEngine(), tableDTO.getEngine())) {
-            sqlList.add(crudService.toSetTableEngineSql(tableEntity.getTableName(), tableDTO.getEngine()));
+        	String setTableEngineSql = crudService.toSetTableEngineSql(tableEntity.getTableName(), tableDTO.getEngine());
+        	if (setTableEngineSql != null) {
+            	sqlList.add(setTableEngineSql);
+            }
             tableEntity.setEngine(tableDTO.getEngine());
         }
 

@@ -52,12 +52,59 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 
 	@Override
 	public List<Map<String, Object>> getMetaDatas() {
-		return crudService.getMetaDatas();
+		 List<Map<String, Object>> filterMetaDatas =  new ArrayList<Map<String, Object>>();
+		 
+		 List<Map<String, Object>> metaDatas =  crudService.getMetaDatas();
+		 
+		 List<TableDTO> tableDTOList = this.list(null, null, null, null, null, null);
+		 for (Map<String, Object> metaData: metaDatas) {
+			 String tableName = metaData.get("tableName").toString();
+			 if (tableName.equalsIgnoreCase("ca_meta_table_relation")
+				|| tableName.equalsIgnoreCase("ca_meta_table")
+				|| tableName.equalsIgnoreCase("ca_meta_index_line")
+				|| tableName.equalsIgnoreCase("ca_meta_index")
+				|| tableName.equalsIgnoreCase("ca_meta_sequence")
+				|| tableName.equalsIgnoreCase("ca_meta_column")
+				|| tableName.equalsIgnoreCase("spring_session")
+				|| tableName.equalsIgnoreCase("spring_session_attributes")
+				|| tableName.equalsIgnoreCase("persistent_logins")) {
+				 continue;
+			 }
+			 
+			 if (tableDTOList.stream().anyMatch( t-> t.getTableName().equalsIgnoreCase(tableName))) {
+				 continue;
+			 }
+			 
+			 filterMetaDatas.add(metaData);
+		 }
+		 
+		 return filterMetaDatas;
 	}
 	
 	@Override
 	public Map<String, Object> getMetaData(String tableName) {
 		return crudService.getMetaData(tableName);
+	}
+	
+	@Transactional
+	@Override
+	@CacheEvict(value = "tableMetadata", allEntries= true)
+	public Long reverseMetaData(String tableName) {
+		TableDTO tableDTO = crudService.reverseMetaData(tableName);
+		return this.create(tableDTO);
+	}
+	
+	@Transactional
+	@Override
+	@CacheEvict(value = "tableMetadata", allEntries= true)
+	public List<Long> batchReverseMetaData(List<String> tableNames) {
+		List<Long> ids = new ArrayList<Long>();
+		for (String tableName : tableNames) {
+			TableDTO tableDTO = crudService.reverseMetaData(tableName);
+			Long id = this.create(tableDTO);
+			ids.add(id);
+		}
+		return ids;
 	}
 	
 	@Override
@@ -160,27 +207,20 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     @Override
     @CacheEvict(value = "tableMetadata", allEntries= true)
     public void delete(Long id, Boolean isDropPhysicalTable) {
-    	TableEntity tableEntity = crudService.get(TABLE_TABLE_NAME, id, TableEntity.class);
+    	TableEntity tableEntity = getTableEntityIncludeChildren(id);
         if (tableEntity == null) {
   			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, id);
   		}
         
-    	deleteTableCascade(id, tableEntity.getTableName(), isDropPhysicalTable);
+    	deleteTableCascade(id, tableEntity, isDropPhysicalTable);
     }
     
 	@Override
 	@CacheEvict(value = "tableMetadata", allEntries= true)
 	public void delete(List<Long> ids, Boolean isDropPhysicalTable) {
-		List<Object> valueList = new ArrayList<Object>();
-		ids.stream().forEach(t -> {
-			valueList.add(t);
-		});
-		
-		Condition cond = ConditionUtils.toCondition("id", valueList);
-		List<TableEntity> tableEntityList = crudService.list(TABLE_TABLE_NAME, cond, null, null, null, TableEntity.class);
-				
-    	for (TableEntity tableEntity : tableEntityList) {
-    		deleteTableCascade(tableEntity.getId(), tableEntity.getTableName(), isDropPhysicalTable);
+    	for (Long id : ids) {
+    		TableEntity tableEntity = getTableEntityIncludeChildren(id);
+    		deleteTableCascade(tableEntity.getId(), tableEntity, isDropPhysicalTable);
         }
 	}
 
@@ -188,9 +228,9 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     @CacheEvict(value = "tableMetadata", allEntries= true)
     public void deleteAll(Boolean isDropPhysicalTable) {
     	List<TableEntity> tableEntityList = crudService.list(TABLE_TABLE_NAME, TableEntity.class);
-    	
-    	for (TableEntity tableEntity : tableEntityList) {
-    		deleteTableCascade(tableEntity.getId(), tableEntity.getTableName(), isDropPhysicalTable);
+    	for (TableEntity t : tableEntityList) {
+    		TableEntity tableEntity = getTableEntityIncludeChildren(t.getId());
+    		deleteTableCascade(tableEntity.getId(), tableEntity, isDropPhysicalTable);
         }
     }
 
@@ -272,9 +312,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             batchInsertIndex(tableEntity.getIndexEntityList(), newTableEntity);
             
             if (!Boolean.TRUE.equals(tableEntity.getReverse())) {
-            	execute(crudService.toCreateTableSql(tableEntity));
-            	
-            	List<String> sqlList = crudService.toCreateIndexSqlList(tableEntity);
+            	List<String> sqlList = crudService.toCreateTableSql(tableEntity);
             	for (String sql: sqlList) {
             		execute(sql);
         		}
@@ -310,7 +348,10 @@ public class TableMetadataServiceImpl implements TableMetadataService {
             log.info(ret.toString());
 
             if (CollectionUtils.isNotEmpty(tableEntity.getColumnEntityList())) {
-                execute(crudService.toCreateTableSql(tableEntity));
+            	List<String> sqlList = crudService.toCreateTableSql(tableEntity);
+            	for (String sql: sqlList) {
+            		execute(sql);
+        		}
             }
         } else {
         	//仅编辑表
@@ -640,7 +681,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
  	    crudService.delete(RELATION_TABLE_NAME, compositeCondition);
 	}
 	
-   private void deleteTableCascade(Long id, String tableName, Boolean isDropPhysicalTable) {
+   private void deleteTableCascade(Long id, TableEntity tableEntity, Boolean isDropPhysicalTable) {
         deleteRelationEntity(id);
         
         deleteIndexEntity(id);
@@ -649,12 +690,12 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	
     	crudService.delete(TABLE_TABLE_NAME, id);
     	
-    	dropPhysicalTable(tableName, isDropPhysicalTable);
+    	dropPhysicalTable(tableEntity, isDropPhysicalTable);
     }
    
-    private void dropPhysicalTable(String tableName, Boolean isDropPhysicalTable) {
+    private void dropPhysicalTable(TableEntity tableEntity, Boolean isDropPhysicalTable) {
     	if (Boolean.TRUE.equals(isDropPhysicalTable) ) {
-    		crudService.dropTable(tableName);
+    		crudService.dropTable(tableEntity);
     	}
     }
 	

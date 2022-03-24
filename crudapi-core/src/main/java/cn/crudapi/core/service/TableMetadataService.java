@@ -31,6 +31,10 @@ public interface TableMetadataService {
 
 	List<Map<String, Object>> getMetaDatas();
 	
+	List<Long> batchReverseMetaData(List<String> tableNames);
+
+	Long reverseMetaData(String tableName);
+	
 	void checkTable();
 
 	Boolean isExist(String tableName);

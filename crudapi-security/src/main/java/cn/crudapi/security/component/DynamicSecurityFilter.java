@@ -45,7 +45,7 @@ public class DynamicSecurityFilter extends AbstractSecurityInterceptor implement
         
         //OPTIONS请求直接放行
         if(reqMethod.equals(HttpMethod.OPTIONS.toString())){
-        	log.info("DynamicSecurityFilter doFilter OPTIONS passed!");
+        	log.debug("DynamicSecurityFilter doFilter OPTIONS passed!");
             fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
             return;
         }
@@ -65,13 +65,13 @@ public class DynamicSecurityFilter extends AbstractSecurityInterceptor implement
                 fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
                 return;
             } else {
-            	log.info("DynamicSecurityFilter doFilter " + reqPath + " try match " + ignoreUrl + " continued!");
+            	log.debug("DynamicSecurityFilter doFilter " + reqPath + " try match " + ignoreUrl + " continued!");
             }
         }
         //此处会调用AccessDecisionManager中的decide方法进行鉴权操作
         InterceptorStatusToken token = super.beforeInvocation(fi);
         
-        log.info("DynamicSecurityFilter getChain doFilter...");
+        log.debug("DynamicSecurityFilter getChain doFilter...");
         try {
             fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
         } finally {

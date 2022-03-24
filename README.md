@@ -43,7 +43,7 @@ spring.datasource.password=postgres
 
 ### run
 ```bash
-java -jar ./target/crudapi-service-1.3.0.jar
+java -jar ./target/crudapi-service-1.4.0.jar
 ```
 
 ### swagger

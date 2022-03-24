@@ -66,12 +66,19 @@ public class ColumnMapper {
         	throw new BusinessException(ApiErrorCode.PRIMARY_MUST_NOT_NULL, "主键字段不能为NULL");
         }
 
-    	//主键index_name必须为null
-    	if (columnEntity.getIndexType() == IndexTypeEnum.PRIMARY
-    		&& columnEntity.getIndexName() != null
-    		&& !columnEntity.getIndexName().equals("PRIMARY")) {
-        	throw new BusinessException(ApiErrorCode.PRIMARY_INDEX_NAME_MUST_EMPTY, "主键索引名称必须为空或者PRIMARY！");
-        }
+    	//主键索引名称必须为空或者PRIMARY
+    	if (columnEntity.getIndexType() == IndexTypeEnum.PRIMARY) {
+    		if (crudService.getDateBaseName().equals("mssql") 
+    		|| crudService.getDateBaseName().equals("postsql")) {
+	    		if (StringUtils.isBlank(columnEntity.getIndexName())) {
+    	        	throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "主键索引名称不能为空！");
+    	        }
+	    	} else {
+	    		if (!StringUtils.isBlank(columnEntity.getIndexName())) {
+    	        	throw new BusinessException(ApiErrorCode.PRIMARY_INDEX_NAME_MUST_EMPTY, "主键索引名称必须为空!");
+    	        }
+	    	}
+		}
     }
 
 	public ColumnEntity toEntity(ColumnDTO columnDTO) {
@@ -113,13 +120,13 @@ public class ColumnMapper {
 		List<String> sqlList = new ArrayList<String>();
 		String sql = null;
 
+		Boolean oldColumnNullable = columnEntity.getNullable();
 		String oldColumnName = columnEntity.getName();
 		String oldIndexName = columnEntity.getIndexName();
+		IndexTypeEnum oldIndexType = columnEntity.getIndexType();
 		if (columnEntity.getIndexType() == null
 			|| IndexTypeEnum.NONE.equals(columnEntity.getIndexType())) {
 			oldIndexName = null;
-		} else if (IndexTypeEnum.PRIMARY.equals(columnEntity.getIndexType())) {
-			oldIndexName = "PRIMARY";
 		}
 
 		Boolean isChanged = false;
@@ -128,6 +135,8 @@ public class ColumnMapper {
 		if ((columnDTO.getName() != null && !StringUtils.equals(columnEntity.getName(), columnDTO.getName()))
 				|| (columnDTO.getDataType() != null
 						&& !Objects.equals(columnEntity.getDataType(), columnDTO.getDataType()))
+				|| (columnDTO.getDescription() != null
+					&& !Objects.equals(columnEntity.getDescription(), columnDTO.getDescription()))
 				|| (columnDTO.getUnsigned() != null
 						&& !Objects.equals(columnEntity.getUnsigned(), columnDTO.getUnsigned()))
 				|| (columnDTO.getLength() != null && !Objects.equals(columnEntity.getLength(), columnDTO.getLength()))
@@ -241,16 +250,28 @@ public class ColumnMapper {
 		}
 		
 		if (isChanged) {
-			sql = crudService.toUpdateColumnSql(tableName, oldColumnName, columnEntity);
+			sql = crudService.toUpdateColumnSql(tableName, oldColumnName, oldColumnNullable, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
-				sqlList.add(sql);
+				String[] subSqls = sql.split(";");
+				for (String t : subSqls) {
+					String subSql = t.trim();
+					if (!subSql.isEmpty()) {
+						sqlList.add(t);
+					}
+				}
 			}
 		}
 
 		if (isIndexChanged) {
-			sql = crudService.toUpdateColumnIndexSql(tableName, oldIndexName, columnEntity);
+			sql = crudService.toUpdateColumnIndexSql(tableName, oldIndexType, oldIndexName,  columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
-				sqlList.add(sql);
+				String[] subSqls = sql.split(";");
+				for (String t : subSqls) {
+					String subSql = t.trim();
+					if (!subSql.isEmpty()) {
+						sqlList.add(t);
+					}
+				}
 			}
 		}
 
@@ -288,7 +309,7 @@ public class ColumnMapper {
 				columnEntity = toEntity(columnDTO);
 				columnEntityList.add(columnEntity);
 
-				addSqlList.add(crudService.toAddColumnSql(tableName, columnEntity));
+				addSqlList.addAll(crudService.toAddColumnSql(tableName, columnEntity));
 			}
 		}
 
