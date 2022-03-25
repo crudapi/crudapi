@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -596,7 +599,13 @@ public class TableServiceImpl implements TableService {
             			newObj = new BigDecimal(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
             			newObj = encodePassword(objStr);
-                    }
+                    } else if (t.getDataType().equals(DataTypeEnum.DATETIME)) {
+            			newObj = Timestamp.valueOf(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DATE)) {
+            			newObj = Date.valueOf(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.TIME)) {
+            			newObj = Time.valueOf(objStr);
+            		}
         		}
                 
                 valueList.add(newObj);
@@ -1265,6 +1274,12 @@ public class TableServiceImpl implements TableService {
             			newObj = Float.parseFloat(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
             			newObj = new BigDecimal(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DATETIME)) {
+            			newObj = Timestamp.valueOf(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.DATE)) {
+            			newObj = Date.valueOf(objStr);
+            		} else if (t.getDataType().equals(DataTypeEnum.TIME)) {
+            			newObj = Time.valueOf(objStr);
             		}
         		}
         		

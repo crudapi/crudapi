@@ -59,13 +59,13 @@ ALTER TABLE "${tableName}" ALTER COLUMN
   <#elseif columnEntity.dataType == "DECIMAL">
     "${columnEntity.name}" SET DEFAULT ${columnEntity.defaultValue}
   <#elseif columnEntity.dataType == "DATE">
-    "${columnEntity.name}" SET DEFAULT ${columnEntity.defaultValue}
+    "${columnEntity.name}" SET DEFAULT '${columnEntity.defaultValue}'
   <#elseif columnEntity.dataType == "TIME">
-    "${columnEntity.name}" SET DEFAULT ${columnEntity.defaultValue}
+    "${columnEntity.name}" SET DEFAULT '${columnEntity.defaultValue}'
   <#elseif columnEntity.dataType == "DATETIME">
-    "${columnEntity.name}" SET DEFAULT ${columnEntity.defaultValue}
+    "${columnEntity.name}" SET DEFAULT '${columnEntity.defaultValue}'
   <#elseif columnEntity.dataType == "TIMESTAMP">
-    "${columnEntity.name}" SET DEFAULT ${columnEntity.defaultValue}
+    "${columnEntity.name}" SET DEFAULT '${columnEntity.defaultValue}'
   <#elseif columnEntity.dataType == "CHAR">
     "${columnEntity.name}" SET DEFAULT '${columnEntity.defaultValue}'
   <#elseif columnEntity.dataType == "VARCHAR">

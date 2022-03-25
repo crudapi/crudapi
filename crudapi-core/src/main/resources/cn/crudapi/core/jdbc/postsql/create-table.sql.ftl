@@ -13,13 +13,13 @@ CREATE TABLE "${tableName}" (
   <#elseif columnEntity.dataType == "DECIMAL">
     "${columnEntity.name}" DECIMAL<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DATE">
-    "${columnEntity.name}" DATE<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
+    "${columnEntity.name}" DATE<#if columnEntity.defaultValue??> DEFAULT '${columnEntity.defaultValue}'</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "TIME">
-    "${columnEntity.name}" TIME<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
+    "${columnEntity.name}" TIME<#if columnEntity.defaultValue??> DEFAULT '${columnEntity.defaultValue}'</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DATETIME">
-    "${columnEntity.name}" TIMESTAMP<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
+    "${columnEntity.name}" TIMESTAMP<#if columnEntity.defaultValue??> DEFAULT '${columnEntity.defaultValue}'</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "TIMESTAMP">
-    "${columnEntity.name}" TIMESTAMP<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
+    "${columnEntity.name}" TIMESTAMP<#if columnEntity.defaultValue??> DEFAULT '${columnEntity.defaultValue}'</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "CHAR">
     "${columnEntity.name}" CHAR(${columnEntity.length})<#if columnEntity.defaultValue??> DEFAULT '${columnEntity.defaultValue}'</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "VARCHAR">

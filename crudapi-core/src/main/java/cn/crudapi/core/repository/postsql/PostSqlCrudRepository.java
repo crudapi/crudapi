@@ -262,6 +262,9 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 	            case "date":
 	            	dataType = DataTypeEnum.DATE;
 	                break;
+	            case "time":
+	            	dataType = DataTypeEnum.TIME;
+	                break;
 	            case "timestamp":
 	            	dataType = DataTypeEnum.DATETIME;
 	                break;
@@ -311,6 +314,9 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 					columnDTO.setDisplayable(true);
 				} else {
 					columnDTO.setAutoIncrement(false);
+					
+					defaultValue = defaultValue.split("::")[0].replace("'", "");
+					
 					columnDTO.setDefaultValue(defaultValue);
 				}
 			}
