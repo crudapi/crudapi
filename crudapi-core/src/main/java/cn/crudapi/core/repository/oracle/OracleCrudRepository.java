@@ -1,6 +1,9 @@
 package cn.crudapi.core.repository.oracle;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.query.CompositeCondition;
+import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
 import cn.crudapi.core.repository.CrudAbstractRepository;
 
@@ -31,6 +35,66 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	public String getLimitOffsetSql() {
 		return ""; //LIMIT :limit OFFSET :offset
 	}
+	
+	public String toSelectSql(String tableName, List<String> selectNameList, Condition condition, String orderby, Integer offset, Integer limit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT {0} FROM {1}");
+        
+        if (selectNameList == null) {
+        	selectNameList = new ArrayList<String>();
+        	selectNameList.add("*");
+        }
+		
+        List<String> nameList = new ArrayList<String>();
+        selectNameList.stream().forEach(t -> {
+            nameList.add(toSqlName(t));
+        });
+        String columnNames = String.join(",", nameList);
+
+        List<Object> argumentList = new ArrayList<Object>();
+        argumentList.add(columnNames);
+        argumentList.add(toSqlName(tableName));
+        
+        int paramIndex = 2;
+        if (condition != null) {
+        	sb.append(" WHERE {");
+        	sb.append(paramIndex++);
+        	sb.append("}");
+        	argumentList.add(condition.toQuerySql());
+        }
+        
+        if (orderby != null && !orderby.isEmpty()) {
+        	sb.append(" ORDER BY {");
+        	sb.append(paramIndex++);
+        	sb.append("}");
+        	argumentList.add(orderby);
+        }
+        
+        String sql = null;
+        if (offset != null) {
+        	String pattern = sb.toString();
+            Object[] arguments = argumentList.toArray();
+
+            sql = MessageFormat.format(pattern, arguments);
+            
+            Map<String, Object> map = new HashMap<String, Object>();
+    		map.put("columnNames", columnNames);
+    		map.put("sql", sql);
+    		map.put("offset", offset);
+    		map.put("limit", limit);
+    		
+            String newSql = processTemplateToString("crud/select.sql.ftl", map);
+    		
+            return newSql;
+        } else {
+        	 String pattern = sb.toString();
+             Object[] arguments = argumentList.toArray();
+
+             sql = MessageFormat.format(pattern, arguments);
+             
+             return sql;
+        }
+    }
 	
 	@Override
 	public boolean isExistTable(String tableName) {
