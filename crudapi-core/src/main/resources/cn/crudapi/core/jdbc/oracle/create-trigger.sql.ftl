@@ -1,8 +1,8 @@
 <#list columnEntityList as columnEntity>
   <#if columnEntity.autoIncrement == true>
-    CREATE OR REPLACE TRIGGER "${tableName}_tg_insert" BEFORE INSERT ON "${tableName}" FOR EACH ROW
+    CREATE OR REPLACE TRIGGER "TBL_${id}_TG_INSERT" BEFORE INSERT ON "${tableName}" FOR EACH ROW
     BEGIN
-      SELECT "SEQ_${tableName}_${columnEntity.name}".NEXTVAL INTO:NEW."${columnEntity.name}" FROM DUAL;
+      SELECT "TBL_${id}_SEQ_ID".NEXTVAL INTO:NEW."${columnEntity.name}" FROM DUAL;
     END;
   </#if>
 </#list>

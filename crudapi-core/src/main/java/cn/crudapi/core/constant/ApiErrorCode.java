@@ -7,6 +7,7 @@ public class ApiErrorCode {
     public static final String VALIDATED_ERROR = "VALIDATED_ERROR";
     public static final String REST_ERROR = "REST_ERROR";
     public static final String JSON_ERROR = "JSON_ERROR";
+    public static final String SQL_ERROR = "SQL_ERROR";
     
     public static final String TABLE_NAME_NOT_EMPTY = "TABLE_NAME_NOT_EMPTY";
     public static final String TABLE_COUNT_ERROR = "TABLE_COUNT_ERROR";

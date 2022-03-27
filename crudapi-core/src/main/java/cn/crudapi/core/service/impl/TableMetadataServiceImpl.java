@@ -116,7 +116,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     	}
 	}
     
-    @Transactional
+	@Transactional
     @Override
     public Long create(TableDTO tableDTO) {
     	checkTable();
@@ -131,7 +131,47 @@ public class TableMetadataServiceImpl implements TableMetadataService {
         
         tableMapper.check(tableEntity);
 
-        return insert(tableEntity);
+        Long tableId = null;
+   	 
+    	List<ColumnEntity> columnEntityList = tableEntity.getColumnEntityList();
+    	
+        if (CollectionUtils.isNotEmpty(columnEntityList)) {
+            tableEntity.setCreatePhysicalTable(true);
+            
+            //插入表
+            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
+            for (ColumnEntity columnEntity : columnEntityList) {
+         	   columnEntity.setTableId(tableId);
+         	   columnEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
+         	   columnEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
+            }
+            
+            //批量插入列
+            List<Object> columnObjList = new ArrayList<Object>();
+            columnEntityList.stream().forEach(t -> columnObjList.add(t));
+            int[] ret = crudService.batchCreateObj(COLUMN_TABLE_NAME, columnObjList);
+            
+            log.info(ret.toString());
+           
+            TableEntity newTableEntity = getTableEntityIncludeChildren(tableId);
+            
+            //批量插入index
+            batchInsertIndex(tableEntity.getIndexEntityList(), newTableEntity);
+            
+            if (!Boolean.TRUE.equals(tableEntity.getReverse())) {
+            	tableEntity.setId(tableId);
+            	List<String> sqlList = crudService.toCreateTableSql(tableEntity);
+            	for (String sql: sqlList) {
+            		execute(sql);
+        		}
+            }
+        } else {
+        	//仅插入表
+            tableEntity.setCreatePhysicalTable(false);
+            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
+        }
+
+        return tableId;
     }
 
     @Override
@@ -281,49 +321,6 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     private void execute(String sql) {
         log.info(sql);
         crudService.execute(sql);
-    }
-
-    private Long insert(TableEntity tableEntity) {
-    	Long tableId = null;
-    	 
-    	List<ColumnEntity> columnEntityList = tableEntity.getColumnEntityList();
-    	
-        if (CollectionUtils.isNotEmpty(columnEntityList)) {
-            tableEntity.setCreatePhysicalTable(true);
-            
-            //插入表
-            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
-            for (ColumnEntity columnEntity : columnEntityList) {
-         	   columnEntity.setTableId(tableId);
-         	   columnEntity.setCreatedDate(DateTimeUtils.sqlTimestamp());
-         	   columnEntity.setLastModifiedDate(DateTimeUtils.sqlTimestamp());
-            }
-            
-            //批量插入列
-            List<Object> columnObjList = new ArrayList<Object>();
-            columnEntityList.stream().forEach(t -> columnObjList.add(t));
-            int[] ret = crudService.batchCreateObj(COLUMN_TABLE_NAME, columnObjList);
-            
-            log.info(ret.toString());
-           
-            TableEntity newTableEntity = getTableEntityIncludeChildren(tableId);
-            
-            //批量插入index
-            batchInsertIndex(tableEntity.getIndexEntityList(), newTableEntity);
-            
-            if (!Boolean.TRUE.equals(tableEntity.getReverse())) {
-            	List<String> sqlList = crudService.toCreateTableSql(tableEntity);
-            	for (String sql: sqlList) {
-            		execute(sql);
-        		}
-            }
-        } else {
-        	//仅插入表
-            tableEntity.setCreatePhysicalTable(false);
-            tableId = crudService.create(TABLE_TABLE_NAME, tableEntity);
-        }
-
-        return tableId;
     }
     
     private Long put(TableEntity tableEntity) {

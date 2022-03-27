@@ -76,6 +76,7 @@ public class TemplateParse {
         StringWriter stringWriter = new StringWriter();
         try {
             Configuration config = new Configuration(Configuration.VERSION_2_3_31);
+            config.setNumberFormat("#");
             String templateValue = getTemplate(database, templateName);
         	if (templateValue == null) {
         		return str;

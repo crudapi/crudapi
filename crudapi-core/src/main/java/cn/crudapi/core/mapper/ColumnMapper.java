@@ -46,12 +46,11 @@ public class ColumnMapper {
         		throw new BusinessException(ApiErrorCode.COLUMN_LENGTH_INVALID, "字符串字段" + columnEntity.getName() + "长度不能为空且大于0");
         }
 
-    	//非主键索引名称不能为空
+    	//字段索引名称不能为空
     	if (columnEntity.getIndexType() != null
     		&& columnEntity.getIndexType() != IndexTypeEnum.NONE
-    		&& columnEntity.getIndexType() != IndexTypeEnum.PRIMARY
     		&& StringUtils.isBlank(columnEntity.getIndexName())) {
-    		throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "字段非主键索引名称不能为空");
+    		throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "字段索引名称不能为空");
     	}
 
     	//自增长必须为主键
@@ -65,20 +64,6 @@ public class ColumnMapper {
     		&& Objects.equals(columnEntity.getNullable(), true) ) {
         	throw new BusinessException(ApiErrorCode.PRIMARY_MUST_NOT_NULL, "主键字段不能为NULL");
         }
-
-    	//主键索引名称必须为空或者PRIMARY
-    	if (columnEntity.getIndexType() == IndexTypeEnum.PRIMARY) {
-    		if (crudService.getDateBaseName().equals("mssql") 
-    		|| crudService.getDateBaseName().equals("postsql")) {
-	    		if (StringUtils.isBlank(columnEntity.getIndexName())) {
-    	        	throw new BusinessException(ApiErrorCode.INDEX_NAME_NOT_EMPTY, "主键索引名称不能为空！");
-    	        }
-	    	} else {
-	    		if (!StringUtils.isBlank(columnEntity.getIndexName())) {
-    	        	throw new BusinessException(ApiErrorCode.PRIMARY_INDEX_NAME_MUST_EMPTY, "主键索引名称必须为空!");
-    	        }
-	    	}
-		}
     }
 
 	public ColumnEntity toEntity(ColumnDTO columnDTO) {
