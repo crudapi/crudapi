@@ -202,7 +202,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 		}
 		
 		Map<String, Object> autoKey = keyHolder.getKeys();
-		if (autoIncrement && autoKey != null || autoKey.get(keyColumnNames[0]) != null) {
+		if (autoIncrement && autoKey != null && autoKey.get(keyColumnNames[0]) != null) {
 			return autoKey;
 		} else {
 			Map<String, Object> key = new HashMap<String, Object>();

@@ -472,17 +472,27 @@ public abstract class CrudAbstractRepository {
 	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames,  boolean autoIncrement) {
 		log.info("CrudAbstractRepository->create {}", tableName);
 		
-		KeyHolder keyHolder = insert(tableName, map, keyColumnNames);
+		KeyHolder keyHolder = null;
 		
-		Map<String, Object> key = keyHolder.getKeys();
-		if (key == null) {
-			key = new HashMap<String, Object>();
+		if (autoIncrement) {
+			keyHolder = insert(tableName, map,  new String[] { getSqlQuotation() + keyColumnNames[0] + getSqlQuotation() });
+		} else {
+			keyHolder = insert(tableName, map, null);
+		}
+		
+		Map<String, Object> autoKey = keyHolder.getKeys();
+		if (autoIncrement && autoKey != null) {
+			Map<String, Object> key = new HashMap<String, Object>();
+			key.put(keyColumnNames[0], keyHolder.getKey().longValue());
+			
+			return key;
+		} else {
+			Map<String, Object> key = new HashMap<String, Object>();
 			for (String keyColumnName : keyColumnNames) {
 				key.put(keyColumnName, map.get(keyColumnName));
 			}
+			return key;
 		}
-		
-		return key;
 	}
 	
 	public Long create(String tableName, Object obj) {

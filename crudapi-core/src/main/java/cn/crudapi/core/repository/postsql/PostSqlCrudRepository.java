@@ -396,4 +396,26 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 		
 		return Long.parseLong(keyHolder.getKeyList().get(0).get(COLUMN_ID).toString());
 	}
+	
+	@Override
+	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames,  boolean autoIncrement) {
+		log.info("PostSqlCrudRepository->create {}", tableName);
+		
+		KeyHolder keyHolder = insert(tableName, map,  null);
+		
+		
+		Map<String, Object> autoKey = keyHolder.getKeys();
+		if (autoIncrement && autoKey != null) {
+			Map<String, Object> key = new HashMap<String, Object>();
+			key.put(keyColumnNames[0], keyHolder.getKeyList().get(0).get(keyColumnNames[0]));
+			
+			return key;
+		} else {
+			Map<String, Object> key = new HashMap<String, Object>();
+			for (String keyColumnName : keyColumnNames) {
+				key.put(keyColumnName, map.get(keyColumnName));
+			}
+			return key;
+		}
+	}
 }
