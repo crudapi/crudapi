@@ -927,12 +927,7 @@ public class TableServiceImpl implements TableService {
     	}
     	
     	Map<String, Object> keyMap = new HashMap<String, Object>();
-    	if (autoIncrement) {
-    		Long id = crudService.create(tableName, dataMap);
-    		keyMap.put(primaryNameList.get(0), id);
-    	} else {
-    		keyMap = crudService.create(tableName, dataMap, primaryNameList.toArray(new String[0]));
-    	}
+    	keyMap = crudService.create(tableName, dataMap, primaryNameList.toArray(new String[0]), autoIncrement);
     	
     	return keyMap;
     }

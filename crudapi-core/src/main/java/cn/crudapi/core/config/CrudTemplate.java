@@ -36,24 +36,24 @@ public class CrudTemplate {
 		this.crudFactory = crudFactory;
 	}
 	
-	public String toUpdateColumnSql(String tableName, String oldColumnName, Boolean oldColumnNullable, ColumnEntity columnEntity) {
+	public String toUpdateColumnSql(TableEntity tableEntity, ColumnEntity oldColumnEntity, ColumnEntity columnEntity) {
     	log.debug("CrudTemplate->toUpdateColumnSql");
-		return crudFactory.toUpdateColumnSql(tableName, oldColumnName, oldColumnNullable, columnEntity);
+		return crudFactory.toUpdateColumnSql(tableEntity, oldColumnEntity, columnEntity);
     }
         
-    public String toUpdateColumnIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, ColumnEntity columnEntity) {
+    public String toUpdateColumnIndexSql(TableEntity tableEntity, ColumnEntity oldColumnEntity, ColumnEntity columnEntity) {
     	log.debug("CrudTemplate->toUpdateColumnIndexSql");
-		return crudFactory.toUpdateColumnIndexSql(tableName, oldIndexType, oldIndexName, columnEntity);
+		return crudFactory.toUpdateColumnIndexSql(tableEntity, oldColumnEntity, columnEntity);
     }
     
-    public String toDeleteColumnSql(String tableName, String columnName) {
+    public List<String> toDeleteColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) {
     	log.debug("CrudTemplate->toDeleteColumnSql");
-		return crudFactory.toDeleteColumnSql(tableName, columnName);
+		return crudFactory.toDeleteColumnSql(tableEntity, columnEntity);
     }
     
-	public List<String> toAddColumnSql(String tableName, ColumnEntity columnEntity) { 
+	public List<String> toAddColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) { 
 		log.debug("CrudTemplate->toAddColumnSql");
-		return crudFactory.toAddColumnSql(tableName, columnEntity);
+		return crudFactory.toAddColumnSql(tableEntity, columnEntity);
 	}
 	
 	public String toUpdateIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, IndexEntity indexEntity) {
@@ -101,9 +101,9 @@ public class CrudTemplate {
 		return crudFactory.create(tableName, obj);
 	}
 	
-	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames, boolean autoIncrement) {
 		log.debug("CrudTemplate->create");
-		return crudFactory.create(tableName, obj, keyColumnNames);
+		return crudFactory.create(tableName, obj, keyColumnNames, autoIncrement);
 	}
 	
 	public Long create(String tableName, Map<String, Object> map) {
@@ -111,9 +111,9 @@ public class CrudTemplate {
 		return crudFactory.create(tableName, map);
 	}
 	
-	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames, boolean autoIncrement) {
 		log.debug("CrudTemplate->create");
-		return crudFactory.create(tableName, map, keyColumnNames);
+		return crudFactory.create(tableName, map, keyColumnNames, autoIncrement);
 	}
 	
 	public int[] batchCreateMap(String tableName, List<Map<String, Object>> mapList) {

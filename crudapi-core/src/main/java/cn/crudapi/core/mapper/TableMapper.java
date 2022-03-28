@@ -190,7 +190,7 @@ public class TableMapper {
         }
 
         if (tableDTO.getColumnDTOList() != null) {
-            ColumnSql columnSql = columnMapper.toEntityIgnoreNull(tableEntity.getTableName(), tableEntity.getColumnEntityList(), tableDTO.getColumnDTOList());
+            ColumnSql columnSql = columnMapper.toEntityIgnoreNull(tableEntity, tableEntity.getColumnEntityList(), tableDTO.getColumnDTOList());
             tableSql.setColumnSql(columnSql);
         }
 

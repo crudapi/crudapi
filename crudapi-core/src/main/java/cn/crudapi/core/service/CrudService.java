@@ -15,13 +15,13 @@ import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.query.Condition;
 
 public interface CrudService {
-	String toUpdateColumnSql(String tableName, String oldColumnName, Boolean oldColumnNullable, ColumnEntity columnEntity);
+	String toUpdateColumnSql(TableEntity tableEntity, ColumnEntity oldColumnEntity, ColumnEntity columnEntity);
     
-	String toUpdateColumnIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, ColumnEntity columnEntity);
+	String toUpdateColumnIndexSql(TableEntity tableEntity, ColumnEntity oldColumnEntity, ColumnEntity columnEntity);
     
-    String toDeleteColumnSql(String tableName, String columnName);
+	List<String> toDeleteColumnSql(TableEntity tableEntity, ColumnEntity columnEntity);
     
-    List<String> toAddColumnSql(String tableName, ColumnEntity columnEntity);
+    List<String> toAddColumnSql(TableEntity tableEntity, ColumnEntity columnEntity);
 	
     String toUpdateIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, IndexEntity indexEntity);
 	
@@ -41,11 +41,11 @@ public interface CrudService {
 	
 	Long create(String tableName, Object obj);
 
-	Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames);
+	Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames, boolean autoIncrement);
 
 	Long create(String tableName, Map<String, Object> map);
 
-	Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames);
+	Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames, boolean autoIncrement);
 	
 	int[] batchCreateMap(String tableName, List<Map<String, Object>> mapList);
 	

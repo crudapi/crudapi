@@ -28,27 +28,27 @@ public class CrudServiceImpl implements CrudService {
 	private CrudTemplate crudTemplate;
 	
 	@Override
-	public String toUpdateColumnSql(String tableName, String oldColumnName, Boolean oldColumnNullable, ColumnEntity columnEntity) {
+	public String toUpdateColumnSql(TableEntity tableEntity, ColumnEntity oldColumnEntity,  ColumnEntity columnEntity) {
     	log.debug("CrudServiceImpl->toUpdateColumnSql");
-		return crudTemplate.toUpdateColumnSql(tableName, oldColumnName, oldColumnNullable, columnEntity);
+		return crudTemplate.toUpdateColumnSql(tableEntity, oldColumnEntity, columnEntity);
     }
        
 	@Override
-    public String toUpdateColumnIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, ColumnEntity columnEntity) {
+    public String toUpdateColumnIndexSql(TableEntity tableEntity, ColumnEntity oldColumnEntity,  ColumnEntity columnEntity) {
     	log.debug("CrudServiceImpl->toUpdateColumnIndexSql");
-		return crudTemplate.toUpdateColumnIndexSql(tableName, oldIndexType, oldIndexName, columnEntity);
+		return crudTemplate.toUpdateColumnIndexSql(tableEntity, oldColumnEntity, columnEntity);
     }
     
     @Override
-    public String toDeleteColumnSql(String tableName, String columnName) {
+    public List<String> toDeleteColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) {
     	log.debug("CrudServiceImpl->toDeleteColumnSql");
-		return crudTemplate.toDeleteColumnSql(tableName, columnName);
+		return crudTemplate.toDeleteColumnSql(tableEntity, columnEntity);
     }
     
     @Override
-	public List<String> toAddColumnSql(String tableName, ColumnEntity columnEntity) { 
+	public List<String> toAddColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) { 
 		log.debug("CrudServiceImpl->toAddColumnSql");
-		return crudTemplate.toAddColumnSql(tableName, columnEntity);
+		return crudTemplate.toAddColumnSql(tableEntity, columnEntity);
 	}
 	
 	@Override
@@ -106,9 +106,9 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
-	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames, boolean autoIncrement) {
 		log.debug("CrudServiceImpl->create");
-		return crudTemplate.create(tableName, obj, keyColumnNames);
+		return crudTemplate.create(tableName, obj, keyColumnNames, autoIncrement);
 	}
 	
 	@Override
@@ -118,9 +118,9 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
-	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames, boolean autoIncrement) {
 		log.debug("CrudServiceImpl->create");
-		return crudTemplate.create(tableName, map, keyColumnNames);
+		return crudTemplate.create(tableName, map, keyColumnNames, autoIncrement);
 	}
 	
 	@Override

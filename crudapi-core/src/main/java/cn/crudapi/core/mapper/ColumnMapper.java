@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
 import cn.crudapi.core.entity.ColumnEntity;
+import cn.crudapi.core.entity.TableEntity;
 import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
@@ -65,6 +66,33 @@ public class ColumnMapper {
         	throw new BusinessException(ApiErrorCode.PRIMARY_MUST_NOT_NULL, "主键字段不能为NULL");
         }
     }
+	
+	public ColumnEntity clone(ColumnEntity newColumnEntity) {
+		ColumnEntity columnEntity = new ColumnEntity();
+		columnEntity.setId(newColumnEntity.getId());
+		columnEntity.setName(newColumnEntity.getName());
+		columnEntity.setCaption(newColumnEntity.getCaption());
+		columnEntity.setDescription(newColumnEntity.getDescription());
+		columnEntity.setDisplayOrder(newColumnEntity.getDisplayOrder());
+		columnEntity.setDataType(newColumnEntity.getDataType());
+		columnEntity.setUnsigned(newColumnEntity.getUnsigned());
+		columnEntity.setIndexType(newColumnEntity.getIndexType());
+		columnEntity.setIndexStorage(newColumnEntity.getIndexStorage());
+		columnEntity.setIndexName(newColumnEntity.getIndexName());
+		columnEntity.setLength(newColumnEntity.getLength());
+		columnEntity.setPrecision(newColumnEntity.getPrecision());
+		columnEntity.setScale(newColumnEntity.getScale());
+		columnEntity.setAutoIncrement(newColumnEntity.getAutoIncrement());
+		columnEntity.setSeqId(newColumnEntity.getSeqId());
+		columnEntity.setNullable(newColumnEntity.getNullable());
+		columnEntity.setDefaultValue(newColumnEntity.getDefaultValue());
+		columnEntity.setInsertable(newColumnEntity.getInsertable());
+		columnEntity.setUpdatable(newColumnEntity.getUpdatable());
+		columnEntity.setQueryable(newColumnEntity.getQueryable());
+		columnEntity.setDisplayable(newColumnEntity.getDisplayable());
+		columnEntity.setSystemable(newColumnEntity.getSystemable());
+		return columnEntity;
+	}
 
 	public ColumnEntity toEntity(ColumnDTO columnDTO) {
 		ColumnEntity columnEntity = new ColumnEntity();
@@ -101,18 +129,11 @@ public class ColumnMapper {
 		}
 	}
 
-	public List<String> toEntityIgnoreNull(String tableName, ColumnEntity columnEntity, ColumnDTO columnDTO) {
+	public List<String> toEntityIgnoreNull(TableEntity tableEntity, ColumnEntity columnEntity, ColumnDTO columnDTO) {
 		List<String> sqlList = new ArrayList<String>();
 		String sql = null;
-
-		Boolean oldColumnNullable = columnEntity.getNullable();
-		String oldColumnName = columnEntity.getName();
-		String oldIndexName = columnEntity.getIndexName();
-		IndexTypeEnum oldIndexType = columnEntity.getIndexType();
-		if (columnEntity.getIndexType() == null
-			|| IndexTypeEnum.NONE.equals(columnEntity.getIndexType())) {
-			oldIndexName = null;
-		}
+		
+		ColumnEntity oldColumnEntity = this.clone(columnEntity);
 
 		Boolean isChanged = false;
 		Boolean isIndexChanged = false;
@@ -235,7 +256,7 @@ public class ColumnMapper {
 		}
 		
 		if (isChanged) {
-			sql = crudService.toUpdateColumnSql(tableName, oldColumnName, oldColumnNullable, columnEntity);
+			sql = crudService.toUpdateColumnSql(tableEntity, oldColumnEntity, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
 				String[] subSqls = sql.split(";");
 				for (String t : subSqls) {
@@ -248,7 +269,7 @@ public class ColumnMapper {
 		}
 
 		if (isIndexChanged) {
-			sql = crudService.toUpdateColumnIndexSql(tableName, oldIndexType, oldIndexName,  columnEntity);
+			sql = crudService.toUpdateColumnIndexSql(tableEntity, oldColumnEntity, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
 				String[] subSqls = sql.split(";");
 				for (String t : subSqls) {
@@ -263,7 +284,7 @@ public class ColumnMapper {
 		return sqlList;
 	}
 
-	public ColumnSql toEntityIgnoreNull(String tableName, List<ColumnEntity> columnEntityList, List<ColumnDTO> columnDTOList) {
+	public ColumnSql toEntityIgnoreNull(TableEntity tableEntity,  List<ColumnEntity> columnEntityList, List<ColumnDTO> columnDTOList) {
 		ColumnSql columnSql = new ColumnSql();
 		List<String> deleteSqlList = columnSql.getDeleteSqlList();
 		List<String> updateSqlList = columnSql.getUpdateSqlList();
@@ -275,7 +296,7 @@ public class ColumnMapper {
 			if (!columnDTOList.stream().anyMatch(t -> Objects.equals(t.getId(), columnEntity.getId()))) {
 				deleteColumnIdList.add(columnEntity.getId());
 
-				deleteSqlList.add(crudService.toDeleteColumnSql(tableName, columnEntity.getName()));
+				deleteSqlList.addAll(crudService.toDeleteColumnSql(tableEntity, columnEntity));
 			}
 		}
 		columnSql.setDeleteColumnIdList(deleteColumnIdList);
@@ -289,12 +310,12 @@ public class ColumnMapper {
 			optional = columnEntityList.stream()
 					.filter(t ->  columnDTO.getId() != null && Objects.equals(t.getId(), columnDTO.getId())).findFirst();
 			if (optional.isPresent()) {
-				updateSqlList.addAll(toEntityIgnoreNull(tableName, optional.get(), columnDTO));
+				updateSqlList.addAll(toEntityIgnoreNull(tableEntity, optional.get(), columnDTO));
 			} else {
 				columnEntity = toEntity(columnDTO);
 				columnEntityList.add(columnEntity);
 
-				addSqlList.addAll(crudService.toAddColumnSql(tableName, columnEntity));
+				addSqlList.addAll(crudService.toAddColumnSql(tableEntity, columnEntity));
 			}
 		}
 

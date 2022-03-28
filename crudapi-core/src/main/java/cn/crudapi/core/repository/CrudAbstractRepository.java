@@ -58,8 +58,6 @@ public abstract class CrudAbstractRepository {
 	
 	public List<String> toCreateTableSql(TableEntity tableEntity) {
 		String createTableSql = processTemplateToString("create-table.sql.ftl", tableEntity);
-		String createSequenceSql = processTemplateToString("create-sequence.sql.ftl", tableEntity);
-		String createTriggerSql = processTemplateToString("create-trigger.sql.ftl", tableEntity);
 		
 		if (createTableSql == null) {
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "create-table.sql is empty!");
@@ -72,14 +70,6 @@ public abstract class CrudAbstractRepository {
 			if (!subSql.isEmpty()) {
 				sqls.add(t);
 			}
-		}
-		
-		if (createSequenceSql != null && !createSequenceSql.isEmpty())  {
-			sqls.add(createSequenceSql);
-		}
-		
-		if (createSequenceSql != null && !createTriggerSql.isEmpty())  {
-			sqls.add(createTriggerSql);
 		}
 		
 		return sqls;
@@ -115,14 +105,6 @@ public abstract class CrudAbstractRepository {
 		return processTemplateToString("rename-engine.sql.ftl", map);
     }
 
-    public String toDeleteColumnSql(String tableName, String columnName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-		map.put("tableName", tableName);
-		map.put("columnName", columnName);
-		
-		return processTemplateToString("drop-column.sql.ftl", map);
-    }
-
     public String toDeleteIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName) {
     	Map<String, Object> map = new HashMap<String, Object>();
  		map.put("tableName", tableName);
@@ -132,9 +114,32 @@ public abstract class CrudAbstractRepository {
  		return processTemplateToString("drop-index.sql.ftl", map);
     }
     
-	public List<String> toAddColumnSql(String tableName, ColumnEntity columnEntity) {
+    public String toUpdateColumnSql(TableEntity tableEntity, ColumnEntity oldColumnEntity,  ColumnEntity columnEntity) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tableName", tableEntity.getTableName());
+		map.put("oldColumnName", oldColumnEntity.getName());
+		map.put("oldColumnNullable", oldColumnEntity.getNullable());
+		map.put("oldColumnEntity", oldColumnEntity);
+		map.put("columnEntity", columnEntity);
+		
+		return processTemplateToString("update-column.sql.ftl", map);
+    }
+
+    public String toUpdateColumnIndexSql(TableEntity tableEntity, ColumnEntity oldColumnEntity,  ColumnEntity columnEntity) {
+    	Map<String, Object> map = new HashMap<String, Object>();
+    	map.put("tableName", tableEntity.getTableName());
+		map.put("oldColumnName", oldColumnEntity.getName());
+		map.put("oldColumnNullable", oldColumnEntity.getNullable());
+		map.put("oldColumnEntity", oldColumnEntity);
+		map.put("columnEntity", columnEntity);
+		
+		return processTemplateToString("update-column-index.sql.ftl", map);
+    }
+    
+	public List<String> toAddColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("tableName", tableName);
+		map.put("tableName", tableEntity.getTableName());
+		map.put("tableEntity", tableEntity);
 		map.put("columnEntity", columnEntity);
 		
 		String sql = processTemplateToString("add-column.sql.ftl", map);
@@ -150,25 +155,27 @@ public abstract class CrudAbstractRepository {
 		
 		return sqls;
     }
+	
 
-    public String toUpdateColumnSql(String tableName, String oldColumnName, Boolean oldColumnNullable, ColumnEntity columnEntity) {
-    	Map<String, Object> map = new HashMap<String, Object>();
-		map.put("tableName", tableName);
-		map.put("oldColumnName", oldColumnName);
-		map.put("oldColumnNullable", oldColumnNullable);
+    public  List<String> toDeleteColumnSql(TableEntity tableEntity, ColumnEntity columnEntity) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tableName", tableEntity.getTableName());
+		map.put("columnName", columnEntity.getName());
+		map.put("tableEntity", tableEntity);
 		map.put("columnEntity", columnEntity);
 		
-		return processTemplateToString("update-column.sql.ftl", map);
-    }
-
-    public String toUpdateColumnIndexSql(String tableName, IndexTypeEnum oldIndexType, String oldIndexName, ColumnEntity columnEntity) {
-    	Map<String, Object> map = new HashMap<String, Object>();
-		map.put("tableName", tableName);
-		map.put("oldIndexType", oldIndexType);
-		map.put("oldIndexName", oldIndexName);
-		map.put("columnEntity", columnEntity);
+		String sql = processTemplateToString("drop-column.sql.ftl", map);
 		
-		return processTemplateToString("update-column-index.sql.ftl", map);
+		List<String> sqls = new ArrayList<String>();
+		String[] subSqls = sql.split(";");
+		for (String t : subSqls) {
+			String subSql = t.trim();
+			if (!subSql.isEmpty()) {
+				sqls.add(t);
+			}
+		}
+		
+		return sqls;
     }
 
     public String toAddIndexSql(String tableName, IndexEntity indexEntity) {
@@ -462,7 +469,7 @@ public abstract class CrudAbstractRepository {
 		}
 	}
 	
-	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Map<String, Object> map, String[] keyColumnNames,  boolean autoIncrement) {
 		log.info("CrudAbstractRepository->create {}", tableName);
 		
 		KeyHolder keyHolder = insert(tableName, map, keyColumnNames);
@@ -486,12 +493,12 @@ public abstract class CrudAbstractRepository {
 		return this.create(tableName, map);
 	}
 	
-	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames) {
+	public Map<String, Object> create(String tableName, Object obj, String[] keyColumnNames, boolean autoIncrement) {
 		log.info("CrudAbstractRepository->create {}", tableName);
 		
 		Map<String, Object> map = convertObjectToMap(obj);
 
-		return this.create(tableName, map, keyColumnNames);
+		return this.create(tableName, map, keyColumnNames, autoIncrement);
 	}
 
 	public int[] batchCreateMap(String tableName, List<Map<String, Object>> mapList) {
