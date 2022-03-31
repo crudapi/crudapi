@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,48 +92,56 @@ public class SequenceServiceImpl implements SequenceService {
 			Object fromatObj = seqMap.get("format");
 			String format = (fromatObj != null ? fromatObj.toString() : null);
 
-			if (currentTime) {
-				DateTime now = DateTimeUtils.now();
-				Object retValue = null;
-				if (sequenceType == SequenceTypeEnum.LONG) {
-					retValue = now.getMillis();
-				} else {
-					retValue = now.toString(format);
-				}
-
+			if (sequenceType == SequenceTypeEnum.GUID) {
 				for (int count = 0; count < size; ++count) {
+					UUID uuid = UUID.randomUUID();
+					Object retValue = uuid.toString().replace("-", "");
 					retValueList.add(retValue);
 				}
 			} else {
-				Long nextValue = Long.parseLong(String.valueOf(seqMap.get("nextValue"))) ;
-				Long incrementBy = Long.parseLong(String.valueOf(seqMap.get("incrementBy"))) ;
-
-				for (int count = 0; count < size; ++count) {
+				if (currentTime) {
+					DateTime now = DateTimeUtils.now();
 					Object retValue = null;
 					if (sequenceType == SequenceTypeEnum.LONG) {
-						retValue = nextValue;
+						retValue = now.getMillis();
 					} else {
-						retValue = String.format(format, nextValue);
+						retValue = now.toString(format);
 					}
 
-					retValueList.add(retValue);
-					nextValue += incrementBy;
+					for (int count = 0; count < size; ++count) {
+						retValueList.add(retValue);
+					}
+				} else {
+					Long nextValue = Long.parseLong(String.valueOf(seqMap.get("nextValue"))) ;
+					Long incrementBy = Long.parseLong(String.valueOf(seqMap.get("incrementBy"))) ;
+
+					for (int count = 0; count < size; ++count) {
+						Object retValue = null;
+						if (sequenceType == SequenceTypeEnum.LONG) {
+							retValue = nextValue;
+						} else {
+							retValue = String.format(format, nextValue);
+						}
+
+						retValueList.add(retValue);
+						nextValue += incrementBy;
+					}
+
+					sb = new StringBuilder("UPDATE `");
+					sb.append(dataBaseTableName);
+					sb.append("` SET `");
+					sb.append("nextValue");
+					sb.append("` = ? WHERE `id` = ?");
+
+					int row = jdbcTemplate.update(sb.toString(), nextValue, sequenceId);
+
+					log.info("row = " +  row);
+			        if (row == 0) {
+			        	throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, sequenceId);
+			        }
 				}
-
-				sb = new StringBuilder("UPDATE `");
-				sb.append(dataBaseTableName);
-				sb.append("` SET `");
-				sb.append("nextValue");
-				sb.append("` = ? WHERE `id` = ?");
-
-				int row = jdbcTemplate.update(sb.toString(), nextValue, sequenceId);
-
-				log.info("row = " +  row);
-		        if (row == 0) {
-		        	throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, sequenceId);
-		        }
 			}
-
+			
 			log.info("conn commit...");
 			conn.commit();
 		} catch (Exception e) {
