@@ -120,157 +120,155 @@ CREATE TABLE "ca_meta_column" (
 );
 
 ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_name" UNIQUE("tableId","name");
-ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_index_name" UNIQUE("tableId","indexName");
- 
-INSERT INTO "ca_meta_column" ("id", "autoIncrement", "caption", "createdDate", "dataType", "defaultValue", "description", "displayOrder", "indexName", "indexStorage", "indexType", "insertable", "lastModifiedDate", "length", "name", "nullable", "precision", "queryable", "scale", "seqId", "unsigned", "updatable", "displayable", "systemable", "tableId") VALUES
-(1, true, '编号', '2020-12-23 17:06:29.211000', 'BIGINT', NULL, '编号', 0, NULL, NULL, 'PRIMARY', false, '2021-08-05 10:52:53.967000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 1),
-(2, false, '名称', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 1),
-(3, false, '全文索引', '2020-12-23 17:06:29.211000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-08-05 10:52:53.967000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 1),
-(4, false, '创建时间', '2020-12-23 17:06:29.211000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:52:53.967000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 1),
-(5, false, '修改时间', '2020-12-23 17:06:29.211000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:52:53.967000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 1),
-(6, false, 'OPENID', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, 'OPENID', 5, 'uq_spring_user_openid', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967000', 50, 'openId', true, NULL, false, NULL, NULL, false, true, false, false, 1),
-(7, false, '用户名', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '用户名', 6, 'uq_spring_user_username', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967000', 50, 'username', false, NULL, true, NULL, NULL, false, true, false, false, 1),
-(8, false, '真实姓名', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '真实姓名', 7, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 200, 'realname', true, NULL, true, NULL, NULL, false, true, false, false, 1),
-(9, false, '手机', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '手机', 8, 'uq_spring_user_mobile', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967000', 20, 'mobile', true, NULL, true, NULL, NULL, false, true, false, false, 1),
-(10, false, '邮箱', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '邮箱', 9, 'uq_spring_user_email', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967000', 200, 'email', true, NULL, true, NULL, NULL, false, true, false, false, 1),
-(11, false, '密码', '2020-12-23 17:06:29.211000', 'PASSWORD', NULL, '密码', 10, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 500, 'password', false, NULL, false, NULL, NULL, false, true, false, false, 1),
-(12, false, '明文密码', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, '明文密码', 11, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 200, 'cleartextPwd', true, NULL, false, NULL, NULL, false, true, false, false, 1),
-(13, false, 'TOKEN', '2020-12-23 17:06:29.211000', 'VARCHAR', NULL, 'TOKEN', 12, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 200, 'token', true, NULL, false, NULL, NULL, false, true, false, false, 1),
-(14, false, '启用', '2020-12-23 17:06:29.211000', 'BOOL', 'true', '启用', 13, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 10, 'enabled', false, NULL, true, NULL, NULL, false, true, false, false, 1),
-(15, false, '账号没有过期', '2020-12-23 17:06:29.211000', 'BOOL', 'true', '账号没有过期', 14, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 10, 'accountNonExpired', false, NULL, true, NULL, NULL, false, true, false, false, 1),
-(16, false, '账号没有锁定', '2020-12-23 17:06:29.211000', 'BOOL', 'true', '账号没有锁定', 15, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 10, 'accountNonLocked', false, NULL, true, NULL, NULL, false, true, false, false, 1),
-(17, false, '凭证没有过期', '2020-12-23 17:06:29.211000', 'BOOL', 'true', '凭证没有过期', 16, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 10, 'credentialsNonExpired', false, NULL, true, NULL, NULL, false, true, false, false, 1),
-(20, true, '编号', '2021-02-01 10:51:21.334000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-08-05 10:53:53.431000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 2),
-(21, false, '名称', '2021-02-01 10:51:21.334000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:53:53.431000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 2),
-(22, false, '全文索引', '2021-02-01 10:51:21.334000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-08-05 10:53:53.431000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 2),
-(23, false, '创建时间', '2021-02-01 10:51:21.334000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:53:53.431000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 2),
-(24, false, '修改时间', '2021-02-01 10:51:21.334000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:53:53.431000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 2),
-(25, false, '编码', '2021-02-01 10:51:21.334000', 'VARCHAR', NULL, '编码', 5, 'uq_spring_role_code', NULL, 'UNIQUE', true, '2021-08-05 10:53:53.431000', 200, 'code', false, NULL, true, NULL, 1, false, true, false, false, 2),
-(26, false, '备注', '2021-02-01 10:51:21.334000', 'TEXT', NULL, '备注', 6, NULL, NULL, NULL, true, '2021-08-05 10:53:53.431000', NULL, 'remark', true, NULL, true, NULL, NULL, false, true, false, false, 2),
-(27, true, '编号', '2021-02-01 10:54:05.671000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-05 17:52:19.036000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 3),
-(28, false, '名称', '2021-02-01 10:54:05.671000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 3),
-(29, false, '全文索引', '2021-02-01 10:54:05.671000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-05 17:52:19.036000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 3),
-(30, false, '创建时间', '2021-02-01 10:54:05.671000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-05 17:52:19.036000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 3),
-(31, false, '修改时间', '2021-02-01 10:54:05.671000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-05 17:52:19.036000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 3),
-(33, false, 'URL表达式', '2021-02-01 10:54:05.671000', 'VARCHAR', NULL, 'URL表达式', 6, 'uq_spring_resource_url', NULL, 'UNIQUE', true, '2021-02-05 17:52:19.036000', 200, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 3),
-(34, false, '备注', '2021-02-01 10:54:05.671000', 'TEXT', NULL, '备注', 8, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036000', NULL, 'remark', true, NULL, true, NULL, NULL, false, true, NULL, false, 3),
-(35, true, '编号', '2021-02-01 11:11:15.313000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-01 11:11:15.313000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 4),
-(36, false, '名称', '2021-02-01 11:11:15.313000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 4),
-(37, false, '全文索引', '2021-02-01 11:11:15.313000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-01 11:11:15.313000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 4),
-(38, false, '创建时间', '2021-02-01 11:11:15.313000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-01 11:11:15.313000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 4),
-(39, false, '修改时间', '2021-02-01 11:11:15.313000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-01 11:11:15.313000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 4),
-(40, false, '用户编号', '2021-02-01 11:11:15.313000', 'BIGINT', NULL, '用户编号', 5, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313000', 20, 'userId', false, NULL, true, NULL, NULL, false, true, NULL, false, 4),
-(41, false, '角色编号', '2021-02-01 11:11:15.313000', 'BIGINT', NULL, '角色编号', 6, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313000', 20, 'roleId', false, NULL, true, NULL, NULL, false, true, NULL, false, 4),
-(42, true, '编号', '2021-02-01 11:27:24.851000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-03 16:43:36.326000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 5),
-(43, false, '名称', '2021-02-01 11:27:24.851000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 5),
-(44, false, '全文索引', '2021-02-01 11:27:24.851000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-03 16:43:36.326000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 5),
-(45, false, '创建时间', '2021-02-01 11:27:24.851000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-03 16:43:36.326000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 5),
-(46, false, '修改时间', '2021-02-01 11:27:24.851000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-03 16:43:36.326000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 5),
-(47, false, '角色编号', '2021-02-01 11:27:24.851000', 'BIGINT', NULL, '角色编号', 5, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326000', 20, 'roleId', true, NULL, true, NULL, NULL, false, true, NULL, false, 5),
-(48, false, '资源编号', '2021-02-01 11:27:24.851000', 'BIGINT', NULL, '资源编号', 6, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326000', 20, 'resourceId', true, NULL, true, NULL, NULL, false, true, NULL, false, 5),
-(56, false, '编码', '2021-02-02 10:06:53.176000', 'VARCHAR', NULL, '编码', 5, 'uq_spring_resource_code', NULL, 'UNIQUE', true, '2021-02-05 17:52:19.036000', 200, 'code', true, NULL, true, NULL, 2, false, true, NULL, false, 3),
-(58, false, '操作', '2021-02-03 16:44:10.071000', 'VARCHAR', NULL, '操作', 7, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036000', 200, 'action', true, NULL, true, NULL, NULL, false, true, NULL, false, 3),
-(155, true, '编号', '2021-02-07 11:57:10.131000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-07 15:25:57.167000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 19),
-(156, false, '名称', '2021-02-07 11:57:10.131000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-07 15:25:57.167000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 19),
-(157, false, '全文索引', '2021-02-07 11:57:10.131000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-07 15:25:57.167000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 19),
-(158, false, '创建时间', '2021-02-07 11:57:10.131000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-07 15:25:57.167000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 19),
-(159, false, '修改时间', '2021-02-07 11:57:10.131000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-07 15:25:57.167000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 19),
-(160, false, '编码', '2021-02-07 11:57:10.131000', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-02-07 15:25:57.167000', 200, 'code', true, NULL, true, NULL, NULL, false, true, NULL, false, 19),
-(161, true, '编号', '2021-02-07 11:59:06.948000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-08 16:21:31.011000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 20),
-(162, false, '名称', '2021-02-07 11:59:06.948000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 20),
-(163, false, '全文索引', '2021-02-07 11:59:06.948000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-08 16:21:31.011000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 20),
-(164, false, '创建时间', '2021-02-07 11:59:06.948000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-08 16:21:31.011000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 20),
-(165, false, '修改时间', '2021-02-07 11:59:06.948000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-08 16:21:31.011000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 20),
-(166, false, '编码', '2021-02-07 11:59:06.948000', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011000', 200, 'code', true, NULL, true, NULL, NULL, false, true, NULL, false, 20),
-(167, false, '省编号', '2021-02-07 11:59:06.948000', 'BIGINT', NULL, '省编号', 6, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011000', 20, 'provinceId', true, NULL, true, NULL, NULL, false, true, NULL, false, 20),
-(176, true, '编号', '2021-02-07 15:25:23.718000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-08-05 10:38:57.087000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 22),
-(177, false, '名称', '2021-02-07 15:25:23.718000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 22),
-(178, false, '全文索引', '2021-02-07 15:25:23.718000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-08-05 10:38:57.087000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 22),
-(179, false, '创建时间', '2021-02-07 15:25:23.718000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:38:57.087000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 22),
-(180, false, '修改时间', '2021-02-07 15:25:23.718000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:38:57.087000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 22),
-(181, false, '编码', '2021-02-07 15:25:23.718000', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087000', 200, 'code', true, NULL, true, NULL, NULL, false, true, false, false, 22),
-(182, false, '市编号', '2021-02-07 15:25:23.718000', 'BIGINT', NULL, '市编号', 6, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087000', 20, 'cityId', true, NULL, true, NULL, NULL, false, true, false, false, 22),
-(192, true, '编号', '2021-02-08 11:09:32.062000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-09 14:33:24.642000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 24),
-(193, false, '名称', '2021-02-08 11:09:32.062000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 24),
-(194, false, '全文索引', '2021-02-08 11:09:32.062000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-09 14:33:24.642000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 24),
-(195, false, '创建时间', '2021-02-08 11:09:32.062000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-09 14:33:24.642000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 24),
-(196, false, '修改时间', '2021-02-08 11:09:32.062000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-09 14:33:24.642000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 24),
-(197, false, '大小', '2021-02-08 11:09:32.062000', 'BIGINT', NULL, '大小', 6, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 20, 'size', true, NULL, true, NULL, NULL, false, true, NULL, false, 24),
-(198, false, 'MD5', '2021-02-08 11:09:32.062000', 'VARCHAR', NULL, 'MD5', 7, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 200, 'md5', true, NULL, true, NULL, NULL, false, true, NULL, false, 24),
-(199, false, '类型', '2021-02-08 11:09:32.062000', 'VARCHAR', NULL, '类型', 8, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 200, 'type', true, NULL, true, NULL, NULL, false, true, NULL, false, 24),
-(218, false, '链接', '2021-02-08 16:17:56.520000', 'ATTACHMENT', NULL, '链接', 5, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 4000, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 24),
-(219, false, '头像文件编号', '2021-02-08 16:27:37.689000', 'BIGINT', NULL, '头像文件编号', 17, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967000', 20, 'fileId', true, NULL, true, NULL, NULL, false, true, false, false, 1),
-(220, true, '编号', '2021-02-09 14:21:40.999000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-02-09 14:21:40.999000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 34),
-(221, false, '名称', '2021-02-09 14:21:40.999000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-09 14:21:40.999000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 34),
-(222, false, '全文索引', '2021-02-09 14:21:40.999000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-02-09 14:21:40.999000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 34),
-(223, false, '创建时间', '2021-02-09 14:21:40.999000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-09 14:21:40.999000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 34),
-(224, false, '修改时间', '2021-02-09 14:21:40.999000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-09 14:21:40.999000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 34),
-(225, false, '父目录编号', '2021-02-09 14:21:40.999000', 'BIGINT', NULL, '父目录编号', 5, NULL, NULL, NULL, true, '2021-02-09 14:21:40.999000', 20, 'parentFolderId', true, NULL, true, NULL, NULL, false, true, NULL, false, 34),
-(226, false, '目录编号', '2021-02-09 14:33:24.642000', 'BIGINT', NULL, '目录编号', 9, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642000', 20, 'folderId', true, NULL, true, NULL, NULL, false, true, NULL, false, 24),
-(244, true, '编号', '2021-07-25 16:41:11.900000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-07-25 16:41:37.922000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 37),
-(245, false, '名称', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 37),
-(246, false, '全文索引', '2021-07-25 16:41:11.900000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-07-25 16:41:37.922000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 37),
-(247, false, '创建时间', '2021-07-25 16:41:11.900000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-25 16:41:37.922000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 37),
-(248, false, '修改时间', '2021-07-25 16:41:11.900000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-25 16:41:37.922000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 37),
-(249, false, 'AppId', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'AppId', 5, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'appId', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(250, false, 'AppSecret', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'AppSecret', 6, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'appSecret', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(251, false, 'Token', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'Token', 7, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'token', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(252, false, 'EncodingAESKey', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'EncodingAESKey', 8, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'encodingAESKey', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(253, false, 'AccessToken', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'AccessToken', 9, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'accessToken', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(254, false, 'ExpiresIn', '2021-07-25 16:41:11.900000', 'DATETIME', NULL, 'ExpiresIn', 10, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 200, 'expiresIn', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(255, false, 'Enable', '2021-07-25 16:41:11.900000', 'INT', NULL, 'Enable', 11, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 10, 'enable', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(256, false, 'Log', '2021-07-25 16:41:11.900000', 'TEXT', NULL, 'Log', 12, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', NULL, 'log', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(257, false, 'JsapiTicket', '2021-07-25 16:41:11.900000', 'VARCHAR', NULL, 'JsapiTicket', 13, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922000', 400, 'jsapiTicket', true, NULL, true, NULL, NULL, false, true, NULL, false, 37),
-(293, true, '编号', '2021-07-27 15:46:57.240000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-07-27 15:46:57.240000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 42),
-(294, false, '名称', '2021-07-27 15:46:57.240000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-27 15:46:57.240000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 42),
-(295, false, '全文索引', '2021-07-27 15:46:57.240000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-07-27 15:46:57.240000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 42),
-(296, false, '创建时间', '2021-07-27 15:46:57.240000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-27 15:46:57.240000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 42),
-(297, false, '修改时间', '2021-07-27 15:46:57.240000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-27 15:46:57.240000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 42),
-(298, false, 'Url', '2021-07-27 15:46:57.240000', 'VARCHAR', NULL, 'Url', 5, NULL, NULL, NULL, true, '2021-07-27 15:46:57.240000', 200, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 42),
-(299, false, '用户名', '2021-07-27 15:46:57.240000', 'VARCHAR', NULL, '用户名', 6, NULL, NULL, NULL, true, '2021-07-27 15:46:57.240000', 200, 'username', true, NULL, true, NULL, NULL, false, true, NULL, false, 42),
-(300, false, '密码', '2021-07-27 15:46:57.240000', 'VARCHAR', NULL, '密码', 7, NULL, NULL, NULL, true, '2021-07-27 15:46:57.240000', 200, 'password', true, NULL, true, NULL, NULL, false, true, NULL, false, 42),
-(301, true, '编号', '2021-07-28 10:56:47.092000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-07-28 10:56:47.092000', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 43),
-(302, false, '名称', '2021-07-28 10:56:47.092000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 43),
-(303, false, '全文索引', '2021-07-28 10:56:47.092000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-07-28 10:56:47.092000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 43),
-(304, false, '创建时间', '2021-07-28 10:56:47.092000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-28 10:56:47.092000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 43),
-(305, false, '修改时间', '2021-07-28 10:56:47.092000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-28 10:56:47.092000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 43),
-(306, false, '签名', '2021-07-28 10:56:47.092000', 'VARCHAR', NULL, '签名', 5, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092000', 200, 'sign', true, NULL, true, NULL, NULL, false, true, NULL, false, 43),
-(307, false, '模板', '2021-07-28 10:56:47.092000', 'VARCHAR', NULL, '模板', 6, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092000', 200, 'template', true, NULL, true, NULL, NULL, false, true, NULL, false, 43),
-(308, false, '短信配置编号', '2021-07-28 10:56:47.092000', 'BIGINT', NULL, '短信配置编号', 7, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092000', 20, 'smsConfigId', true, NULL, true, NULL, NULL, false, true, NULL, false, 43),
-(432, true, '编号', '2021-09-02 15:30:37.086000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-09-06 17:30:59.446000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 62),
-(433, false, '名称', '2021-09-02 15:30:37.086000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-09-06 17:30:59.446000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 62),
-(434, false, '全文索引', '2021-09-02 15:30:37.086000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-09-06 17:30:59.446000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 62),
-(435, false, '创建时间', '2021-09-02 15:30:37.086000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-09-06 17:30:59.446000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 62),
-(436, false, '修改时间', '2021-09-02 15:30:37.086000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-09-06 17:30:59.446000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 62),
-(437, true, '编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-09-02 15:34:04.947000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 63),
-(438, false, '名称', '2021-09-02 15:34:04.947000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 63),
-(439, false, '全文索引', '2021-09-02 15:34:04.947000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-09-02 15:34:04.947000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 63),
-(440, false, '创建时间', '2021-09-02 15:34:04.947000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-09-02 15:34:04.947000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 63),
-(441, false, '修改时间', '2021-09-02 15:34:04.947000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-09-02 15:34:04.947000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 63),
-(442, false, '模块编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '模块编号', 5, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947000', 20, 'moduleId', true, NULL, true, NULL, NULL, false, true, false, false, 63),
-(443, false, '表编号', '2021-09-02 15:34:04.947000', 'BIGINT', NULL, '表编号', 6, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947000', 20, 'tableId', true, NULL, true, NULL, NULL, false, true, false, false, 63),
-(461, true, '编号', '2021-09-02 15:59:07.090000', 'BIGINT', NULL, '编号', 0, NULL, NULL, 'PRIMARY', true, '2021-09-06 16:20:28.739000', NULL, 'id', false, NULL, true, NULL, NULL, false, true, false, false, 66),
-(462, false, '中文名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '中文名称', 2, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', 255, 'caption', true, NULL, true, NULL, NULL, false, true, true, false, 66),
-(463, false, '是否创建物理表', '2021-09-02 15:59:07.090000', 'BOOL', NULL, '是否创建物理表', 3, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', NULL, 'createPhysicalTable', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(464, false, '创建时间', '2021-09-02 15:59:07.090000', 'DATETIME', NULL, '创建时间', 4, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', 6, 'createdDate', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(465, false, '描述', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '描述', 5, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', 255, 'description', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(466, false, '引擎', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '引擎', 6, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', 255, 'engine', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(467, false, '修改时间', '2021-09-02 15:59:07.090000', 'DATETIME', NULL, '修改时间', 7, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', 6, 'lastModifiedDate', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(468, false, '英文名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '英文名称', 1, 'uq_bsm_table_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739000', 255, 'name', true, NULL, true, NULL, NULL, false, true, true, false, 66),
-(469, false, '英文复数', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '英文复数', 8, 'uq_bsm_table_plural_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739000', 255, 'pluralName', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(470, false, '物理表名称', '2021-09-02 15:59:07.090000', 'VARCHAR', NULL, '物理表名称', 9, 'uq_bsm_table_table_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739000', 255, 'tableName', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(471, false, '是否系统表', '2021-09-02 15:59:07.090000', 'BOOL', NULL, '是否系统表', 10, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', NULL, 'systemable', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(473, false, '是否只读', '2021-09-06 16:10:31.028000', 'BOOL', NULL, '是否只读', 11, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739000', NULL, 'readOnly', true, NULL, true, NULL, NULL, false, true, false, false, 66),
-(489, true, '编号', '2021-11-03 11:23:02.177000', 'BIGINT', NULL, '主键', 0, NULL, NULL, 'PRIMARY', false, '2021-11-03 11:23:02.177000', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 69),
-(490, false, '名称', '2021-11-03 11:23:02.177000', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177000', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 69),
-(491, false, '全文索引', '2021-11-03 11:23:02.177000', 'TEXT', NULL, '全文索引', 2, 'ft_fulltext_body', NULL, 'FULLTEXT', false, '2021-11-03 11:23:02.177000', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 69),
-(492, false, '创建时间', '2021-11-03 11:23:02.177000', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-11-03 11:23:02.177000', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 69),
-(493, false, '修改时间', '2021-11-03 11:23:02.177000', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-11-03 11:23:02.177000', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 69),
-(494, false, '类型', '2021-11-03 11:23:02.177000', 'VARCHAR', NULL, '类型', 5, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177000', 200, 'type', true, NULL, true, NULL, NULL, false, true, false, false, 69),
-(495, false, '设备', '2021-11-03 11:23:02.177000', 'VARCHAR', NULL, '设备', 6, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177000', 200, 'device', true, NULL, true, NULL, NULL, false, true, false, false, 69),
-(496, false, '内容', '2021-11-03 11:23:02.177000', 'LONGTEXT', NULL, '内容', 7, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177000', NULL, 'body', true, NULL, true, NULL, NULL, false, true, false, false, 69),
-(497, false, '表编号', '2021-11-03 11:23:02.177000', 'BIGINT', NULL, '表编号', 8, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177000', 20, 'tableId', true, NULL, true, NULL, NULL, false, true, false, false, 69);
+ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_index_name" UNIQUE("indexName");
 
+INSERT INTO "ca_meta_column" VALUES (2, false, '名称', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 1);
+INSERT INTO "ca_meta_column" VALUES (4, false, '创建时间', '2020-12-23 17:06:29.211', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:52:53.967', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 1);
+INSERT INTO "ca_meta_column" VALUES (5, false, '修改时间', '2020-12-23 17:06:29.211', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:52:53.967', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 1);
+INSERT INTO "ca_meta_column" VALUES (6, false, 'OPENID', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, 'OPENID', 5, 'uq_spring_user_openid', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967', 50, 'openId', true, NULL, false, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (7, false, '用户名', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '用户名', 6, 'uq_spring_user_username', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967', 50, 'username', false, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (8, false, '真实姓名', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '真实姓名', 7, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 200, 'realname', true, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (9, false, '手机', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '手机', 8, 'uq_spring_user_mobile', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967', 20, 'mobile', true, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (10, false, '邮箱', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '邮箱', 9, 'uq_spring_user_email', NULL, 'UNIQUE', true, '2021-08-05 10:52:53.967', 200, 'email', true, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (11, false, '密码', '2020-12-23 17:06:29.211', 'PASSWORD', NULL, '密码', 10, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 500, 'password', false, NULL, false, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (12, false, '明文密码', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, '明文密码', 11, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 200, 'cleartextPwd', true, NULL, false, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (13, false, 'TOKEN', '2020-12-23 17:06:29.211', 'VARCHAR', NULL, 'TOKEN', 12, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 200, 'token', true, NULL, false, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (14, false, '启用', '2020-12-23 17:06:29.211', 'BOOL', 'true', '启用', 13, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 10, 'enabled', false, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (15, false, '账号没有过期', '2020-12-23 17:06:29.211', 'BOOL', 'true', '账号没有过期', 14, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 10, 'accountNonExpired', false, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (16, false, '账号没有锁定', '2020-12-23 17:06:29.211', 'BOOL', 'true', '账号没有锁定', 15, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 10, 'accountNonLocked', false, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (17, false, '凭证没有过期', '2020-12-23 17:06:29.211', 'BOOL', 'true', '凭证没有过期', 16, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 10, 'credentialsNonExpired', false, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (21, false, '名称', '2021-02-01 10:51:21.334', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:53:53.431', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 2);
+INSERT INTO "ca_meta_column" VALUES (23, false, '创建时间', '2021-02-01 10:51:21.334', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:53:53.431', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 2);
+INSERT INTO "ca_meta_column" VALUES (24, false, '修改时间', '2021-02-01 10:51:21.334', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:53:53.431', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 2);
+INSERT INTO "ca_meta_column" VALUES (25, false, '编码', '2021-02-01 10:51:21.334', 'VARCHAR', NULL, '编码', 5, 'uq_spring_role_code', NULL, 'UNIQUE', true, '2021-08-05 10:53:53.431', 200, 'code', false, NULL, true, NULL, 1, false, true, false, false, 2);
+INSERT INTO "ca_meta_column" VALUES (26, false, '备注', '2021-02-01 10:51:21.334', 'TEXT', NULL, '备注', 6, NULL, NULL, NULL, true, '2021-08-05 10:53:53.431', NULL, 'remark', true, NULL, true, NULL, NULL, false, true, false, false, 2);
+INSERT INTO "ca_meta_column" VALUES (28, false, '名称', '2021-02-01 10:54:05.671', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 3);
+INSERT INTO "ca_meta_column" VALUES (30, false, '创建时间', '2021-02-01 10:54:05.671', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-05 17:52:19.036', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 3);
+INSERT INTO "ca_meta_column" VALUES (31, false, '修改时间', '2021-02-01 10:54:05.671', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-05 17:52:19.036', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 3);
+INSERT INTO "ca_meta_column" VALUES (33, false, 'URL表达式', '2021-02-01 10:54:05.671', 'VARCHAR', NULL, 'URL表达式', 6, 'uq_spring_resource_url', NULL, 'UNIQUE', true, '2021-02-05 17:52:19.036', 200, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 3);
+INSERT INTO "ca_meta_column" VALUES (34, false, '备注', '2021-02-01 10:54:05.671', 'TEXT', NULL, '备注', 8, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036', NULL, 'remark', true, NULL, true, NULL, NULL, false, true, NULL, false, 3);
+INSERT INTO "ca_meta_column" VALUES (36, false, '名称', '2021-02-01 11:11:15.313', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 4);
+INSERT INTO "ca_meta_column" VALUES (38, false, '创建时间', '2021-02-01 11:11:15.313', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-01 11:11:15.313', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 4);
+INSERT INTO "ca_meta_column" VALUES (39, false, '修改时间', '2021-02-01 11:11:15.313', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-01 11:11:15.313', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 4);
+INSERT INTO "ca_meta_column" VALUES (40, false, '用户编号', '2021-02-01 11:11:15.313', 'BIGINT', NULL, '用户编号', 5, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313', 20, 'userId', false, NULL, true, NULL, NULL, false, true, NULL, false, 4);
+INSERT INTO "ca_meta_column" VALUES (41, false, '角色编号', '2021-02-01 11:11:15.313', 'BIGINT', NULL, '角色编号', 6, NULL, NULL, NULL, true, '2021-02-01 11:11:15.313', 20, 'roleId', false, NULL, true, NULL, NULL, false, true, NULL, false, 4);
+INSERT INTO "ca_meta_column" VALUES (43, false, '名称', '2021-02-01 11:27:24.851', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 5);
+INSERT INTO "ca_meta_column" VALUES (45, false, '创建时间', '2021-02-01 11:27:24.851', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-03 16:43:36.326', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 5);
+INSERT INTO "ca_meta_column" VALUES (46, false, '修改时间', '2021-02-01 11:27:24.851', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-03 16:43:36.326', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 5);
+INSERT INTO "ca_meta_column" VALUES (47, false, '角色编号', '2021-02-01 11:27:24.851', 'BIGINT', NULL, '角色编号', 5, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326', 20, 'roleId', true, NULL, true, NULL, NULL, false, true, NULL, false, 5);
+INSERT INTO "ca_meta_column" VALUES (48, false, '资源编号', '2021-02-01 11:27:24.851', 'BIGINT', NULL, '资源编号', 6, NULL, NULL, NULL, true, '2021-02-03 16:43:36.326', 20, 'resourceId', true, NULL, true, NULL, NULL, false, true, NULL, false, 5);
+INSERT INTO "ca_meta_column" VALUES (56, false, '编码', '2021-02-02 10:06:53.176', 'VARCHAR', NULL, '编码', 5, 'uq_spring_resource_code', NULL, 'UNIQUE', true, '2021-02-05 17:52:19.036', 200, 'code', true, NULL, true, NULL, 2, false, true, NULL, false, 3);
+INSERT INTO "ca_meta_column" VALUES (58, false, '操作', '2021-02-03 16:44:10.071', 'VARCHAR', NULL, '操作', 7, NULL, NULL, NULL, true, '2021-02-05 17:52:19.036', 200, 'action', true, NULL, true, NULL, NULL, false, true, NULL, false, 3);
+INSERT INTO "ca_meta_column" VALUES (156, false, '名称', '2021-02-07 11:57:10.131', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-07 15:25:57.167', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 19);
+INSERT INTO "ca_meta_column" VALUES (158, false, '创建时间', '2021-02-07 11:57:10.131', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-07 15:25:57.167', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 19);
+INSERT INTO "ca_meta_column" VALUES (159, false, '修改时间', '2021-02-07 11:57:10.131', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-07 15:25:57.167', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 19);
+INSERT INTO "ca_meta_column" VALUES (160, false, '编码', '2021-02-07 11:57:10.131', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-02-07 15:25:57.167', 200, 'code', true, NULL, true, NULL, NULL, false, true, NULL, false, 19);
+INSERT INTO "ca_meta_column" VALUES (162, false, '名称', '2021-02-07 11:59:06.948', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 20);
+INSERT INTO "ca_meta_column" VALUES (164, false, '创建时间', '2021-02-07 11:59:06.948', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-08 16:21:31.011', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 20);
+INSERT INTO "ca_meta_column" VALUES (165, false, '修改时间', '2021-02-07 11:59:06.948', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-08 16:21:31.011', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 20);
+INSERT INTO "ca_meta_column" VALUES (166, false, '编码', '2021-02-07 11:59:06.948', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011', 200, 'code', true, NULL, true, NULL, NULL, false, true, NULL, false, 20);
+INSERT INTO "ca_meta_column" VALUES (167, false, '省编号', '2021-02-07 11:59:06.948', 'BIGINT', NULL, '省编号', 6, NULL, NULL, NULL, true, '2021-02-08 16:21:31.011', 20, 'provinceId', true, NULL, true, NULL, NULL, false, true, NULL, false, 20);
+INSERT INTO "ca_meta_column" VALUES (177, false, '名称', '2021-02-07 15:25:23.718', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 22);
+INSERT INTO "ca_meta_column" VALUES (179, false, '创建时间', '2021-02-07 15:25:23.718', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-08-05 10:38:57.087', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, true, 22);
+INSERT INTO "ca_meta_column" VALUES (180, false, '修改时间', '2021-02-07 15:25:23.718', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-08-05 10:38:57.087', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, true, 22);
+INSERT INTO "ca_meta_column" VALUES (181, false, '编码', '2021-02-07 15:25:23.718', 'VARCHAR', NULL, '编码', 5, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087', 200, 'code', true, NULL, true, NULL, NULL, false, true, false, false, 22);
+INSERT INTO "ca_meta_column" VALUES (182, false, '市编号', '2021-02-07 15:25:23.718', 'BIGINT', NULL, '市编号', 6, NULL, NULL, NULL, true, '2021-08-05 10:38:57.087', 20, 'cityId', true, NULL, true, NULL, NULL, false, true, false, false, 22);
+INSERT INTO "ca_meta_column" VALUES (193, false, '名称', '2021-02-08 11:09:32.062', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 24);
+INSERT INTO "ca_meta_column" VALUES (195, false, '创建时间', '2021-02-08 11:09:32.062', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-09 14:33:24.642', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 24);
+INSERT INTO "ca_meta_column" VALUES (196, false, '修改时间', '2021-02-08 11:09:32.062', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-09 14:33:24.642', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 24);
+INSERT INTO "ca_meta_column" VALUES (197, false, '大小', '2021-02-08 11:09:32.062', 'BIGINT', NULL, '大小', 6, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 20, 'size', true, NULL, true, NULL, NULL, false, true, NULL, false, 24);
+INSERT INTO "ca_meta_column" VALUES (198, false, 'MD5', '2021-02-08 11:09:32.062', 'VARCHAR', NULL, 'MD5', 7, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 200, 'md5', true, NULL, true, NULL, NULL, false, true, NULL, false, 24);
+INSERT INTO "ca_meta_column" VALUES (199, false, '类型', '2021-02-08 11:09:32.062', 'VARCHAR', NULL, '类型', 8, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 200, 'type', true, NULL, true, NULL, NULL, false, true, NULL, false, 24);
+INSERT INTO "ca_meta_column" VALUES (218, false, '链接', '2021-02-08 16:17:56.52', 'ATTACHMENT', NULL, '链接', 5, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 4000, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 24);
+INSERT INTO "ca_meta_column" VALUES (219, false, '头像文件编号', '2021-02-08 16:27:37.689', 'BIGINT', NULL, '头像文件编号', 17, NULL, NULL, NULL, true, '2021-08-05 10:52:53.967', 20, 'fileId', true, NULL, true, NULL, NULL, false, true, false, false, 1);
+INSERT INTO "ca_meta_column" VALUES (221, false, '名称', '2021-02-09 14:21:40.999', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-02-09 14:21:40.999', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 34);
+INSERT INTO "ca_meta_column" VALUES (223, false, '创建时间', '2021-02-09 14:21:40.999', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-02-09 14:21:40.999', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 34);
+INSERT INTO "ca_meta_column" VALUES (224, false, '修改时间', '2021-02-09 14:21:40.999', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-02-09 14:21:40.999', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 34);
+INSERT INTO "ca_meta_column" VALUES (225, false, '父目录编号', '2021-02-09 14:21:40.999', 'BIGINT', NULL, '父目录编号', 5, NULL, NULL, NULL, true, '2021-02-09 14:21:40.999', 20, 'parentFolderId', true, NULL, true, NULL, NULL, false, true, NULL, false, 34);
+INSERT INTO "ca_meta_column" VALUES (226, false, '目录编号', '2021-02-09 14:33:24.642', 'BIGINT', NULL, '目录编号', 9, NULL, NULL, NULL, true, '2021-02-09 14:33:24.642', 20, 'folderId', true, NULL, true, NULL, NULL, false, true, NULL, false, 24);
+INSERT INTO "ca_meta_column" VALUES (245, false, '名称', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 37);
+INSERT INTO "ca_meta_column" VALUES (247, false, '创建时间', '2021-07-25 16:41:11.9', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-25 16:41:37.922', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 37);
+INSERT INTO "ca_meta_column" VALUES (248, false, '修改时间', '2021-07-25 16:41:11.9', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-25 16:41:37.922', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 37);
+INSERT INTO "ca_meta_column" VALUES (249, false, 'AppId', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'AppId', 5, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'appId', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (250, false, 'AppSecret', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'AppSecret', 6, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'appSecret', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (251, false, 'Token', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'Token', 7, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'token', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (252, false, 'EncodingAESKey', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'EncodingAESKey', 8, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'encodingAESKey', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (253, false, 'AccessToken', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'AccessToken', 9, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'accessToken', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (254, false, 'ExpiresIn', '2021-07-25 16:41:11.9', 'DATETIME', NULL, 'ExpiresIn', 10, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 200, 'expiresIn', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (255, false, 'Enable', '2021-07-25 16:41:11.9', 'INT', NULL, 'Enable', 11, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 10, 'enable', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (256, false, 'Log', '2021-07-25 16:41:11.9', 'TEXT', NULL, 'Log', 12, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', NULL, 'log', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (257, false, 'JsapiTicket', '2021-07-25 16:41:11.9', 'VARCHAR', NULL, 'JsapiTicket', 13, NULL, NULL, NULL, true, '2021-07-25 16:41:37.922', 400, 'jsapiTicket', true, NULL, true, NULL, NULL, false, true, NULL, false, 37);
+INSERT INTO "ca_meta_column" VALUES (294, false, '名称', '2021-07-27 15:46:57.24', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-27 15:46:57.24', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 42);
+INSERT INTO "ca_meta_column" VALUES (296, false, '创建时间', '2021-07-27 15:46:57.24', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-27 15:46:57.24', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 42);
+INSERT INTO "ca_meta_column" VALUES (297, false, '修改时间', '2021-07-27 15:46:57.24', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-27 15:46:57.24', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 42);
+INSERT INTO "ca_meta_column" VALUES (298, false, 'Url', '2021-07-27 15:46:57.24', 'VARCHAR', NULL, 'Url', 5, NULL, NULL, NULL, true, '2021-07-27 15:46:57.24', 200, 'url', true, NULL, true, NULL, NULL, false, true, NULL, false, 42);
+INSERT INTO "ca_meta_column" VALUES (299, false, '用户名', '2021-07-27 15:46:57.24', 'VARCHAR', NULL, '用户名', 6, NULL, NULL, NULL, true, '2021-07-27 15:46:57.24', 200, 'username', true, NULL, true, NULL, NULL, false, true, NULL, false, 42);
+INSERT INTO "ca_meta_column" VALUES (300, false, '密码', '2021-07-27 15:46:57.24', 'VARCHAR', NULL, '密码', 7, NULL, NULL, NULL, true, '2021-07-27 15:46:57.24', 200, 'password', true, NULL, true, NULL, NULL, false, true, NULL, false, 42);
+INSERT INTO "ca_meta_column" VALUES (302, false, '名称', '2021-07-28 10:56:47.092', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, true, 43);
+INSERT INTO "ca_meta_column" VALUES (304, false, '创建时间', '2021-07-28 10:56:47.092', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-07-28 10:56:47.092', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, NULL, true, 43);
+INSERT INTO "ca_meta_column" VALUES (305, false, '修改时间', '2021-07-28 10:56:47.092', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-07-28 10:56:47.092', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, NULL, true, 43);
+INSERT INTO "ca_meta_column" VALUES (306, false, '签名', '2021-07-28 10:56:47.092', 'VARCHAR', NULL, '签名', 5, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092', 200, 'sign', true, NULL, true, NULL, NULL, false, true, NULL, false, 43);
+INSERT INTO "ca_meta_column" VALUES (307, false, '模板', '2021-07-28 10:56:47.092', 'VARCHAR', NULL, '模板', 6, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092', 200, 'template', true, NULL, true, NULL, NULL, false, true, NULL, false, 43);
+INSERT INTO "ca_meta_column" VALUES (308, false, '短信配置编号', '2021-07-28 10:56:47.092', 'BIGINT', NULL, '短信配置编号', 7, NULL, NULL, NULL, true, '2021-07-28 10:56:47.092', 20, 'smsConfigId', true, NULL, true, NULL, NULL, false, true, NULL, false, 43);
+INSERT INTO "ca_meta_column" VALUES (433, false, '名称', '2021-09-02 15:30:37.086', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-09-06 17:30:59.446', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 62);
+INSERT INTO "ca_meta_column" VALUES (435, false, '创建时间', '2021-09-02 15:30:37.086', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-09-06 17:30:59.446', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 62);
+INSERT INTO "ca_meta_column" VALUES (436, false, '修改时间', '2021-09-02 15:30:37.086', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-09-06 17:30:59.446', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 62);
+INSERT INTO "ca_meta_column" VALUES (438, false, '名称', '2021-09-02 15:34:04.947', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 63);
+INSERT INTO "ca_meta_column" VALUES (440, false, '创建时间', '2021-09-02 15:34:04.947', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-09-02 15:34:04.947', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (441, false, '修改时间', '2021-09-02 15:34:04.947', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-09-02 15:34:04.947', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (442, false, '模块编号', '2021-09-02 15:34:04.947', 'BIGINT', NULL, '模块编号', 5, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947', 20, 'moduleId', true, NULL, true, NULL, NULL, false, true, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (443, false, '表编号', '2021-09-02 15:34:04.947', 'BIGINT', NULL, '表编号', 6, NULL, NULL, NULL, true, '2021-09-02 15:34:04.947', 20, 'tableId', true, NULL, true, NULL, NULL, false, true, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (462, false, '中文名称', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '中文名称', 2, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', 255, 'caption', true, NULL, true, NULL, NULL, false, true, true, false, 66);
+INSERT INTO "ca_meta_column" VALUES (463, false, '是否创建物理表', '2021-09-02 15:59:07.09', 'BOOL', NULL, '是否创建物理表', 3, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', NULL, 'createPhysicalTable', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (464, false, '创建时间', '2021-09-02 15:59:07.09', 'DATETIME', NULL, '创建时间', 4, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', 6, 'createdDate', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (465, false, '描述', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '描述', 5, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', 255, 'description', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (466, false, '引擎', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '引擎', 6, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', 255, 'engine', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (467, false, '修改时间', '2021-09-02 15:59:07.09', 'DATETIME', NULL, '修改时间', 7, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', 6, 'lastModifiedDate', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (468, false, '英文名称', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '英文名称', 1, 'uq_bsm_table_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739', 255, 'name', true, NULL, true, NULL, NULL, false, true, true, false, 66);
+INSERT INTO "ca_meta_column" VALUES (469, false, '英文复数', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '英文复数', 8, 'uq_bsm_table_plural_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739', 255, 'pluralName', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (470, false, '物理表名称', '2021-09-02 15:59:07.09', 'VARCHAR', NULL, '物理表名称', 9, 'uq_bsm_table_table_name', 'BTREE', 'UNIQUE', true, '2021-09-06 16:20:28.739', 255, 'tableName', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (471, false, '是否系统表', '2021-09-02 15:59:07.09', 'BOOL', NULL, '是否系统表', 10, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', NULL, 'systemable', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (473, false, '是否只读', '2021-09-06 16:10:31.028', 'BOOL', NULL, '是否只读', 11, NULL, NULL, NULL, true, '2021-09-06 16:20:28.739', NULL, 'readOnly', true, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (490, false, '名称', '2021-11-03 11:23:02.177', 'VARCHAR', NULL, '名称', 1, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177', 200, 'name', false, NULL, true, NULL, NULL, false, true, true, false, 69);
+INSERT INTO "ca_meta_column" VALUES (492, false, '创建时间', '2021-11-03 11:23:02.177', 'DATETIME', NULL, '创建时间', 3, NULL, NULL, NULL, false, '2021-11-03 11:23:02.177', NULL, 'createdDate', false, NULL, false, NULL, NULL, false, false, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (493, false, '修改时间', '2021-11-03 11:23:02.177', 'DATETIME', NULL, '修改时间', 4, NULL, NULL, NULL, false, '2021-11-03 11:23:02.177', NULL, 'lastModifiedDate', true, NULL, false, NULL, NULL, false, false, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (494, false, '类型', '2021-11-03 11:23:02.177', 'VARCHAR', NULL, '类型', 5, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177', 200, 'type', true, NULL, true, NULL, NULL, false, true, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (495, false, '设备', '2021-11-03 11:23:02.177', 'VARCHAR', NULL, '设备', 6, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177', 200, 'device', true, NULL, true, NULL, NULL, false, true, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (496, false, '内容', '2021-11-03 11:23:02.177', 'LONGTEXT', NULL, '内容', 7, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177', NULL, 'body', true, NULL, true, NULL, NULL, false, true, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (497, false, '表编号', '2021-11-03 11:23:02.177', 'BIGINT', NULL, '表编号', 8, NULL, NULL, NULL, true, '2021-11-03 11:23:02.177', 20, 'tableId', true, NULL, true, NULL, NULL, false, true, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (1, true, '编号', '2020-12-23 17:06:29.211', 'BIGINT', NULL, '编号', 0, 'spring_user_pkey', NULL, 'PRIMARY', false, '2021-08-05 10:52:53.967', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 1);
+INSERT INTO "ca_meta_column" VALUES (20, true, '编号', '2021-02-01 10:51:21.334', 'BIGINT', NULL, '主键', 0, 'spring_role_pkey', NULL, 'PRIMARY', false, '2021-08-05 10:53:53.431', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 2);
+INSERT INTO "ca_meta_column" VALUES (27, true, '编号', '2021-02-01 10:54:05.671', 'BIGINT', NULL, '主键', 0, 'spring_resource_pkey', NULL, 'PRIMARY', false, '2021-02-05 17:52:19.036', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 3);
+INSERT INTO "ca_meta_column" VALUES (35, true, '编号', '2021-02-01 11:11:15.313', 'BIGINT', NULL, '主键', 0, 'ca_userRoleLine_pkey', NULL, 'PRIMARY', false, '2021-02-01 11:11:15.313', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 4);
+INSERT INTO "ca_meta_column" VALUES (42, true, '编号', '2021-02-01 11:27:24.851', 'BIGINT', NULL, '主键', 0, 'ca_roleResourceLine_pkey', NULL, 'PRIMARY', false, '2021-02-03 16:43:36.326', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 5);
+INSERT INTO "ca_meta_column" VALUES (155, true, '编号', '2021-02-07 11:57:10.131', 'BIGINT', NULL, '主键', 0, 'ca_province_pkey', NULL, 'PRIMARY', false, '2021-02-07 15:25:57.167', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 19);
+INSERT INTO "ca_meta_column" VALUES (161, true, '编号', '2021-02-07 11:59:06.948', 'BIGINT', NULL, '主键', 0, 'ca_city_pkey', NULL, 'PRIMARY', false, '2021-02-08 16:21:31.011', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 20);
+INSERT INTO "ca_meta_column" VALUES (176, true, '编号', '2021-02-07 15:25:23.718', 'BIGINT', NULL, '主键', 0, 'ca_district_pkey', NULL, 'PRIMARY', false, '2021-08-05 10:38:57.087', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, true, 22);
+INSERT INTO "ca_meta_column" VALUES (192, true, '编号', '2021-02-08 11:09:32.062', 'BIGINT', NULL, '主键', 0, 'ca_file_pkey', NULL, 'PRIMARY', false, '2021-02-09 14:33:24.642', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 24);
+INSERT INTO "ca_meta_column" VALUES (220, true, '编号', '2021-02-09 14:21:40.999', 'BIGINT', NULL, '主键', 0, 'ca_folder_pkey', NULL, 'PRIMARY', false, '2021-02-09 14:21:40.999', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 34);
+INSERT INTO "ca_meta_column" VALUES (244, true, '编号', '2021-07-25 16:41:11.9', 'BIGINT', NULL, '主键', 0, 'ca_weixinConfig_pkey', NULL, 'PRIMARY', false, '2021-07-25 16:41:37.922', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 37);
+INSERT INTO "ca_meta_column" VALUES (293, true, '编号', '2021-07-27 15:46:57.24', 'BIGINT', NULL, '主键', 0, 'ca_smsConfig_pkey', NULL, 'PRIMARY', false, '2021-07-27 15:46:57.24', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 42);
+INSERT INTO "ca_meta_column" VALUES (301, true, '编号', '2021-07-28 10:56:47.092', 'BIGINT', NULL, '主键', 0, 'ca_smsTemplate_pkey', NULL, 'PRIMARY', false, '2021-07-28 10:56:47.092', 20, 'id', false, NULL, false, NULL, NULL, true, false, NULL, true, 43);
+INSERT INTO "ca_meta_column" VALUES (432, true, '编号', '2021-09-02 15:30:37.086', 'BIGINT', NULL, '主键', 0, 'ca_sys_module_pkey', NULL, 'PRIMARY', false, '2021-09-06 17:30:59.446', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 62);
+INSERT INTO "ca_meta_column" VALUES (437, true, '编号', '2021-09-02 15:34:04.947', 'BIGINT', NULL, '主键', 0, 'ca_sys_moduleLine_pkey', NULL, 'PRIMARY', false, '2021-09-02 15:34:04.947', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (461, true, '编号', '2021-09-02 15:59:07.09', 'BIGINT', NULL, '编号', 0, 'ca_meta_table_pkey', NULL, 'PRIMARY', true, '2021-09-06 16:20:28.739', NULL, 'id', false, NULL, true, NULL, NULL, false, true, false, false, 66);
+INSERT INTO "ca_meta_column" VALUES (489, true, '编号', '2021-11-03 11:23:02.177', 'BIGINT', NULL, '主键', 0, 'ca_tableFormBuilder_pkey', NULL, 'PRIMARY', false, '2021-11-03 11:23:02.177', 20, 'id', false, NULL, false, NULL, NULL, true, false, false, false, 69);
+INSERT INTO "ca_meta_column" VALUES (3, false, '全文索引', '2020-12-23 17:06:29.211', 'TEXT', NULL, '全文索引', 2, 'spring_user_ftidx', NULL, 'FULLTEXT', false, '2021-08-05 10:52:53.967', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 1);
+INSERT INTO "ca_meta_column" VALUES (22, false, '全文索引', '2021-02-01 10:51:21.334', 'TEXT', NULL, '全文索引', 2, 'spring_role_ftidx', NULL, 'FULLTEXT', false, '2021-08-05 10:53:53.431', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 2);
+INSERT INTO "ca_meta_column" VALUES (29, false, '全文索引', '2021-02-01 10:54:05.671', 'TEXT', NULL, '全文索引', 2, 'spring_resource_ftidx', NULL, 'FULLTEXT', false, '2021-02-05 17:52:19.036', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 3);
+INSERT INTO "ca_meta_column" VALUES (37, false, '全文索引', '2021-02-01 11:11:15.313', 'TEXT', NULL, '全文索引', 2, 'ca_userRoleLine_ftidx', NULL, 'FULLTEXT', false, '2021-02-01 11:11:15.313', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 4);
+INSERT INTO "ca_meta_column" VALUES (44, false, '全文索引', '2021-02-01 11:27:24.851', 'TEXT', NULL, '全文索引', 2, 'ca_roleResourceLine_ftidx', NULL, 'FULLTEXT', false, '2021-02-03 16:43:36.326', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 5);
+INSERT INTO "ca_meta_column" VALUES (157, false, '全文索引', '2021-02-07 11:57:10.131', 'TEXT', NULL, '全文索引', 2, 'ca_province_ftidx', NULL, 'FULLTEXT', false, '2021-02-07 15:25:57.167', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 19);
+INSERT INTO "ca_meta_column" VALUES (163, false, '全文索引', '2021-02-07 11:59:06.948', 'TEXT', NULL, '全文索引', 2, 'ca_city_ftidx', NULL, 'FULLTEXT', false, '2021-02-08 16:21:31.011', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 20);
+INSERT INTO "ca_meta_column" VALUES (178, false, '全文索引', '2021-02-07 15:25:23.718', 'TEXT', NULL, '全文索引', 2, 'ca_district_ftidx', NULL, 'FULLTEXT', false, '2021-08-05 10:38:57.087', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, true, 22);
+INSERT INTO "ca_meta_column" VALUES (194, false, '全文索引', '2021-02-08 11:09:32.062', 'TEXT', NULL, '全文索引', 2, 'ca_file_ftidx', NULL, 'FULLTEXT', false, '2021-02-09 14:33:24.642', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 24);
+INSERT INTO "ca_meta_column" VALUES (222, false, '全文索引', '2021-02-09 14:21:40.999', 'TEXT', NULL, '全文索引', 2, 'ca_folder_ftidx', NULL, 'FULLTEXT', false, '2021-02-09 14:21:40.999', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 34);
+INSERT INTO "ca_meta_column" VALUES (246, false, '全文索引', '2021-07-25 16:41:11.9', 'TEXT', NULL, '全文索引', 2, 'ca_weixinConfig_ftidx', NULL, 'FULLTEXT', false, '2021-07-25 16:41:37.922', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 37);
+INSERT INTO "ca_meta_column" VALUES (295, false, '全文索引', '2021-07-27 15:46:57.24', 'TEXT', NULL, '全文索引', 2, 'ca_smsConfig_ftidx', NULL, 'FULLTEXT', false, '2021-07-27 15:46:57.24', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 42);
+INSERT INTO "ca_meta_column" VALUES (303, false, '全文索引', '2021-07-28 10:56:47.092', 'TEXT', NULL, '全文索引', 2, 'ca_smsTemplate_ftidx', NULL, 'FULLTEXT', false, '2021-07-28 10:56:47.092', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, NULL, true, 43);
+INSERT INTO "ca_meta_column" VALUES (434, false, '全文索引', '2021-09-02 15:30:37.086', 'TEXT', NULL, '全文索引', 2, 'ca_sys_module_ftidx', NULL, 'FULLTEXT', false, '2021-09-06 17:30:59.446', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 62);
+INSERT INTO "ca_meta_column" VALUES (439, false, '全文索引', '2021-09-02 15:34:04.947', 'TEXT', NULL, '全文索引', 2, 'ca_sys_moduleLine_ftidx', NULL, 'FULLTEXT', false, '2021-09-02 15:34:04.947', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 63);
+INSERT INTO "ca_meta_column" VALUES (491, false, '全文索引', '2021-11-03 11:23:02.177', 'TEXT', NULL, '全文索引', 2, 'ca_tableFormBuilder_ftidx', NULL, 'FULLTEXT', false, '2021-11-03 11:23:02.177', NULL, 'fullTextBody', true, NULL, false, NULL, NULL, false, false, false, false, 69);
 
 CREATE TABLE "ca_meta_index" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -349,6 +347,7 @@ CREATE TABLE "spring_resource" (
 
 ALTER TABLE "spring_resource" ADD CONSTRAINT "uq_spring_resource_code" UNIQUE("code");
 ALTER TABLE "spring_resource" ADD CONSTRAINT "uq_spring_resource_url" UNIQUE("url");
+CREATE INDEX "spring_resource_ftidx" ON "spring_resource" ("fullTextBody");
 
 INSERT INTO "spring_resource" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate", "url", "remark", "code", "action") VALUES
 (12, '业务数据', '业务数据 RESOURCE_BUSINESS /api/business/** *', '2021-07-27 16:02:17', '2021-07-27 16:51:43', '/api/business/**', NULL, 'RESOURCE_BUSINESS', '*'),
@@ -382,6 +381,7 @@ ALTER TABLE "spring_user" ADD CONSTRAINT "uq_spring_user_username" UNIQUE("usern
 ALTER TABLE "spring_user" ADD CONSTRAINT "uq_spring_user_openid" UNIQUE("openId");
 ALTER TABLE "spring_user" ADD CONSTRAINT "uq_spring_user_mobile" UNIQUE("mobile");
 ALTER TABLE "spring_user" ADD CONSTRAINT "uq_spring_user_email" UNIQUE("email");
+CREATE INDEX "spring_user_ftidx" ON "spring_user" ("fullTextBody");
 
 INSERT INTO "spring_user" ("id", "openId", "username", "realname", "mobile", "email", "password", "cleartextPwd", "token", "enabled", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "createdDate", "lastModifiedDate", "name", "fullTextBody", "fileId") VALUES
 (1, NULL, 'superadmin', '超级管理员', '11111111111', NULL, '$2a$10$R9HWotqpXzmLOU0aYlFkquxcs0jq7f1raKHHnsbfT51gM9TF.2q7q', NULL, '1094a2c5e57c4c7fa3922d69b012cfa7', true, true, true, true, '2020-07-21 15:00:24', '2021-07-27 15:53:21', '超级管理员', '超级管理员 superadmin 超级管理员 11111111111 true true true true', NULL);
@@ -398,6 +398,7 @@ CREATE TABLE "spring_role" (
 );
 
 ALTER TABLE "spring_role" ADD CONSTRAINT "uq_spring_role_code" UNIQUE("code");
+CREATE INDEX "spring_role_ftidx" ON "spring_role" ("fullTextBody");
 
 INSERT INTO "spring_role" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate", "code", "remark") VALUES
 (11, '超级管理员', '超级管理员 ROLE_SUPER_ADMIN 超级管理员', '2021-02-01 13:28:37', '2021-06-07 16:50:45', 'ROLE_SUPER_ADMIN', '超级管理员'),
@@ -414,6 +415,8 @@ CREATE TABLE "ca_roleResourceLine" (
   "resourceId" bigint DEFAULT NULL
 );
 
+CREATE INDEX "ca_roleResourceLine_ftidx" ON "ca_roleResourceLine" ("fullTextBody");
+
 INSERT INTO "ca_roleResourceLine" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate", "roleId", "resourceId") VALUES
 (11, '业务数据资源', NULL, '2021-07-27 16:57:16', NULL, 20, 12),
 (12, '业务数据数字资源', NULL, '2021-07-27 16:57:16', NULL, 20, 13);
@@ -428,6 +431,8 @@ CREATE TABLE "ca_userRoleLine" (
   "roleId" bigint NOT NULL
 );
 
+CREATE INDEX "ca_userRoleLine_ftidx" ON "ca_userRoleLine" ("fullTextBody");
+
 INSERT INTO "ca_userRoleLine" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate", "userId", "roleId") VALUES
 (15, '超级管理员', NULL, '2021-07-27 15:53:21', NULL, 1, 11);
 
@@ -438,6 +443,8 @@ CREATE TABLE "ca_sys_module" (
   "createdDate" TIMESTAMP NOT NULL,
   "lastModifiedDate" TIMESTAMP DEFAULT NULL
 );
+
+CREATE INDEX "ca_sys_module_ftidx" ON "ca_sys_module" ("fullTextBody");
 
 INSERT INTO "ca_sys_module" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate") VALUES
 (1, '字典', '字典 bg-teal', '2021-09-02 16:05:41', '2021-09-03 16:51:05'),
@@ -455,6 +462,8 @@ CREATE TABLE "ca_sys_moduleLine" (
   "moduleId" bigint DEFAULT NULL,
   "tableId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_sys_moduleLine_ftidx" ON "ca_sys_moduleLine" ("fullTextBody");
+
 
 INSERT INTO "ca_sys_moduleLine" ("id", "name", "fullTextBody", "createdDate", "lastModifiedDate", "moduleId", "tableId") VALUES
 (1, '省', '省 1 19', '2021-09-02 16:05:42', '2021-09-03 16:51:05', 1, 19),
@@ -480,6 +489,7 @@ CREATE TABLE "ca_tableFormBuilder" (
   "body" text,
   "tableId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_tableFormBuilder_ftidx" ON "ca_tableFormBuilder" ("fullTextBody");
 
 
 CREATE TABLE SPRING_SESSION (
@@ -520,8 +530,8 @@ CREATE TABLE "ca_province" (
   "createdDate" TIMESTAMP NOT NULL,
   "lastModifiedDate" TIMESTAMP DEFAULT NULL,
   "code" varchar(200) DEFAULT NULL
-) ;
-
+);
+CREATE INDEX "ca_province_ftidx" ON "ca_province" ("fullTextBody");
 
 CREATE TABLE "ca_city" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -532,6 +542,7 @@ CREATE TABLE "ca_city" (
   "code" varchar(200) DEFAULT NULL,
   "provinceId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_city_ftidx" ON "ca_city" ("fullTextBody");
 
 CREATE TABLE "ca_district" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -542,6 +553,7 @@ CREATE TABLE "ca_district" (
   "code" varchar(200) DEFAULT NULL,
   "cityId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_district_ftidx" ON "ca_district" ("fullTextBody");
 
 CREATE TABLE "ca_file" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -555,6 +567,7 @@ CREATE TABLE "ca_file" (
   "url" varchar(4000) DEFAULT NULL,
   "folderId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_file_ftidx" ON "ca_file" ("fullTextBody");
 
 CREATE TABLE "ca_folder" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -563,7 +576,9 @@ CREATE TABLE "ca_folder" (
   "createdDate" TIMESTAMP NOT NULL,
   "lastModifiedDate" TIMESTAMP DEFAULT NULL,
   "parentFolderId" bigint DEFAULT NULL
-) ;
+);
+
+CREATE INDEX "ca_folder_ftidx" ON "ca_folder" ("fullTextBody");
 
 CREATE TABLE "ca_smsConfig" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -576,6 +591,7 @@ CREATE TABLE "ca_smsConfig" (
   "password" varchar(200) DEFAULT NULL
 );
 
+CREATE INDEX "ca_smsConfig_ftidx" ON "ca_smsConfig" ("fullTextBody");
 
 CREATE TABLE "ca_smsTemplate" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -587,6 +603,7 @@ CREATE TABLE "ca_smsTemplate" (
   "template" varchar(200) DEFAULT NULL,
   "smsConfigId" bigint DEFAULT NULL
 );
+CREATE INDEX "ca_smsTemplate_ftidx" ON "ca_smsTemplate" ("fullTextBody");
 
 CREATE TABLE "ca_weixinConfig" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -604,6 +621,8 @@ CREATE TABLE "ca_weixinConfig" (
   "log" text,
   "jsapiTicket" varchar(400) DEFAULT NULL
 );
+
+CREATE INDEX "ca_weixinConfig_ftidx" ON "ca_weixinConfig" ("fullTextBody");
 
 --SELECT "c"."relname" FROM "pg_class" "c" WHERE "c"."relkind" = 'S';
 SELECT setval('"ca_meta_sequence_id_seq"', 10000, true);
@@ -628,5 +647,3 @@ SELECT setval('"ca_folder_id_seq"', 10000, true);
 SELECT setval('"ca_smsConfig_id_seq"', 10000, true);
 SELECT setval('"ca_smsTemplate_id_seq"', 10000, true);
 SELECT setval('"ca_weixinConfig_id_seq"', 10000, true);
-
-
