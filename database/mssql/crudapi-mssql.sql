@@ -123,8 +123,8 @@ CREATE TABLE "ca_meta_column" (
 );
 
 ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_name" UNIQUE("tableId","name");
---ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_index_name" UNIQUE("tableId","indexName");
- 
+--ALTER TABLE "ca_meta_column" ADD CONSTRAINT "uq_bsm_column_index_name" UNIQUE("indexName");
+
 SET IDENTITY_INSERT "ca_meta_column" ON;
 INSERT INTO "ca_meta_column" ("id", "autoIncrement", "caption", "createdDate", "dataType", "defaultValue", "description", "displayOrder", "indexName", "indexStorage", "indexType", "insertable", "lastModifiedDate", "length", "name", "nullable", "precision", "queryable", "scale", "seqId", "unsigned", "updatable", "displayable", "systemable", "tableId") VALUES
 (1, 1, '编号', '2022-02-28 17:06:29', 'BIGINT', NULL, '编号', 0, NULL, NULL, 'PRIMARY', 0, '2022-02-28 17:06:29', 20, 'id', 0, NULL, 0, NULL, NULL, 1, 0, 0, 1, 1),
@@ -348,7 +348,7 @@ SET IDENTITY_INSERT "ca_meta_table_relation" OFF;
 CREATE TABLE "spring_resource" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "url" VARCHAR(200) DEFAULT NULL,
@@ -386,7 +386,7 @@ CREATE TABLE "spring_user" (
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "fileId" BIGINT DEFAULT NULL
 );
 
@@ -403,7 +403,7 @@ SET IDENTITY_INSERT "spring_user" OFF;
 CREATE TABLE "spring_role" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "code" VARCHAR(200) NOT NULL,
@@ -421,7 +421,7 @@ SET IDENTITY_INSERT "spring_role" OFF;
 CREATE TABLE "ca_roleResourceLine" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "roleId" BIGINT DEFAULT NULL,
@@ -437,7 +437,7 @@ SET IDENTITY_INSERT "ca_roleResourceLine" OFF;
 CREATE TABLE "ca_userRoleLine" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "userId" BIGINT NOT NULL,
@@ -452,7 +452,7 @@ SET IDENTITY_INSERT "ca_userRoleLine" OFF;
 CREATE TABLE "ca_sys_module" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL
 );
@@ -468,7 +468,7 @@ SET IDENTITY_INSERT "ca_sys_module" OFF;
 CREATE TABLE "ca_sys_moduleLine" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY ,
   "name" VARCHAR(200)  NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "moduleId" BIGINT DEFAULT NULL,
@@ -493,7 +493,7 @@ SET IDENTITY_INSERT "ca_sys_moduleLine" OFF;
 CREATE TABLE "ca_tableFormBuilder" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "type" VARCHAR(200) DEFAULT NULL,
@@ -536,7 +536,7 @@ CREATE TABLE "persistent_logins" (
 CREATE TABLE "ca_province" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "code" VARCHAR(200) DEFAULT NULL
@@ -546,7 +546,7 @@ CREATE TABLE "ca_province" (
 CREATE TABLE "ca_city" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "code" VARCHAR(200) DEFAULT NULL,
@@ -556,7 +556,7 @@ CREATE TABLE "ca_city" (
 CREATE TABLE "ca_district" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT ,
+  "fullTextBody" VARCHAR(1700) ,
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "code" VARCHAR(200) DEFAULT NULL,
@@ -566,7 +566,7 @@ CREATE TABLE "ca_district" (
 CREATE TABLE "ca_file" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT ,
+  "fullTextBody" VARCHAR(1700) ,
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "size" BIGINT DEFAULT NULL,
@@ -579,7 +579,7 @@ CREATE TABLE "ca_file" (
 CREATE TABLE "ca_folder" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT ,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "parentFolderId" BIGINT DEFAULT NULL
@@ -588,7 +588,7 @@ CREATE TABLE "ca_folder" (
 CREATE TABLE "ca_smsConfig" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "url" VARCHAR(200) DEFAULT NULL,
@@ -600,7 +600,7 @@ CREATE TABLE "ca_smsConfig" (
 CREATE TABLE "ca_smsTemplate" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "sign" VARCHAR(200) DEFAULT NULL,
@@ -611,7 +611,7 @@ CREATE TABLE "ca_smsTemplate" (
 CREATE TABLE "ca_weixinConfig" (
   "id" BIGINT IDENTITY(10000, 1) NOT NULL PRIMARY KEY,
   "name" VARCHAR(200) NOT NULL,
-  "fullTextBody" TEXT,
+  "fullTextBody" VARCHAR(1700),
   "createdDate" DATETIME NOT NULL,
   "lastModifiedDate" DATETIME DEFAULT NULL,
   "appId" VARCHAR(200) DEFAULT NULL,
@@ -624,3 +624,27 @@ CREATE TABLE "ca_weixinConfig" (
   "log" TEXT,
   "jsapiTicket" VARCHAR(400) DEFAULT NULL
 );
+
+UPDATE "ca_meta_column"
+SET "indexName" = (select CONCAT(t."tableName", '_ftidx')
+  from "ca_meta_table" t where t."id" = "ca_meta_column"."tableId")
+WHERE "indexType" = 'FULLTEXT'
+AND "ca_meta_column"."tableId" in (SELECT "id" FROM "ca_meta_table" where "systemable" = 1);
+
+CREATE INDEX "ca_userRoleLine_ftidx" ON "ca_userRoleLine" ("fullTextBody");
+CREATE INDEX "ca_roleResourceLine_ftidx" ON "ca_roleResourceLine" ("fullTextBody");
+CREATE INDEX "spring_role_ftidx" ON "spring_role" ("fullTextBody");
+CREATE INDEX "spring_resource_ftidx" ON "spring_resource" ("fullTextBody");
+CREATE INDEX "spring_user_ftidx" ON "spring_user" ("fullTextBody");
+CREATE INDEX "ca_weixinConfig_ftidx" ON "ca_weixinConfig" ("fullTextBody");
+CREATE INDEX "ca_smsTemplate_ftidx" ON "ca_smsTemplate" ("fullTextBody");
+CREATE INDEX "ca_smsConfig_ftidx" ON "ca_smsConfig" ("fullTextBody");
+CREATE INDEX "ca_folder_ftidx" ON "ca_folder" ("fullTextBody");
+CREATE INDEX "ca_file_ftidx" ON "ca_file" ("fullTextBody");
+CREATE INDEX "ca_district_ftidx" ON "ca_district" ("fullTextBody");
+CREATE INDEX "ca_city_ftidx" ON "ca_city" ("fullTextBody");
+CREATE INDEX "ca_province_ftidx" ON "ca_province" ("fullTextBody");
+CREATE INDEX "ca_tableFormBuilder_ftidx" ON "ca_tableFormBuilder" ("fullTextBody");
+CREATE INDEX "ca_sys_moduleLine_ftidx" ON "ca_sys_moduleLine" ("fullTextBody");
+CREATE INDEX "ca_sys_module_ftidx" ON "ca_sys_module" ("fullTextBody");
+
