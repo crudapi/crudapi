@@ -353,6 +353,40 @@ public abstract class CrudAbstractRepository {
         return sql;
     }
 	
+	public String toGetForUpdateSql(String tableName, List<String> selectNameList, List<String> keyColumnNames) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT {0} FROM {1}");
+        
+        List<String> nameList = new ArrayList<String>();
+        selectNameList.stream().forEach(t -> {
+            nameList.add(toSqlName(t));
+        });
+        String columnNames = String.join(",", selectNameList);
+
+        List<Object> argumentList = new ArrayList<Object>();
+        argumentList.add(columnNames);
+        argumentList.add(toSqlName(tableName));
+        
+        if (keyColumnNames != null && keyColumnNames.size() > 0) {
+        	sb.append(" WHERE {2}");
+        	List<String> whereNameAndValuesList = new ArrayList<String>();
+        	keyColumnNames.stream().forEach(t -> {
+        		whereNameAndValuesList.add(toSqlName(t) + "=:" + t);
+        	});
+        	String whereNameAndValues = String.join(" AND ", whereNameAndValuesList);
+
+        	argumentList.add(whereNameAndValues);
+        }
+        
+        sb.append(" FOR UPDATE");
+        String pattern = sb.toString();
+        Object[] arguments = argumentList.toArray();
+
+        String sql = MessageFormat.format(pattern, arguments);
+
+        return sql;
+    }
+	
 	public String toGetSql(String tableName, List<String> keyColumnNames) {
 		List<String> selectNameList = new ArrayList<String>();
 		selectNameList.add("*");
@@ -363,6 +397,18 @@ public abstract class CrudAbstractRepository {
 		List<String> keyColumnNames = new ArrayList<String>();
 		keyColumnNames.add(keyColumnName);
 		return toGetSql(tableName, keyColumnNames);
+    }
+	
+	public String toGetForUpdateSql(String tableName, List<String> keyColumnNames) {
+		List<String> selectNameList = new ArrayList<String>();
+		selectNameList.add("*");
+		return toGetForUpdateSql(tableName, selectNameList, keyColumnNames);
+    }
+	
+	public String toGetForUpdateSql(String tableName, String keyColumnName) {
+		List<String> keyColumnNames = new ArrayList<String>();
+		keyColumnNames.add(keyColumnName);
+		return toGetForUpdateSql(tableName, keyColumnNames);
     }
 	
 	//get list sql
@@ -653,6 +699,10 @@ public abstract class CrudAbstractRepository {
 	
 	public Map<String, Object> get(String tableName, Long id) {
 		return this.getForMap(tableName, id);
+	}
+	
+	public Map<String, Object> getForUpdate(String tableName, Long id) {
+		return this.getForUpdateMap(tableName, id);
 	}
 	
 	public <T> T get(String tableName, Map<String, Object> keyMap, Class<T> classType) {
@@ -1087,6 +1137,24 @@ public abstract class CrudAbstractRepository {
 	private Map<String, Object> getForMap(String tableName, Long id) {
 		Map<String, Object> keyMap = convertToKeyMap(id);
 		return this.getForMap(tableName, keyMap);
+	}
+	
+	private Map<String, Object> getForUpdateMap(String tableName, Map<String, Object> keyMap) {
+		List<String> primaryNameList = this.convertToPrimaryNameList(keyMap);
+		
+		String sql = toGetForUpdateSql(tableName, primaryNameList);
+		log.info("CrudAbstractRepository->getForUpdateMap {}", sql);
+		
+		Map<String, Object> objMap = this.queryForMap(sql, keyMap);
+		
+		log.info("CrudAbstractRepository->getForUpdateMap->{}", objMap);
+
+        return objMap;
+	}
+	
+	private Map<String, Object> getForUpdateMap(String tableName, Long id) {
+		Map<String, Object> keyMap = convertToKeyMap(id);
+		return this.getForUpdateMap(tableName, keyMap);
 	}
 
 	private <T> T getForObject(String tableName, Map<String, Object> keyMap, Class<T> classType) {

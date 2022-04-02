@@ -232,6 +232,12 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
+	public Map<String, Object> getForUpdate(String tableName, Long id) {
+		log.debug("CrudServiceImpl->getForUpdate");
+		return crudTemplate.getForUpdate(tableName, id);
+	}
+	
+	@Override
 	public <T> T get(String tableName, Map<String, Object> keyMap, Class<T> classType) {
 		log.debug("CrudServiceImpl->get");
 		return crudTemplate.get(tableName, keyMap, classType);

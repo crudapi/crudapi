@@ -83,6 +83,8 @@ public interface CrudService {
 	
 	Map<String, Object> get(String tableName, Long id);
 	
+	Map<String, Object> getForUpdate(String tableName, Long id);
+	
 	<T> T get(String tableName, Map<String, Object> keyMap, Class<T> classType);
 	
 	<T> T get(String tableName, Long id, Class<T> classType);

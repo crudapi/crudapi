@@ -226,6 +226,12 @@ public abstract class CrudAbstractFactory {
 		return repository.get(tableName, id);
 	}
 	
+	public Map<String, Object> getForUpdate(String tableName, Long id) {
+		log.debug("CrudAbstractFactory->getForUpdate");
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.getForUpdate(tableName, id);
+	}
+	
 	public <T> T get(String tableName, Map<String, Object> keyMap, Class<T> classType) {
 		log.debug("CrudAbstractFactory->get");
 		CrudAbstractRepository repository = this.getCrudRepository();

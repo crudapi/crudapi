@@ -206,6 +206,12 @@ public class CrudTemplate {
 		return crudFactory.get(tableName, id);
 	}
 	
+	public Map<String, Object> getForUpdate(String tableName, Long id) {
+		log.debug("CrudTemplate->getForUpdate");
+		return crudFactory.getForUpdate(tableName, id);
+	}
+	
+	
 	public <T> T get(String tableName, Map<String, Object> keyMap, Class<T> classType) {
 		log.debug("CrudTemplate->get");
 		return crudFactory.get(tableName, keyMap, classType);

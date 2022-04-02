@@ -3,6 +3,7 @@ package cn.crudapi.core.service.impl;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,17 +77,13 @@ public class SequenceServiceImpl implements SequenceService {
 		JdbcTemplate jdbcTemplate = crudService.getJdbcTemplate();
 		Connection conn = null;
 		List<Object> retValueList = new ArrayList<Object>();
-		String dataBaseTableName = SEQUENCE_TABLE_NAME;
 
 		try {
 			conn = jdbcTemplate.getDataSource().getConnection();
 			conn.setAutoCommit(false);
-				
-			StringBuilder sb = new StringBuilder("SELECT * FROM `");
-			sb.append(dataBaseTableName);
-			sb.append("` WHERE `id` = ? FOR UPDATE");
-
-			Map<String, Object> seqMap = jdbcTemplate.queryForMap(sb.toString(), sequenceId);
+		
+			Map<String, Object> seqMap = crudService.getForUpdate(SEQUENCE_TABLE_NAME, sequenceId);
+					
 			Boolean currentTime = Boolean.valueOf(String.valueOf(seqMap.get("currentTime")));
 			SequenceTypeEnum sequenceType = SequenceTypeEnum.valueOf(String.valueOf(seqMap.get("sequenceType")));
 			Object fromatObj = seqMap.get("format");
@@ -126,19 +123,11 @@ public class SequenceServiceImpl implements SequenceService {
 						retValueList.add(retValue);
 						nextValue += incrementBy;
 					}
+					
+					Map<String, Object> dataMap = new HashMap<String, Object>();
+					dataMap.put("nextValue", nextValue);
 
-					sb = new StringBuilder("UPDATE `");
-					sb.append(dataBaseTableName);
-					sb.append("` SET `");
-					sb.append("nextValue");
-					sb.append("` = ? WHERE `id` = ?");
-
-					int row = jdbcTemplate.update(sb.toString(), nextValue, sequenceId);
-
-					log.info("row = " +  row);
-			        if (row == 0) {
-			        	throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, sequenceId);
-			        }
+					crudService.patch(SEQUENCE_TABLE_NAME, sequenceId, dataMap);
 				}
 			}
 			
