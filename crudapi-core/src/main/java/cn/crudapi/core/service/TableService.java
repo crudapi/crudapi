@@ -33,7 +33,7 @@ public interface TableService {
 
 	String getImportTemplate(String name, String type);
 	
-	String exportData(String name, String type);
+	String exportData(String name, String type, String filter, String search, Condition condition);
 
 	List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand);
 

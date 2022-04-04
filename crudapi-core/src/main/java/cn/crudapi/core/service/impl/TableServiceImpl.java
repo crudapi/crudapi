@@ -250,7 +250,7 @@ public class TableServiceImpl implements TableService {
 	
 
 	@Override
-	public String exportData(String name, String type) {
+	public String exportData(String name, String type, String filter, String search, Condition condition) {
 		String fileName = null;
 		try {
 			if (StringUtils.isEmpty(type)) {
@@ -280,7 +280,7 @@ public class TableServiceImpl implements TableService {
 	        }
 	        
 	        int rowIndex = 1;
-	        List<Map<String, Object>> mapList = list(name, null, null, null, null, null, 0, 999999, null);
+	        List<Map<String, Object>> mapList = listMain(name, null, null, filter, search, condition, null, null, null);
 	        for (Map<String, Object> map : mapList) {
 	        	 Row dataRow = sheet.createRow(rowIndex++);
 	        	 
