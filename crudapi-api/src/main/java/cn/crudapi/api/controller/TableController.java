@@ -178,11 +178,11 @@ public class TableController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 
-	@ApiOperation(value="清空表")
-	@DeleteMapping(value = "")
-	public ResponseEntity<Void> deleteAll(@RequestBody List<String> nameList) {
-		tableService.deleteAll(nameList);
-
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
+//	@ApiOperation(value="清空表")
+//	@DeleteMapping(value = "")
+//	public ResponseEntity<Void> deleteAll(@RequestBody List<String> nameList) {
+//		tableService.deleteAll(nameList);
+//
+//		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+//	}
 }

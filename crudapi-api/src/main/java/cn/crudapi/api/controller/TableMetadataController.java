@@ -201,7 +201,8 @@ public class TableMetadataController {
 	public ResponseEntity<Void> batchDelete(@RequestBody(required = false) List<Long> idList,
 			@RequestParam(value = "isDropPhysicalTable", required = false) Boolean isDropPhysicalTable) {
 		if (idList == null) {
-			tableMetadataService.deleteAll(isDropPhysicalTable);
+			//tableMetadataService.deleteAll(isDropPhysicalTable);
+			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, "表ID不能为空");
 		} else if (idList.size() == 0) {
 			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, "至少选择一个");
 		} else {
