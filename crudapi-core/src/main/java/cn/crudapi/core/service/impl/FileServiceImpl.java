@@ -70,7 +70,8 @@ public class FileServiceImpl implements FileService {
 
 		    fileInfo.put("size", size);
 		    fileInfo.put("name", fileName);
-		    fileInfo.put("url", getFullUrl(fileName));
+		    fileInfo.put("fullUrl", getFullUrl(fileName));
+		    fileInfo.put("url", getUrl(fileName));
 		    fileInfo.put("isFinished", false);
 		    
 	        FileUtils.writeWithBlok(getUploadFullPath(fileName), size, file.getInputStream(), file.getSize(), chunks, chunk);
@@ -118,7 +119,8 @@ public class FileServiceImpl implements FileService {
 	        dest.getParentFile().mkdir();
 	    }
 	    
-	    fileInfo.put("url", getFullUrl(fileName));
+	    fileInfo.put("fullUrl", getFullUrl(fileName));
+	    fileInfo.put("url", getUrl(fileName));
 	    
 	    try {
 	    	file.transferTo(dest); //保存文件
@@ -185,7 +187,7 @@ public class FileServiceImpl implements FileService {
             	}
             	
             	String fileName = tmpFile.getName();
-            	String url = getFullUrl(fileName);
+            	String url = getUrl(fileName);
             	Condition cond = ConditionUtils.toCondition("url", url);
             	Long count = tableService.count("file", null, null, cond);
             	if (count.longValue() == 0) {
@@ -228,6 +230,11 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public String getFullUrl(String fileName) {
 		return ossUploadDomain + "/" + ossUploadPath + "/" + fileName;
+    }
+	
+	@Override
+	public String getUrl(String fileName) {
+		return "/" + ossUploadPath + "/" + fileName;
     }
 	
 	private String getFileExt(String filename) {

@@ -76,7 +76,7 @@ public class TableController {
 	@GetMapping(value = "/{name}/import/template")
     public ResponseEntity<String> getImportTemplate(@PathVariable("name") String name) {
 		String fileName = tableService.getImportTemplate(name, null);
-		String url = fileService.getFullUrl(fileName);
+		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
     
@@ -90,7 +90,7 @@ public class TableController {
     	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
     	
    		String fileName = tableService.exportData(name, null, filter, search, condition);
-   		String url = fileService.getFullUrl(fileName);
+   		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
        
