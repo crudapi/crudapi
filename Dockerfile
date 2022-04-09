@@ -22,13 +22,13 @@ RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml &&
     tail mvnlog.txt && \
     rm -rf mvnlog.txt && \
     version=`awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' pom.xml` && \
-    mkdir -p /crudapi/dist/pro/$version && \
+    mkdir -p /crudapi/dist/crudapi/$version && \
     rm -rf /crudapi/crudapi-core/target/*proguard* && \
-    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/pro/$version && \
+    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/crudapi/$version && \
+    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/crudapi/$version && \
+    cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/crudapi/$version && \
+    cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/crudapi/$version && \
+    cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/crudapi/$version && \
     cp /crudapi/crudapi-service/target/*.jar /crudapi
 
 FROM openjdk:8-jdk-alpine
