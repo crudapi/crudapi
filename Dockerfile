@@ -29,23 +29,7 @@ RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml &&
     cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/pro/$version && \
     cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/pro/$version && \
-    cp /crudapi/crudapi-service/target/*.jar /crudapi && \
-    cp /crudapi/config/free/MetaDataConfig.java /crudapi/crudapi-core/src/main/java/cn/crudapi/core/constant/MetaDataConfig.java  && \
-    mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
-    tail mvnlog.txt && \
-    rm -rf mvnlog.txt && \
-    mkdir -p /crudapi/dist/free/$version && \
-    rm -rf /crudapi/crudapi-core/target/*proguard* && \
-    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/free/$version && \
-    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/free/$version && \
-    cp /crudapi/config/plus/MetaDataConfig.java /crudapi/crudapi-core/src/main/java/cn/crudapi/core/constant/MetaDataConfig.java  && \
-    mvn package -Dmaven.test.skip=true -s settings.xml > mvnlog.txt && \
-    tail mvnlog.txt && \
-    rm -rf mvnlog.txt && \
-    mkdir -p /crudapi/dist/plus/$version && \
-    rm -rf /crudapi/crudapi-core/target/*proguard* && \
-    cp /crudapi/crudapi-core/target/*.jar /crudapi/dist/plus/$version && \
-    cp /crudapi/crudapi-api/target/*.jar /crudapi/dist/plus/$version
+    cp /crudapi/crudapi-service/target/*.jar /crudapi
 
 FROM openjdk:8-jdk-alpine
 
