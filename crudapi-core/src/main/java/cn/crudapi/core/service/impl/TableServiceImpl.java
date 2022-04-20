@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -172,9 +173,6 @@ public class TableServiceImpl implements TableService {
                 		columnCaptionList.add(columnCaption);
                 		log.info(columnCaption);
                 	} else {
-                		Object colValue = sheet.getRow(row).getCell(col);
-                		String value = (colValue != null) ? colValue.toString() : null;
-                		
                 		String caption = columnCaptionList.get(col);
                 		ColumnDTO columnDTO = tableDTO.getColumnDTOList()
                 		.stream()
@@ -182,10 +180,37 @@ public class TableServiceImpl implements TableService {
                 		.findFirst().get();
                 		String key = columnDTO.getName();
                 		
-                		if (caption.equalsIgnoreCase("名称")) {
-                			map.put("name", value);
+                		Cell cell = sheet.getRow(row).getCell(col);
+                		String cellStr = getString(cell);
+                		Object newObj = cellStr;
+                		if (cellStr != null && !cellStr.toString().isEmpty()) {
+                			if (columnDTO.getDataType().equals(DataTypeEnum.BIGINT)) {
+                    			newObj = getLong(cell);
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.INT)) {
+                    			newObj = getInteger(cell);
+                    		}  else if (columnDTO.getDataType().equals(DataTypeEnum.TINYINT)) {
+                    			newObj = getInteger(cell);
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DOUBLE)) {
+                    			newObj = getDouble(cell);
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.FLOAT)) {
+                    			newObj = getFloat(cell);
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DECIMAL)) {
+                    			newObj = getBigDecimal(cell);
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
+                    			newObj = encodePassword(cellStr);
+                            } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
+                    			newObj = new Timestamp(getDate(cell));
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
+                    			newObj = new Date(getDate(cell));
+                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
+                    			newObj = new Time(getDate(cell));
+                    		}
                 		}
-            			map.put(key, value);
+                		
+                		if (caption.equalsIgnoreCase("名称")) {
+                			map.put("name", newObj);
+                		}
+            			map.put(key, newObj);
                 	}
                 }
                
@@ -442,6 +467,106 @@ public class TableServiceImpl implements TableService {
         }
     }
     
+    private String getStringByToString(Cell cell) {
+		Object obj = cell;
+		String objStr = null;
+		if (obj != null) {
+			objStr = obj.toString().replace((char) 12288, ' ').trim();
+			objStr = objStr.replace(" ", "");
+		}
+		
+		return objStr;
+	}
+    
+    private String getString(Cell cell) {
+    	String value = null;
+		try {
+			cell.setCellType(CellType.STRING);
+			value = cell.getStringCellValue();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private BigDecimal getBigDecimal(Cell cell) {
+		Object obj = cell;
+		BigDecimal decimal = null;
+		String objStr = null;
+		try {
+			if (obj != null) {
+				objStr = obj.toString().replace((char) 12288, ' ').trim();
+				if (!objStr.isEmpty()) {
+					decimal = new BigDecimal(objStr);
+				}
+			}
+		} catch (Exception e) {
+			log.info(objStr);
+		}
+		
+		return decimal;
+	}
+	
+	private Integer getInteger(Cell cell) {
+		Integer value = null;
+		try {
+			Double obj = cell.getNumericCellValue();
+			value = obj.intValue();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private Long getLong(Cell cell) {
+		Long value = null;
+		try {
+			Double obj = cell.getNumericCellValue();
+			value = obj.longValue();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private Double getDouble(Cell cell) {
+		Double value = null;
+		try {
+			value = cell.getNumericCellValue();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private Float getFloat(Cell cell) {
+		Float value = null;
+		try {
+			Double obj = cell.getNumericCellValue();
+			value = obj.floatValue();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private Long getDate(Cell cell) {
+		Long value = null;
+		try {
+			java.util.Date date  = cell.getDateCellValue();
+			value = date.getTime();
+		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
     private String convertToId(TableDTO tableDTO, Map<String, Object> recId) {
     	List<String> primaryNameList = tableDTO.getPrimaryNameList();
         if (primaryNameList.size() == 1) {

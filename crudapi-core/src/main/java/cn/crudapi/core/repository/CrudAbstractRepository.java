@@ -241,6 +241,31 @@ public abstract class CrudAbstractRepository {
         return sql;
     }
 	
+	public String toBatchInserSql(String tableName, List<String> columnNameList, String action) {
+        StringBuilder sb = new StringBuilder();
+        if (action == null) {
+        	sb.append("INSERT INTO {0}({1}) VALUES({2})");
+        } else {
+        	sb.append("REPLACE INTO {0}({1}) VALUES({2})");
+        }
+        
+        List<String> nameList = new ArrayList<String>();
+        List<String> valueList = new ArrayList<String>();
+        columnNameList.stream().forEach(t -> {
+            nameList.add(toSqlName(t));
+            valueList.add(toSqlValue(t));
+        });
+        String columnNames = String.join(",", nameList);
+        String columnValues = String.join(",", valueList);
+
+        String pattern = sb.toString();
+        Object[] arguments = { toSqlName(tableName), columnNames, columnValues };
+
+        String sql = MessageFormat.format(pattern, arguments);
+
+        return sql;
+    }
+	
 	public String toUpdateSql(String tableName, List<String> columnNameList, String keyColumnName) {
 		List<String> keyColumnNames = new ArrayList<String>();
 		keyColumnNames.add(keyColumnName);
@@ -1046,7 +1071,7 @@ public abstract class CrudAbstractRepository {
 			columnNameList.add(key);
         }
 		
-		String sql = toInserSql(tableName, columnNameList);
+		String sql = toBatchInserSql(tableName, columnNameList, "REPLACE");
 		
 		log.info("CrudAbstractRepository->batchInsert {}", sql);
 		
