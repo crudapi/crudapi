@@ -141,7 +141,8 @@ public class FileServiceImpl implements FileService {
 			log.info("delete " +  dest.getAbsolutePath());
 			boolean ret = FileSystemUtils.deleteRecursively(dest);
 			if (!ret) {
-				throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "删除失败，可能文件不存在！");
+				log.warn("删除失败，可能文件不存在！");
+				//throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "删除失败，可能文件不存在！");
 			}
 		} catch (Exception e) {
 	        e.printStackTrace();

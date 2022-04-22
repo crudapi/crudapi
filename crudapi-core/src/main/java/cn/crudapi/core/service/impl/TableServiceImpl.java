@@ -511,6 +511,7 @@ public class TableServiceImpl implements TableService {
 	private Integer getInteger(Cell cell) {
 		Integer value = null;
 		try {
+			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.intValue();
 		} catch (Exception e) {
@@ -523,6 +524,7 @@ public class TableServiceImpl implements TableService {
 	private Long getLong(Cell cell) {
 		Long value = null;
 		try {
+			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.longValue();
 		} catch (Exception e) {
@@ -535,6 +537,7 @@ public class TableServiceImpl implements TableService {
 	private Double getDouble(Cell cell) {
 		Double value = null;
 		try {
+			cell.setCellType(CellType.NUMERIC);
 			value = cell.getNumericCellValue();
 		} catch (Exception e) {
 			log.info(e.getMessage());
@@ -546,6 +549,7 @@ public class TableServiceImpl implements TableService {
 	private Float getFloat(Cell cell) {
 		Float value = null;
 		try {
+			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.floatValue();
 		} catch (Exception e) {
