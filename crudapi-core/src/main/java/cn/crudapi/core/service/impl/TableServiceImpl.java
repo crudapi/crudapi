@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,6 +46,8 @@ import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.enumeration.TableRelationTypeEnum;
 import cn.crudapi.core.event.BusinessEvent;
 import cn.crudapi.core.exception.BusinessException;
+import cn.crudapi.core.model.QueryData;
+import cn.crudapi.core.model.QueryModel;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
@@ -402,27 +405,317 @@ public class TableServiceImpl implements TableService {
         return maplist;
     }
     
+    private List<Object> getValuesByColumnName(List<Map<String, Object>> mapList, String columnName) {
+    	 List<Object> values = new ArrayList<>();
+    	 for (Map<String, Object> map : mapList) {
+         	Object value = map.get(columnName);
+         	if (value != null) {
+         		values.add(value);
+         	}
+         }
+    	 
+    	 return values.stream().distinct().collect(Collectors.toList());
+    	 
+    	 //return values;
+    }
+    
+    private List<Map<String, Object>> getListDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
+    	 List<Map<String, Object>> filterMapList = new ArrayList<Map<String, Object>>();
+    	 for (Map<String, Object> t : mapList) {
+    		Object oldValue = t.get(columnName);
+          	if (oldValue != null && oldValue.toString().equals(value.toString())) {
+          		filterMapList.add(t);
+          	}
+         }
+    	 
+    	 return filterMapList;
+    }
+    
+    private List<Map<String, Object>> getListDataByColumnName(List<Map<String, Object>> mapList, String columnName, List<Object> values) {
+   	 	List<Map<String, Object>> filterMapList = new ArrayList<Map<String, Object>>();
+   	 	for (Map<String, Object> t : mapList) {
+	   	 	Object oldValue = t.get(columnName);
+	     	if (oldValue != null
+	     		&& values.stream().anyMatch(v -> oldValue.toString().equals(v.toString()))) {
+	     		filterMapList.add(t);
+	     	}
+        }
+   	 
+   	 	return filterMapList;
+    }
+    
+    private Map<String, Object> getOneDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
+   	  for (Map<String, Object> t : mapList) {
+   		Object oldValue = t.get(columnName);
+     	if (oldValue != null && oldValue.toString().equals(value.toString())) {
+     		return t;
+     	}
+      }
+   	 
+   	  return null;
+    }
+    
+    private List<Object> getRightValues (List<Object> allValues, List<Object> joinValues) {
+    	 List<Object> rightValues = new ArrayList<>();
+    	 for (Object t : allValues) {
+    		 if (!joinValues.stream().anyMatch( v -> t.toString().equals(v.toString()))) {
+    			 rightValues.add(t);
+    		 }
+         }
+    	 
+    	 return rightValues;
+    }
+    
+    private List<String> getMainSelectAndSubSelectMap(List<String> selectList, Map<String, List<String>> subSelectMap) {
+    	List<String> mainSelectList = new ArrayList<String>();
+        if (!CollectionUtils.isEmpty(selectList)) {
+     	   for (String t : selectList) {
+            	if (t.contains(".")) {
+            		String key = getSubExpandKey(t);
+            		String value = getSubExpandValue(t);
+            		List<String> subSelectList = null;
+            		if (subSelectMap.get(key) == null) {
+            			subSelectList = new ArrayList<String>();
+            			subSelectList.add(value);
+            			subSelectMap.put(key, subSelectList);
+            			mainSelectList.add(key);
+            		} else {
+            			subSelectList = subSelectMap.get(key);
+            			subSelectList.add(value);
+            		}
+            	} else {
+            		mainSelectList.add(t);
+            	}
+            }
+        }
+        
+        return mainSelectList.stream().distinct().collect(Collectors.toList());
+    }
+    
+    private void supplementFkColumnName(List<TableRelationDTO> tableRelationDTOList, List<String> mainSelectList) {
+    	if (!CollectionUtils.isEmpty(mainSelectList)) {
+  		  for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+  		      String relationName = tableRelationDTO.getName();
 
-    @Override
+  		      if (mainSelectList.contains(relationName)
+  		    		  && (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
+  		    		  || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain)) {
+  		          String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+  		          mainSelectList.add(fkColumnName);
+  		      }
+  		  }
+        }
+    }
+   
+	@Override
     public List<Map<String, Object>> list(String name, String select, String expand, String filter,
     		String search, Condition condition, Integer offset, Integer limit, String orderby) {
-        TableDTO tableDTO = tableMetadataService.get(name);
-      
-        List<Map<String, Object>> maplist = new ArrayList<Map<String, Object>>();
-
-      	List<String> selectColumnNameList = convertSelect(select);
+        TableDTO mainTableDTO = tableMetadataService.get(name);
+        
+		Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
+		
+    	Stack<QueryData> tableQueryDataStack = new Stack<QueryData>();
+    	
+    	//解析select and expand
+    	List<String> selectList = convertSelect(select);
     	List<String> expandList = convertExpand(expand);
+        Map<String, List<String>> subSelectMap = new HashMap<String, List<String>>();
+        List<String> mainSelectList = getMainSelectAndSubSelectMap(selectList, subSelectMap);
+        
+        supplementFkColumnName(tableRelationService.getFromTable(mainTableDTO.getId()), mainSelectList);
+        
+    	//主表查询参数
+        QueryModel mainTableQueryModel = new QueryModel();
+        Condition newCondition = convertConditon(mainTableDTO, filter, search, condition);
+        mainTableQueryModel.setTableDTO(mainTableDTO);
+        mainTableQueryModel.setSelectList(mainSelectList);
+        mainTableQueryModel.setCondition(newCondition);
+        mainTableQueryModel.setOffset(offset);
+        mainTableQueryModel.setLimit(limit);
+        mainTableQueryModel.setOrderby(orderby);
 
-    	Condition newCond = convertConditon(tableDTO, filter, search, condition);
-
-    	List<Map<String, Object>> recIdList = queryIds(tableDTO.getTableName(), tableDTO.toDataTypeMap(), tableDTO.getPrimaryNameList(), newCond, offset, limit, orderby);
-        for (Map<String, Object> recId : recIdList) {
-            log.info("list->recId = " + recId);
-            Map<String, Object> map = selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
-            maplist.add(map);
+        //主表数据
+    	List<Map<String, Object>> mainTableDataMapList = queryForList(mainTableQueryModel);
+       
+    	//主表入栈
+    	QueryData mainTableQueryData = new QueryData();
+    	mainTableQueryData.setTableDTO(mainTableDTO);
+    	mainTableQueryData.setSelectList(mainSelectList);
+    	mainTableQueryData.setSubSelectMap(subSelectMap);
+    	mainTableQueryData.setTableDataMapList(mainTableDataMapList);
+    	tableQueryDataStack.push(mainTableQueryData);
+      
+        //遍历栈
+        while (!tableQueryDataStack.isEmpty()) {
+        	//top出栈
+        	QueryData topTableQueryData = tableQueryDataStack.pop();
+        	TableDTO topTableDTO = topTableQueryData.getTableDTO();
+        	log.info("************visit stack top: " + topTableDTO.getName());
+        	
+        	Long topTableId = topTableDTO.getId();
+        	
+        	List<Map<String, Object>> topMapList = topTableQueryData.getTableDataMapList();
+        	
+        	List<String> topSelectList = topTableQueryData.getSelectList();
+        	Map<String, List<String>> topSubSelectMap = topTableQueryData.getSubSelectMap();
+        	
+    		//查询关联表
+        	List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(topTableId);
+            for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            	String relationName = tableRelationDTO.getName();
+                
+            	//select 过滤
+                if (!CollectionUtils.isEmpty(topSelectList) && !topSelectList.contains(relationName)) {
+                	continue;
+                }
+                
+                //关联表入栈
+                Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+                TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+                
+                QueryModel relationQueryModel = new QueryModel();
+                relationQueryModel.setTableDTO(relationTableDTO);
+                
+                if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany
+                	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneMainToSub) {
+                	String pkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                    String fkColumnName = tableRelationDTO.getToColumnDTO().getName();
+                    
+                    List<String> relationSelectList = topSubSelectMap.get(relationName);
+                    
+                    Map<String, List<String>> relationSubSelectMap = new HashMap<String, List<String>>();
+                    List<String> relationMainSelectList = getMainSelectAndSubSelectMap(relationSelectList, relationSubSelectMap);
+                    supplementFkColumnName(tableRelationService.getFromTable(relationTableId), relationMainSelectList);
+                    
+                    QueryData relationQueryData = new QueryData();
+                    relationQueryData.setTableDTO(relationTableDTO);
+                    relationQueryData.setSubSelectMap(relationSubSelectMap);
+                    
+                    //关联字段需要查询
+                    if (!CollectionUtils.isEmpty(relationMainSelectList) && !relationMainSelectList.contains(relationName)) {
+                    	relationMainSelectList.add(fkColumnName);
+                    }
+                    
+                    relationQueryData.setSelectList(relationMainSelectList);
+                    relationQueryModel.setSelectList(relationMainSelectList);
+                    
+                    Condition relationCondition = ConditionUtils.toCondition(fkColumnName, 
+                    		getValuesByColumnName(topMapList, pkColumnName));
+                    relationQueryModel.setCondition(relationCondition);
+                    
+                    List<Map<String, Object>> relationTableDataMapList = new ArrayList<Map<String, Object>>();
+                    if (relationCondition != null) {
+                    	relationTableDataMapList = queryForList(relationQueryModel);
+                    }
+                    
+                    //更新主表关联字段
+                    for (Map<String, Object> topMap : topMapList) {
+                    	Object value = topMap.get(pkColumnName);
+                     	if (value != null) {
+                     		 if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToMany) {
+                         		List<Map<String, Object>> subRelationTableDataMapList = 
+                         				getListDataByColumnName(relationTableDataMapList, fkColumnName, value);
+                         		 
+                     			topMap.put(relationName, subRelationTableDataMapList);
+                     		 } else {
+                     			Map<String, Object> subRelationTableDataMap = 
+                         				getOneDataByColumnName(relationTableDataMapList, fkColumnName, value);
+                     			
+                     			topMap.put(relationName, subRelationTableDataMap);
+                     		 }
+                     	}
+                    }
+                    
+                    relationQueryData.setTableDataMapList(relationTableDataMapList);
+                    
+                    tableQueryDataStack.push(relationQueryData);
+                } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
+                	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+                     String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+                	 String pkColumnName = tableRelationDTO.getToColumnDTO().getName();
+                	 String relatiobTableName = relationTableDTO.getName();
+                	 
+                	 List<String> relationMainSelectList = new ArrayList<String>();
+                	 
+                	 if (CollectionUtils.isEmpty(expandList) || !expandList.contains(relatiobTableName)) {
+                		 relationMainSelectList.addAll(relationTableDTO.getPrimaryNameList());
+                    	 relationMainSelectList.add(pkColumnName);
+                         for (ColumnDTO t : relationTableDTO.getColumnDTOList()) {
+                         	if (t.getDisplayable()) {
+                         		relationMainSelectList.add(t.getName());
+                         	}
+                         }
+                	 }
+                	 
+                     
+                     relationMainSelectList = relationMainSelectList.stream().distinct().collect(Collectors.toList());
+                     relationQueryModel.setSelectList(relationMainSelectList);
+                	 
+                     
+                     
+                	 //字典表主键
+                	 List<Object> values = getValuesByColumnName(topMapList, fkColumnName);
+                	 log.info(relatiobTableName + " values" + values.toString());
+                	 
+                     List<Map<String, Object>> relationTableDataMapList = null;
+                     
+                     //查询旧的字典表数据
+                     List<Map<String, Object>> relationTableCacheMapList = dicTableDataCacheMap.get(relatiobTableName);
+                     
+                     if (relationTableCacheMapList == null) {
+                    	 Condition relationCondition = ConditionUtils.toCondition(pkColumnName, values);
+                         relationQueryModel.setCondition(relationCondition);
+                         
+                    	 relationTableDataMapList = new ArrayList<Map<String, Object>>();
+                         if (relationCondition != null) {
+                        	 relationTableDataMapList = queryForList(relationQueryModel);
+                        	 
+                        	 //缓存dic
+                             dicTableDataCacheMap.put(relatiobTableName, relationTableDataMapList);
+                         }
+                     } else {
+                    	 log.info(relatiobTableName + " use cache!");
+                    	 List<Object> cacheValues = getValuesByColumnName(relationTableCacheMapList, pkColumnName);
+                    	 log.info(relatiobTableName + " cacheValues" + cacheValues.toString());
+                    	 
+                    	 List<Map<String, Object>> joinRelationTableDataMapList = getListDataByColumnName(relationTableCacheMapList, pkColumnName, values);
+                    	 
+                    	 List<Object> joinValues = getValuesByColumnName(joinRelationTableDataMapList, pkColumnName);
+                    	 log.info(relatiobTableName + " joinValues" + joinValues.toString());
+                    	 
+                    	 List<Object> rightValues = getRightValues(values, joinValues);
+                    	 log.info(relatiobTableName + " rightValues" + rightValues.toString());
+                    	 
+                    	 Condition relationCondition = ConditionUtils.toCondition(pkColumnName, rightValues);
+                         relationQueryModel.setCondition(relationCondition);
+                         
+                         List<Map<String, Object>> rightRelationTableDataMapList = new ArrayList<Map<String, Object>>();
+                         if (relationCondition != null) {
+                        	 rightRelationTableDataMapList = queryForList(relationQueryModel);
+                         }
+                        
+                         relationTableCacheMapList.addAll(rightRelationTableDataMapList);
+                         
+                         joinRelationTableDataMapList.addAll(rightRelationTableDataMapList);
+                         
+                         relationTableDataMapList = joinRelationTableDataMapList;
+                     }
+                     
+                     //更新主表关联字段
+                     for (Map<String, Object> topMap : topMapList) {
+                     	Object value = topMap.get(fkColumnName);
+                      	if (value != null) {
+                      		Map<String, Object> subRelationTableDataMap = 
+                     				getOneDataByColumnName(relationTableDataMapList, pkColumnName, value);
+                 			
+                 			topMap.put(relationName, subRelationTableDataMap);
+                      	}
+                     }
+                }
+            }
         }
-
-        return maplist;
+        
+        return mainTableDataMapList;
     }
     
 	@Override
@@ -1154,6 +1447,7 @@ public class TableServiceImpl implements TableService {
             			subSelectList = new ArrayList<String>();
             			subSelectList.add(value);
             			subSelectMap.put(key, subSelectList);
+            			mainSelectList.add(key);
             		} else {
             			subSelectList = subSelectMap.get(key);
             			subSelectList.add(value);
@@ -1322,6 +1616,42 @@ public class TableServiceImpl implements TableService {
         return crudService.list(tableName, dataTypeMap, selectColumnNameList, cond, newOrderby, offset, limit);
     }
 
+    private List<Map<String, Object>> queryForList(QueryModel queryModel) {
+    	TableDTO tableDTO = queryModel.getTableDTO();
+
+    	List<String> fullSelectColumnNameList = new ArrayList<String>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+        	if (!IndexTypeEnum.FULLTEXT.equals(t.getIndexType())) {
+            	fullSelectColumnNameList.add(t.getName());
+        	}
+        });
+
+    	if (!CollectionUtils.isEmpty(queryModel.getSelectList())) {
+        	fullSelectColumnNameList.retainAll(queryModel.getSelectList());
+        }
+    	
+    	if (CollectionUtils.isEmpty(fullSelectColumnNameList)) {
+            tableDTO.getColumnDTOList().stream().forEach(t -> {
+            	if (!IndexTypeEnum.FULLTEXT.equals(t.getIndexType())) {
+                	fullSelectColumnNameList.add(t.getName());
+            	}
+            });
+    	}
+    	
+    	List<Map<String, Object>> mapList = queryForList(tableDTO.getTableName(),  
+    			tableDTO.toDataTypeMap(), 
+    			tableDTO.getPrimaryNameList(), 
+    			fullSelectColumnNameList, 
+    			queryModel.getCondition(),
+    			queryModel.getOffset(), 
+    			queryModel.getLimit(), 
+    			queryModel.getOrderby());
+    	
+    	return mapList;
+
+    }
+
+    
     private Long queryForCount(String tableName,  Map<String, DataTypeEnum> dataTypeMap, Condition cond) {
         return crudService.count(tableName, dataTypeMap, cond);
     }

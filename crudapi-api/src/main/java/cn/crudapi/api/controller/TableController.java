@@ -121,7 +121,7 @@ public class TableController {
 
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
 	}
-
+    
     @ApiOperation(value="查询个数")
 	@GetMapping(value = "/{name}/count")
 	public ResponseEntity<Long> count(@PathVariable("name") String name,
