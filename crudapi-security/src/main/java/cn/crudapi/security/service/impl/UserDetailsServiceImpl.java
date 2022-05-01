@@ -91,7 +91,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 	private UserDTO loadUserByCondition(Condition condition) {
 		log.info("loadUserByCondition {}", condition.toString());
 		
-    	List<Map<String, Object>> mapList = tableService.list(USER_TABLE_NAME, null, "roleLines.role", null, null, condition, null, null, null);
+    	List<Map<String, Object>> mapList = tableService.list(USER_TABLE_NAME, null, "role", null, null, condition, null, null, null);
     	if (mapList.size() == 0) {
     		return null;
     	}
