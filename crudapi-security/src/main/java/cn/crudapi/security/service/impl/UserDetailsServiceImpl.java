@@ -61,7 +61,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 		}
 		
 		Condition condition = ConditionUtils.toCondition("id", roleIdObjs);
-    	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, "resourceLines.resource", null, null, condition, 0, 99999, null);
+    	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, "resource", null, null, condition, 0, 99999, null);
     	
     	
     	for (Map<String, Object> roleMap : mapList) {
