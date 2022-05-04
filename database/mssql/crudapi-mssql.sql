@@ -117,6 +117,7 @@ CREATE TABLE "ca_meta_column" (
   "updatable" BIT DEFAULT NULL,
   "displayable" BIT DEFAULT NULL,
   "systemable" BIT DEFAULT NULL,
+  "multipleValue" BIT NULL DEFAULT 0,
   "tableId" BIGINT DEFAULT NULL,
   CONSTRAINT "fk_bsm_column_seq_id" FOREIGN KEY ("seqId") REFERENCES "ca_meta_sequence" ("id"),
   CONSTRAINT "fk_bsm_column_table_id" FOREIGN KEY ("tableId") REFERENCES "ca_meta_table" ("id")

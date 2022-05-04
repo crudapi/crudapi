@@ -118,6 +118,7 @@ CREATE TABLE `ca_meta_column` (
   `updatable` bit(1) DEFAULT NULL,
   `displayable` bit(1) DEFAULT NULL,
   `systemable` bit(1) DEFAULT NULL,
+  `multipleValue` bit(1) NULL DEFAULT b'0',
   `tableId` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
