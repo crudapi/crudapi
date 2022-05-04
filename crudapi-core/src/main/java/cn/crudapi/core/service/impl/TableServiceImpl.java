@@ -405,12 +405,21 @@ public class TableServiceImpl implements TableService {
         return maplist;
     }
     
-    private List<Object> getValuesByColumnName(List<Map<String, Object>> mapList, String columnName) {
+    private List<Object> getValuesByColumnName(TableDTO tableDTO, List<Map<String, Object>> mapList, String columnName) {
     	 List<Object> values = new ArrayList<>();
     	 for (Map<String, Object> map : mapList) {
          	Object value = map.get(columnName);
          	if (value != null) {
-         		values.add(value);
+         		if (tableDTO.getColumn(columnName).getMultipleValue()) {
+         			String[] valueArr = value.toString().trim().split(",");
+        			for (String v : valueArr) { 
+        				if (!v.isEmpty()) {
+        					values.add(v);
+        				}
+        			}
+         		} else {
+         			values.add(value);
+         		}
          	}
          }
     	 
@@ -445,6 +454,10 @@ public class TableServiceImpl implements TableService {
     }
     
     private Map<String, Object> getOneDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
+      if (value == null) {
+    	  return null;
+      }
+      
    	  for (Map<String, Object> t : mapList) {
    		Object oldValue = t.get(columnName);
      	if (oldValue != null && oldValue.toString().equals(value.toString())) {
@@ -453,6 +466,23 @@ public class TableServiceImpl implements TableService {
       }
    	 
    	  return null;
+    }
+    
+    private List<Map<String, Object>> getMultipleDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
+        List<Object> values = new ArrayList<>();
+        
+        if (value != null) {
+        	String[] valueArr = value.toString().trim().split(",");
+    		for (String v : valueArr) { 
+    			if (!v.isEmpty()) {
+    				values.add(v);
+    			}
+    		}
+        } else {
+        	return new ArrayList<Map<String, Object>>();
+        }
+    	
+     	return this.getListDataByColumnName(mapList, columnName, values);
     }
     
     private List<Object> getRightValues (List<Object> allValues, List<Object> joinValues) {
@@ -600,7 +630,7 @@ public class TableServiceImpl implements TableService {
                     relationQueryModel.setSelectList(relationMainSelectList);
                     
                     Condition relationCondition = ConditionUtils.toCondition(fkColumnName, 
-                    		getValuesByColumnName(topMapList, pkColumnName));
+                    		getValuesByColumnName(topTableDTO, topMapList, pkColumnName));
                     relationQueryModel.setCondition(relationCondition);
                     
                     List<Map<String, Object>> relationTableDataMapList = new ArrayList<Map<String, Object>>();
@@ -654,7 +684,7 @@ public class TableServiceImpl implements TableService {
                      
                      
                 	 //字典表主键
-                	 List<Object> values = getValuesByColumnName(topMapList, fkColumnName);
+                	 List<Object> values = getValuesByColumnName(topTableDTO, topMapList, fkColumnName);
                 	 log.info(relatiobTableName + " values" + values.toString());
                 	 
                      List<Map<String, Object>> relationTableDataMapList = null;
@@ -675,12 +705,12 @@ public class TableServiceImpl implements TableService {
                          }
                      } else {
                     	 log.info(relatiobTableName + " use cache!");
-                    	 List<Object> cacheValues = getValuesByColumnName(relationTableCacheMapList, pkColumnName);
+                    	 List<Object> cacheValues = getValuesByColumnName(relationTableDTO, relationTableCacheMapList, pkColumnName);
                     	 log.info(relatiobTableName + " cacheValues" + cacheValues.toString());
                     	 
                     	 List<Map<String, Object>> joinRelationTableDataMapList = getListDataByColumnName(relationTableCacheMapList, pkColumnName, values);
                     	 
-                    	 List<Object> joinValues = getValuesByColumnName(joinRelationTableDataMapList, pkColumnName);
+                    	 List<Object> joinValues = getValuesByColumnName(relationTableDTO, joinRelationTableDataMapList, pkColumnName);
                     	 log.info(relatiobTableName + " joinValues" + joinValues.toString());
                     	 
                     	 List<Object> rightValues = getRightValues(values, joinValues);
@@ -705,10 +735,18 @@ public class TableServiceImpl implements TableService {
                      for (Map<String, Object> topMap : topMapList) {
                      	Object value = topMap.get(fkColumnName);
                       	if (value != null) {
-                      		Map<String, Object> subRelationTableDataMap = 
-                     				getOneDataByColumnName(relationTableDataMapList, pkColumnName, value);
-                 			
-                 			topMap.put(relationName, subRelationTableDataMap);
+                      		
+                      		if (topTableDTO.getColumn(fkColumnName).getMultipleValue()) {
+                      			List<Map<String, Object>> subRelationTableDataMapList = 
+                      					getMultipleDataByColumnName(relationTableDataMapList, pkColumnName, value);
+                     			
+                     			topMap.put(relationName, subRelationTableDataMapList);
+                      		} else {
+                      			Map<String, Object> subRelationTableDataMap = 
+                         				getOneDataByColumnName(relationTableDataMapList, pkColumnName, value);
+                     			
+                     			topMap.put(relationName, subRelationTableDataMap);
+                      		}
                       	}
                      }
                 }
@@ -1061,8 +1099,21 @@ public class TableServiceImpl implements TableService {
                 String fkName = tableRelationDTO.getFromColumnDTO().getName();
                 Object obj = newMap.get(relationName);
                 if (obj != null) {
-                    Map<String, Object> relationMap = (Map<String, Object>) obj;
-                    newMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                	if (tableDTO.getColumn(fkName).getMultipleValue()) {
+                		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
+                		List<String> valueList =  new ArrayList<String>();
+                		for (Map<String, Object> relationMap : relationMapList) {
+                			Object valueObj = relationMap.get(tableRelationDTO.getToColumnDTO().getName());
+                			if (valueObj != null) {
+                				valueList.add(valueObj.toString());
+                			}
+                		}
+                		
+                		newMap.put(fkName, String.join(",", valueList));
+                	} else {
+                		Map<String, Object> relationMap = (Map<String, Object>) obj;
+                        newMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                    }
                 }
             }
         }
@@ -1273,8 +1324,21 @@ public class TableServiceImpl implements TableService {
                 String fkName = tableRelationDTO.getFromColumnDTO().getName();
                 Object obj = paramMap.get(relationName);
                 if (obj != null) {
-                    Map<String, Object> relationMap = (Map<String, Object>) obj;
-                    paramMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                	if (tableDTO.getColumn(fkName).getMultipleValue()) {
+                		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
+                		List<String> valueList =  new ArrayList<String>();
+                		for (Map<String, Object> relationMap : relationMapList) {
+                			Object valueObj = relationMap.get(tableRelationDTO.getToColumnDTO().getName());
+                			if (valueObj != null) {
+                				valueList.add(valueObj.toString());
+                			}
+                		}
+                		
+                		paramMap.put(fkName, String.join(",", valueList));
+                	} else {
+                		Map<String, Object> relationMap = (Map<String, Object>) obj;
+                        paramMap.put(fkName, relationMap.get(tableRelationDTO.getToColumnDTO().getName()));
+                	}
                 }
             }
         }
@@ -1552,11 +1616,32 @@ public class TableServiceImpl implements TableService {
                      	relationSelectColumnNameList = null;
                      }
                      
-                     Map<String, Object> relationRecId = new HashMap<String, Object>();
-                     relationRecId.put(pkColumnName, fkUqValue);
-                     
-                     Map<String, Object> relationMap = queryForMap(relationTableDTO, relationSelectColumnNameList, relationRecId);
-                     map.put(relationName, relationMap);
+                     if (tableDTO.getColumn(fkColumnName).getMultipleValue()) {
+                    	 List<Object> fkUqValues = new ArrayList<>();
+                     	 String[] fkUqValueArr = fkUqValue.toString().trim().split(",");
+                 		 for (String f : fkUqValueArr) { 
+                 			if (!f.isEmpty()) {
+                 				fkUqValues.add(f);
+                 			}
+                 		 }
+                 		 
+                 		 List<Map<String, Object>> relationMapList = new ArrayList<Map<String, Object>>();
+                 		 for (Object f : fkUqValues) { 
+                 			 Map<String, Object> relationRecId = new HashMap<String, Object>();
+                             relationRecId.put(pkColumnName, f);
+                             
+                             Map<String, Object> relationMap = queryForMap(relationTableDTO, relationSelectColumnNameList, relationRecId);
+                             relationMapList.add(relationMap);
+                 		 }
+                 		 
+                 		 map.put(relationName, relationMapList);
+                     } else {
+                    	 Map<String, Object> relationRecId = new HashMap<String, Object>();
+                         relationRecId.put(pkColumnName, fkUqValue);
+                         
+                         Map<String, Object> relationMap = queryForMap(relationTableDTO, relationSelectColumnNameList, relationRecId);
+                         map.put(relationName, relationMap);
+                     }
                 }
             }
         }

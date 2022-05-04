@@ -221,6 +221,7 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 			columnDTO.setQueryable(true);
 			columnDTO.setDisplayable(false);
 			columnDTO.setUnsigned(false);
+			columnDTO.setMultipleValue(false);
 			
 			//数据类型
 			String udtName = column.get("udt_name").toString();

@@ -58,6 +58,8 @@ public class ColumnEntity {
 	private Boolean displayable;
 	
 	private Boolean systemable;
+	
+	private Boolean multipleValue;
 
 	private Long tableId;
 	
@@ -252,6 +254,14 @@ public class ColumnEntity {
 
 	public void setSystemable(Boolean systemable) {
 		this.systemable = systemable;
+	}
+
+	public Boolean getMultipleValue() {
+		return multipleValue;
+	}
+
+	public void setMultipleValue(Boolean multipleValue) {
+		this.multipleValue = multipleValue;
 	}
 
 	public Long getTableId() {

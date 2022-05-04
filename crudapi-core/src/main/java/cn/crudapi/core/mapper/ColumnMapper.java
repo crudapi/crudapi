@@ -91,6 +91,7 @@ public class ColumnMapper {
 		columnEntity.setQueryable(newColumnEntity.getQueryable());
 		columnEntity.setDisplayable(newColumnEntity.getDisplayable());
 		columnEntity.setSystemable(newColumnEntity.getSystemable());
+		columnEntity.setMultipleValue(newColumnEntity.getMultipleValue());
 		return columnEntity;
 	}
 
@@ -118,6 +119,7 @@ public class ColumnMapper {
 		columnEntity.setQueryable(columnDTO.getQueryable());
 		columnEntity.setDisplayable(columnDTO.getDisplayable());
 		columnEntity.setSystemable(columnDTO.getSystemable());
+		columnEntity.setMultipleValue(columnDTO.getMultipleValue());
 		return columnEntity;
 	}
 
@@ -254,7 +256,11 @@ public class ColumnMapper {
 		if (columnDTO.getSystemable() != null) {
 			columnEntity.setSystemable(columnDTO.getSystemable());
 		}
-		
+
+		if (columnDTO.getMultipleValue() != null) {
+			columnEntity.setMultipleValue(columnDTO.getMultipleValue());
+		}
+
 		if (isChanged) {
 			sql = crudService.toUpdateColumnSql(tableEntity, oldColumnEntity, columnEntity);
 			if (StringUtils.isNotBlank(sql)) {
@@ -356,7 +362,8 @@ public class ColumnMapper {
 		columnDTO.setQueryable(columnEntity.getQueryable() != null ? columnEntity.getQueryable() : false);
 		columnDTO.setDisplayable(columnEntity.getDisplayable() != null ? columnEntity.getDisplayable() : false);
 		columnDTO.setSystemable(columnEntity.getSystemable() != null ? columnEntity.getSystemable() : false);
-		
+		columnDTO.setMultipleValue(columnEntity.getMultipleValue() != null ? columnEntity.getMultipleValue() : false);
+
 		if (columnEntity.getCreatedDate() != null) {
 			columnDTO.setCreatedDate(DateTimeUtils.toDateTime(columnEntity.getCreatedDate()));
 		}

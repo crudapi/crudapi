@@ -46,6 +46,8 @@ public class ColumnDTO extends AuditDTO {
 	private Boolean displayable;
 	
 	private Boolean systemable;
+	
+	private Boolean multipleValue;
 
 	public Long getId() {
 		return id;
@@ -197,6 +199,15 @@ public class ColumnDTO extends AuditDTO {
 
 	public void setSystemable(Boolean systemable) {
 		this.systemable = systemable;
+	}
+
+
+	public Boolean getMultipleValue() {
+		return multipleValue;
+	}
+
+	public void setMultipleValue(Boolean multipleValue) {
+		this.multipleValue = multipleValue;
 	}
 
 	@Override
