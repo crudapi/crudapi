@@ -1,5 +1,6 @@
 package cn.crudapi.core.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,12 +18,17 @@ import java.net.URLDecoder;
 
 public final class ConditionUtils {
 	public static Condition toCondition(Map<String, Object> parameterMap) {
-		return toCondition(parameterMap, ConditionTypeEnum.AND, OperatorTypeEnum.EQ);
+		return toCondition(parameterMap, ConditionTypeEnum.AND, OperatorTypeEnum.EQ, null);
+	}
+
+	public static Condition toCondition(Map<String, Object> parameterMap, Map<String, OperatorTypeEnum> operatorTypeMap) {
+		return toCondition(parameterMap, ConditionTypeEnum.AND, OperatorTypeEnum.EQ, operatorTypeMap);
 	}
 	
 	public static Condition toCondition(Map<String, Object> parameterMap, 
 			ConditionTypeEnum conditionType, 
-			OperatorTypeEnum operatorType) {
+			OperatorTypeEnum operatorType,
+			Map<String, OperatorTypeEnum> operatorTypeMap) {
 		if (parameterMap == null || parameterMap.size() == 0) {
 			return null;
 		}
@@ -32,14 +38,36 @@ public final class ConditionUtils {
 		
 		for (Map.Entry<String, Object> entry : parameterMap.entrySet()) {
 		  String key = entry.getKey();
+		  
+		  OperatorTypeEnum newOperatorType = operatorType;
+		  if (operatorTypeMap != null && operatorTypeMap.get(key) != null) {
+			  newOperatorType = operatorTypeMap.get(key);
+		  }
+		  
 		  Object value = entry.getValue();
 		  
-		  if (value != null && !StringUtils.isEmpty(value.toString())) {
+		  if (value != null && !StringUtils.isEmpty(value.toString().trim())) {
+			  String valueStr = value.toString().trim();
 			  LeafCondition condition = new LeafCondition();
 			  condition.setColumnName(key);
-			  condition.setOperatorType(operatorType);
-			  condition.addValue(value);
+			  if (newOperatorType.equals(OperatorTypeEnum.MLIKE)
+				|| valueStr.contains(",")) {
+       			String[] valueArr = valueStr.split(",");
+      			for (String v : valueArr) { 
+      				if (!v.isEmpty()) {
+      					condition.addValue(v);
+      				}
+      			}
+      			
+      			if (newOperatorType.equals(OperatorTypeEnum.EQ)) {
+      				newOperatorType = OperatorTypeEnum.IN;
+      			}
+			  } else {
+				  condition.addValue(value);
+			  }
 			  
+
+			  condition.setOperatorType(newOperatorType);
 			  compositeCondition.add(condition);
 		  }
 		}

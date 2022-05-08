@@ -1,6 +1,7 @@
 package cn.crudapi.api.controller;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +25,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.TableDTO;
+import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.service.FileService;
+import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.RequestUtils;
@@ -38,6 +43,9 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/api/business")
 public class TableController {
+    @Autowired
+    private TableMetadataService tableMetadataService;
+
     @Autowired
     private TableService tableService;
 
@@ -115,7 +123,8 @@ public class TableController {
 			@RequestParam(value = "limit", required = false) Integer limit,
 			@RequestParam(value = "orderby", required = false) String orderby,
 			HttpServletRequest request) {
-    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
+    	
+    	Condition condition =convertNewCondition(name, request);
     	
 		List<Map<String, Object>> mapList = tableService.list(name, select, expand, filter, search, condition, offset, limit, orderby);
 
@@ -128,7 +137,7 @@ public class TableController {
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			HttpServletRequest request) {
-    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
+    	Condition condition =convertNewCondition(name, request);
     	
     	Long count  = tableService.count(name, filter, search, condition);
 
@@ -177,6 +186,20 @@ public class TableController {
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
+    
+    private Condition convertNewCondition(String name, HttpServletRequest request) {
+    	TableDTO mainTableDTO = tableMetadataService.get(name);
+    	Map<String, OperatorTypeEnum> operatorTypeMap = new HashMap<String, OperatorTypeEnum>();
+    	for (ColumnDTO columnDTO : mainTableDTO.getColumnDTOList()) {
+    		if (Boolean.TRUE.equals(columnDTO.getMultipleValue())) {
+    			operatorTypeMap.put(columnDTO.getName(), OperatorTypeEnum.MLIKE);
+    		}
+    	}
+    	
+    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request), operatorTypeMap);
+    	
+    	return condition;
+    }
 
 //	@ApiOperation(value="清空表")
 //	@DeleteMapping(value = "")
