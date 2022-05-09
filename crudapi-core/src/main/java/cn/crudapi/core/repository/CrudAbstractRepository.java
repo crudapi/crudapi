@@ -242,11 +242,16 @@ public abstract class CrudAbstractRepository {
     }
 	
 	public String toBatchInserSql(String tableName, List<String> columnNameList, String action) {
+		String dateBase = getDateBaseName();
         StringBuilder sb = new StringBuilder();
         if (action == null) {
         	sb.append("INSERT INTO {0}({1}) VALUES({2})");
         } else {
-        	sb.append("REPLACE INTO {0}({1}) VALUES({2})");
+        	if (dateBase.equals("mysql")) {
+        		sb.append("REPLACE INTO {0}({1}) VALUES({2})");
+        	} else {
+        		sb.append("INSERT INTO {0}({1}) VALUES({2})");
+        	}
         }
         
         List<String> nameList = new ArrayList<String>();
