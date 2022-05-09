@@ -658,7 +658,10 @@ public class TableServiceImpl implements TableService {
                     
                     relationQueryData.setTableDataMapList(relationTableDataMapList);
                     
-                    tableQueryDataStack.push(relationQueryData);
+                    //如果关联表数据为空，不再入栈
+                    if (relationTableDataMapList.size() > 0) {
+                    	 tableQueryDataStack.push(relationQueryData);
+                    }
                 } else if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne
                 	|| tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
                      String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
