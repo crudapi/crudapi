@@ -124,7 +124,7 @@ public class TableController {
 			@RequestParam(value = "orderby", required = false) String orderby,
 			HttpServletRequest request) {
     	
-    	Condition condition =convertNewCondition(name, request);
+    	Condition condition = convertNewCondition(name, request);
     	
 		List<Map<String, Object>> mapList = tableService.list(name, select, expand, filter, search, condition, offset, limit, orderby);
 

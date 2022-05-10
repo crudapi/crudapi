@@ -704,12 +704,25 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 	    	Condition filterCond = ConditionUtils.toCondition(filter);
 
 	    	//2. search
-	    	LeafCondition searchCond = null;
+	    	Condition searchCond = null;
 	    	if (!StringUtils.isEmpty(search)) {
-	    		searchCond = new LeafCondition();
-	        	searchCond.setColumnName("name");
-	        	searchCond.setOperatorType(OperatorTypeEnum.LIKE);
-	        	searchCond.addValue(search);
+	    		LeafCondition searchCond1 = null;
+	    		searchCond1 = new LeafCondition();
+	        	searchCond1.setColumnName("name");
+	        	searchCond1.setOperatorType(OperatorTypeEnum.LIKE);
+	        	searchCond1.addValue(search);
+	        	
+	        	LeafCondition searchCond2 = null;
+	    		searchCond2 = new LeafCondition();
+	        	searchCond2.setColumnName("caption");
+	        	searchCond2.setOperatorType(OperatorTypeEnum.LIKE);
+	        	searchCond2.addValue(search);
+	        	
+	        	CompositeCondition searchCompositeCondition = new CompositeCondition();
+	        	searchCompositeCondition.setConditionType(ConditionTypeEnum.OR);
+	        	searchCompositeCondition.add(searchCond1);
+	        	searchCompositeCondition.add(searchCond2);
+	        	searchCond = searchCompositeCondition;
 			}
 	    	
 	    	//3. other condition

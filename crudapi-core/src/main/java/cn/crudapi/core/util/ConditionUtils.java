@@ -48,6 +48,7 @@ public final class ConditionUtils {
 		  
 		  if (value != null && !StringUtils.isEmpty(value.toString().trim())) {
 			  String valueStr = value.toString().trim();
+			  
 			  LeafCondition condition = new LeafCondition();
 			  condition.setColumnName(key);
 			  if (newOperatorType.equals(OperatorTypeEnum.MLIKE)
@@ -63,10 +64,23 @@ public final class ConditionUtils {
       				newOperatorType = OperatorTypeEnum.IN;
       			}
 			  } else {
-				  condition.addValue(value);
+				  //name=LIKE crudapi&productCount=LE 2
+				  List<String> opValueList = new ArrayList<String>();
+				  String[] opValueArr = valueStr.replaceAll(" +", ";").split(";");
+				  for (String ov : opValueArr) { 
+					if (!ov.isEmpty()) {
+						opValueList.add(ov);
+					}
+	    		  }
+				  
+				  if (opValueList.size() == 2) {
+					  newOperatorType = OperatorTypeEnum.valueOf(opValueList.get(0));
+					  condition.addValue(opValueList.get(1));
+				  } else {
+					  condition.addValue(value);
+				  }
 			  }
 			  
-
 			  condition.setOperatorType(newOperatorType);
 			  compositeCondition.add(condition);
 		  }
