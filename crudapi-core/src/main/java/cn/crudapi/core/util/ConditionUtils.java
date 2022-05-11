@@ -73,9 +73,20 @@ public final class ConditionUtils {
 					}
 	    		  }
 				  
-				  if (opValueList.size() == 2) {
-					  newOperatorType = OperatorTypeEnum.valueOf(opValueList.get(0));
-					  condition.addValue(opValueList.get(1));
+				  if (opValueList.size() > 1) {
+					  OperatorTypeEnum opt = null;
+					  try {
+						  opt = OperatorTypeEnum.valueOf(opValueList.get(0));
+					  } catch (Exception e) {
+						  
+					  }
+					  
+					  if (opt != null) {
+						  newOperatorType = opt;
+						  condition.addValue(valueStr.replaceFirst(opValueList.get(0), "").trim());
+					  } else {
+						  condition.addValue(value);
+					  }
 				  } else {
 					  condition.addValue(value);
 				  }
