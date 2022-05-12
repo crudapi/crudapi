@@ -59,6 +59,11 @@ public class LeafCondition implements Condition {
 		for (int i = 0; i < valueList.size(); ++i) {
 			this.valueParamNameList.add("LeafCondition" + seq++);
 		}
+		
+		if (inCondition != null) {
+			seq = inCondition.build(sqlQuotation, seq, dataTypeMap);
+		}
+		
 		return seq;
 	}
 	public String toSqlName(String colunmName) {
