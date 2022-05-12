@@ -30,6 +30,9 @@ public class LeafCondition implements Condition {
 	private String funcName;
 	
 	//INSELECT
+	private String inColumnName;
+	
+	//INSELECT
 	private String inTableName;
 	
 	//INSELECT
@@ -98,6 +101,12 @@ public class LeafCondition implements Condition {
 		this.columnName = columnName;
 	}
 
+	public String getInColumnName() {
+		return inColumnName;
+	}
+	public void setInColumnName(String inColumnName) {
+		this.inColumnName = inColumnName;
+	}
 	public String getFuncName() {
 		return funcName;
 	}
@@ -402,8 +411,8 @@ public class LeafCondition implements Condition {
     private String toQuerySqlForINSELECT() {
        String querySql = "";
 
-       String selectSql = "SELECT " + toSqlName("id") + " FROM " + toSqlName(inTableName);
-       selectSql += "where ";
+       String selectSql = "SELECT " + toSqlName(inColumnName) + " FROM " + toSqlName(inTableName);
+       selectSql += " WHERE ";
        selectSql += inCondition.toQuerySql();
        
        querySql = toSqlName(columnName) + " IN (" + selectSql + ")";
