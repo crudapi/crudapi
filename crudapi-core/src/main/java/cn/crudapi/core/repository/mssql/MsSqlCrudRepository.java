@@ -114,14 +114,14 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 		mapParams.put("tableName", tableName);
 		mapParams.put("tableSchema", getSchema());
 		
-//		String sql = processTemplateToString("select-table-comment.sql.ftl", mapParams);
-//		List<Map<String, Object>> tableCommentList = jdbcTemplate.queryForList(sql);
-//		map.put("tableComment", tableCommentList.get(0));
-//		
-//		sql = processTemplateToString("select-column-comment.sql.ftl", mapParams);
-//		List<Map<String, Object>> columnCommentList = jdbcTemplate.queryForList(sql);
-//		map.put("columnComments", columnCommentList);
-//		
+		String sql = processTemplateToString("select-table-comment.sql.ftl", mapParams);
+		List<Map<String, Object>> tableCommentList = jdbcTemplate.queryForList(sql);
+		map.put("tableComment", tableCommentList.get(0));
+		
+		sql = processTemplateToString("select-column-comment.sql.ftl", mapParams);
+		List<Map<String, Object>> columnCommentList = jdbcTemplate.queryForList(sql);
+		map.put("columnComments", columnCommentList);
+		
 //		sql = processTemplateToString("select-index.sql.ftl", mapParams);
 //		List<Map<String, Object>> indexLsit = jdbcTemplate.queryForList(sql);
 //		
