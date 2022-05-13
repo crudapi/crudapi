@@ -9,7 +9,7 @@ CREATE TABLE "${tableName}" (
   <#elseif columnEntity.dataType == "FLOAT">
     "${columnEntity.name}" FLOAT<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DOUBLE">
-    "${columnEntity.name}" DOUBLE<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
+    "${columnEntity.name}" FLOAT<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DECIMAL">
     "${columnEntity.name}" DECIMAL<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if><#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DATE">

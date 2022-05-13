@@ -6,9 +6,9 @@ ALTER TABLE "${tableName}" ADD
 <#elseif columnEntity.dataType == "BIGINT">
   "${columnEntity.name}" BIGINT<#if columnEntity.autoIncrement == true> IDENTITY(1, 1)</#if><#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
 <#elseif columnEntity.dataType == "FLOAT">
-  "${columnEntity.name}" REAL<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
+  "${columnEntity.name}" FLOAT<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
 <#elseif columnEntity.dataType == "DOUBLE">
-  "${columnEntity.name}" DOUBLE PRECISION<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
+  "${columnEntity.name}" FLOAT<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
 <#elseif columnEntity.dataType == "DECIMAL">
   "${columnEntity.name}" DECIMAL<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if>
 <#elseif columnEntity.dataType == "DATE">
