@@ -114,7 +114,11 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 		mapParams.put("tableName", tableName);
 		mapParams.put("tableSchema", getSchema());
 		
-		String sql = processTemplateToString("select-table-comment.sql.ftl", mapParams);
+		String sql = processTemplateToString("select-column.sql.ftl", mapParams);
+		List<Map<String, Object>> columnExtList = jdbcTemplate.queryForList(sql);
+		map.put("columnExts", columnExtList);
+		
+		sql = processTemplateToString("select-table-comment.sql.ftl", mapParams);
 		List<Map<String, Object>> tableCommentList = jdbcTemplate.queryForList(sql);
 		map.put("tableComment", tableCommentList.get(0));
 		
@@ -122,15 +126,15 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 		List<Map<String, Object>> columnCommentList = jdbcTemplate.queryForList(sql);
 		map.put("columnComments", columnCommentList);
 		
-//		sql = processTemplateToString("select-index.sql.ftl", mapParams);
-//		List<Map<String, Object>> indexLsit = jdbcTemplate.queryForList(sql);
-//		
-//		map.put("indexs", indexLsit);
-//		
+		sql = processTemplateToString("select-index.sql.ftl", mapParams);
+		List<Map<String, Object>> indexLsit = jdbcTemplate.queryForList(sql);
+		
+		map.put("indexs", indexLsit);
+		
 //		sql = processTemplateToString("select-index-comment.sql.ftl", mapParams);
 //		List<Map<String, Object>> indexCommentList = jdbcTemplate.queryForList(sql);
 //		
-//		map.put("indexComments", indexCommentList);
+		map.put("indexComments", new ArrayList<Map<String, Object>>());
 		
 		return map;
 	}
@@ -154,6 +158,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 		tableDTO.setReadOnly(false);
 		
 		List<Map<String, Object>> columns = (List<Map<String, Object>>)metaDataMap.get("columns");
+		List<Map<String, Object>> columnExts = (List<Map<String, Object>>)metaDataMap.get("columnExts");
 		List<Map<String, Object>> indexs = (List<Map<String, Object>>)metaDataMap.get("indexs");
 		List<Map<String, Object>> columnComments = (List<Map<String, Object>>)metaDataMap.get("columnComments");
 		List<Map<String, Object>> indexComments = (List<Map<String, Object>>)metaDataMap.get("indexComments");
@@ -169,6 +174,17 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 				indexMap.put(indexName, indexColumnNames);
 			} else {
 				indexColumnNames.add(t);
+			}
+		}
+		
+		//autoIncrement分组
+		Map<String, Boolean> autoIncrementMap = new HashMap<String, Boolean>();
+		for (Map<String, Object> t : columnExts) {
+			String columnName = t.get("columnName").toString();
+			if (t.get("isIdentity").toString().equals("1")) {
+				autoIncrementMap.put(columnName, true);
+			} else {
+				autoIncrementMap.put(columnName, false);
 			}
 		}
 		
@@ -208,7 +224,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 		for (Map<String, Object> column : columns) {
 			ColumnDTO columnDTO = new ColumnDTO();
 
-			String name = column.get("column_name").toString();
+			String name = column.get("COLUMN_NAME").toString();
 			String comment = columnCommentMap.get(name);
 			String caption = (comment != null ? comment : name);
 			columnDTO.setName(name);
@@ -222,28 +238,34 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 			columnDTO.setMultipleValue(false);
 			
 			//数据类型
-			String udtName = column.get("udt_name").toString();
+//			bigint
+//			binary
+//			bit
+//			char
+//			date
+//			datetime
+//			decimal
+//			float
+//			int
+//			text
+//			time
+//			varchar
+			String DATA_TYPE = column.get("DATA_TYPE").toString();
 			DataTypeEnum dataType = DataTypeEnum.VARCHAR;
-			switch (udtName) {
-				case "bool": 
+			switch (DATA_TYPE) {
+				case "bit": 
 					dataType = DataTypeEnum.BOOL;
 					break;
-				case "int2": 
+				case "int": 
 	            	dataType = DataTypeEnum.INT;
 	            	break;
-				case "int4": 
-	            	dataType = DataTypeEnum.INT;
-	            	break;
-	            case "int8": 
+	            case "bigint": 
 	            	dataType = DataTypeEnum.BIGINT;
 	            	break;
-	            case "float4": 
+	            case "float": 
 	            	dataType = DataTypeEnum.FLOAT;
 	            	break;
-	            case "float8": 
-	            	dataType = DataTypeEnum.DOUBLE;
-	            	break;
-	            case "numeric": 
+	            case "decimal": 
 	            	dataType = DataTypeEnum.DECIMAL;
 	            	break;
 	            case "varchar":
@@ -255,7 +277,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 	            case "text":
 	            	dataType = DataTypeEnum.TEXT;
 	                break;
-	            case "bytea":
+	            case "binary":
 	            	dataType = DataTypeEnum.BLOB;
 	                break;
 	            case "date":
@@ -264,7 +286,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 	            case "time":
 	            	dataType = DataTypeEnum.TIME;
 	                break;
-	            case "timestamp":
+	            case "datetime":
 	            	dataType = DataTypeEnum.DATETIME;
 	                break;
 	            default:
@@ -277,17 +299,17 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 			Integer precision = null;
 			Integer scale = null; 
 			
-			Object characterMaximumLength = column.get("character_maximum_length");
+			Object characterMaximumLength = column.get("CHARACTER_MAXIMUM_LENGTH");
 			if (characterMaximumLength != null) {
 				length = Integer.parseInt(characterMaximumLength.toString());
 			}
 			
-			Object numericPrecision = column.get("numeric_precision");
+			Object numericPrecision = column.get("NUMERIC_PRECISION");
 			if (numericPrecision != null) {
 				precision = Integer.parseInt(numericPrecision.toString());
 			}
 			
-			Object numericScale = column.get("numeric_scale");
+			Object numericScale = column.get("NUMERIC_SCALE");
 			if (numericScale != null) {
 				scale = Integer.parseInt(numericScale.toString());
 			}
@@ -296,37 +318,47 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 			columnDTO.setScale(scale);
 			
 			//是否可以为空
-			String isNullable = column.get("is_nullable").toString();
+			String isNullable = column.get("IS_NULLABLE").toString();
 			if (isNullable.equals("YES")) {
 				columnDTO.setNullable(true);
 			} else {
 				columnDTO.setNullable(false);
 			}
 			
+			//autoIncrement
+			columnDTO.setAutoIncrement(false);
+			Boolean autoIncrement = autoIncrementMap.get(name);
+			if (autoIncrement != null) {
+				columnDTO.setAutoIncrement(autoIncrement);
+				if (autoIncrement) {
+					columnDTO.setInsertable(false);
+					columnDTO.setDisplayable(true);
+				}
+			}
+			
 			//默认值
-			Object columnDefault = column.get("column_default");
+			Object columnDefault = column.get("COLUMN_DEFAULT");
 			String defaultValue = null;
 			if (columnDefault != null) {
 				defaultValue = columnDefault.toString();
-				if (defaultValue.startsWith("nextval")) {
-					columnDTO.setAutoIncrement(true);
-					columnDTO.setDisplayable(true);
-				} else {
-					columnDTO.setAutoIncrement(false);
-					
-					defaultValue = defaultValue.split("::")[0].replace("'", "");
-					
-					columnDTO.setDefaultValue(defaultValue);
-				}
+				defaultValue = defaultValue.substring(2, defaultValue.length() - 2);
+				columnDTO.setDefaultValue(defaultValue);
 			}
+			
 			
 			//索引
 			Map<String, Object> signleIndex = signleIndexMap.get(name);
 			if (signleIndex != null) {
-				String indexName = signleIndex.get("indexName").toString();
-				Boolean isPrimary = Boolean.parseBoolean(signleIndex.get("isPrimary").toString());
-				Boolean isUnique = Boolean.parseBoolean(signleIndex.get("isUnique").toString());
+				Boolean isPrimary = false;
+				Boolean isUnique = false;
 				
+				String indexName = signleIndex.get("indexName").toString();
+				Object indexTypeObj = signleIndex.get("indexType");
+				if (indexTypeObj != null) {
+					isPrimary = indexTypeObj.toString().equals("PK");
+					isUnique = indexTypeObj.toString().equals("UQ");
+				}
+			
 				if (isPrimary) {
 					columnDTO.setIndexType(IndexTypeEnum.PRIMARY);
 				} else if (isUnique) {
@@ -358,9 +390,15 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 			List<Map<String, Object>> values = e.getValue();
 			for (Map<String, Object> t : values) {
 				String columnName = t.get("columnName").toString();
-				Boolean isPrimary = Boolean.parseBoolean(t.get("isPrimary").toString());
-				Boolean isUnique = Boolean.parseBoolean(t.get("isUnique").toString());
+				Boolean isPrimary = false;
+				Boolean isUnique = false;
 				
+				Object indexTypeObj = t.get("indexType");
+				if (indexTypeObj != null) {
+					isPrimary = indexTypeObj.toString().equals("PK");
+					isUnique = indexTypeObj.toString().equals("UQ");
+				}
+			
 				ColumnDTO columnDTO = new ColumnDTO();
 				columnDTO.setName(columnName);
 				

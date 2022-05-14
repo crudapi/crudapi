@@ -1,4 +1,4 @@
-select a.name as tableName, b.name as columName, c.value as comment
+select a.name as tableName, b.name as columnName, c.value as comment
 
 from sys.tables a left join sys.columns b on a.object_id=b.object_id
 
