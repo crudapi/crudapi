@@ -54,6 +54,10 @@ CREATE TABLE `${tableName}` (
 
 <#if indexEntityList??>
   <#list indexEntityList as indexEntity>
+    <#if indexEntity.indexType?? && indexEntity.indexType == "PRIMARY">
+      ALTER TABLE `${tableName}` ADD PRIMARY KEY (<#list indexEntity.indexLineEntityList as indexLineEntity>`${indexLineEntity.columnEntity.name}`<#if indexLineEntity_has_next>,</#if></#list>);
+    </#if>
+
     <#if indexEntity.indexType?? && indexEntity.indexType == "UNIQUE">
       ALTER TABLE `${tableName}` ADD CONSTRAINT `${indexEntity.name}` UNIQUE(<#list indexEntity.indexLineEntityList as indexLineEntity>`${indexLineEntity.columnEntity.name}`<#if indexLineEntity_has_next>,</#if></#list>);
     </#if>

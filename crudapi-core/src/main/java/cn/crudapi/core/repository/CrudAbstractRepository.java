@@ -19,12 +19,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.IndexDTO;
+import cn.crudapi.core.dto.IndexLineDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.entity.ColumnEntity;
 import cn.crudapi.core.entity.IndexEntity;
 import cn.crudapi.core.entity.TableEntity;
 import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.EngineEnum;
+import cn.crudapi.core.enumeration.IndexStorageEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.query.Condition;
@@ -861,7 +865,15 @@ public abstract class CrudAbstractRepository {
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {
-		return namedParameterJdbcTemplate.getJdbcTemplate().queryForList("SHOW TABLE STATUS");
+		List<Map<String, Object>> mapList =  namedParameterJdbcTemplate.getJdbcTemplate().queryForList("SHOW TABLE STATUS");
+		List<Map<String, Object>> newMapList =  new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> t : mapList) {
+			Map<String, Object> newMap = new HashMap<String, Object>();
+			newMap.put("tableName", t.get("Name"));
+			newMap.put("comment", t.get("Comment"));
+			newMapList.add(newMap);
+		}
+		return newMapList;
 	}
 	
 	public Map<String, Object> getMetaData(String tableName) {
@@ -871,19 +883,261 @@ public abstract class CrudAbstractRepository {
 		map = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap(sql);
 	
 		sql = "SHOW FULL COLUMNS FROM " + getSqlQuotation() + tableName + getSqlQuotation();
-		List<Map<String, Object>> descLsit = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
-		map.put("columns", descLsit);
+		List<Map<String, Object>> descList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		map.put("columns", descList);
 		
 		sql = "SHOW INDEX FROM " + getSqlQuotation() + tableName +  getSqlQuotation();
-		List<Map<String, Object>> indexLsit = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
-		map.put("indexs", indexLsit);
+		List<Map<String, Object>> indexList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		map.put("indexs", indexList);
 		
 		return map;
 	}
 	
-	public TableDTO reverseMetaData(String tableName) { 
-		throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "method reverseMetaData is not Override");
+	@SuppressWarnings("unchecked")
+	public TableDTO reverseMetaData(String tableName) {
+		Map<String, Object> metaDataMap = getMetaData(tableName);
+		TableDTO tableDTO = new TableDTO();
+		tableDTO.setName(tableName);
+		
+		Object tableComment = metaDataMap.get("Comment");
+		String tableCaption = (tableComment != null ? tableComment.toString() : tableName);
+		String engine =  metaDataMap.get("Engine").toString().toUpperCase();
+		EngineEnum engineEnum = EngineEnum.valueOf(engine);
+
+		tableDTO.setPluralName(tableName);
+		tableDTO.setCaption(tableName);
+		tableDTO.setDescription(tableCaption);
+		tableDTO.setTableName(tableName);
+		tableDTO.setEngine(engineEnum);
+		tableDTO.setReverse(true);
+		tableDTO.setReadOnly(false);
+		
+		List<Map<String, Object>> columns = (List<Map<String, Object>>)metaDataMap.get("columns");
+		List<Map<String, Object>> indexs = (List<Map<String, Object>>)metaDataMap.get("indexs");
+		
+		//索引分组
+		Map<String, List<Map<String, Object>>> indexMap = new HashMap<String, List<Map<String, Object>>>();
+		for (Map<String, Object> t : indexs) {
+			String indexName = t.get("Key_name").toString();
+			List<Map<String, Object>> indexColumnNames = indexMap.get(indexName);
+			if (indexColumnNames == null) {
+				indexColumnNames = new ArrayList<Map<String, Object>>();
+				indexColumnNames.add(t);
+				indexMap.put(indexName, indexColumnNames);
+			} else {
+				indexColumnNames.add(t);
+			}
+		}
+		
+		//单列索引和联合索引
+		Map<String, Map<String, Object>> signleIndexMap = new HashMap<String, Map<String, Object>>();
+		Map<String, List<Map<String, Object>>> unionIndexMap = new HashMap<String, List<Map<String, Object>>>();
+		for (Map.Entry<String, List<Map<String, Object>>>  e : indexMap.entrySet()) {
+			String key = e.getKey();
+			List<Map<String, Object>> value = e.getValue();
+			if (value.size() == 1) {
+				Map<String, Object> t = value.get(0);
+				String columnName = t.get("Column_name").toString();
+				signleIndexMap.put(columnName,  t);
+			} else {
+				unionIndexMap.put(key, value);
+			}
+		}
+		
+		//组装columnDTOList
+		Integer displayOrder = 1;
+		List<ColumnDTO> columnDTOList = new ArrayList<ColumnDTO>();
+		for (Map<String, Object> column : columns) {
+			ColumnDTO columnDTO = new ColumnDTO();
+
+			String name = column.get("Field").toString();
+			Object commentObj = column.get("Comment");
+			String caption = (commentObj != null ? commentObj.toString() : name);
+			columnDTO.setName(name);
+			columnDTO.setCaption(name);
+			columnDTO.setDescription(caption);
+			columnDTO.setInsertable(true);
+			columnDTO.setUpdatable(true);
+			columnDTO.setQueryable(true);
+			columnDTO.setDisplayable(false);
+			columnDTO.setUnsigned(false);
+			columnDTO.setMultipleValue(false);
+			columnDTO.setDisplayOrder(displayOrder++);
+			
+			//数据类型
+//			DATE
+//			CHAR
+//			BLOB
+//			NUMBER
+//			FLOAT
+//			VARCHAR2
+//			LONG
+			//长度精度
+			String dataTypeRowStr = column.get("Type").toString().toUpperCase();
+			Boolean unsigned = dataTypeRowStr.indexOf("UNSIGNED") >= 0;
+			Integer length = 200;
+			Integer precision = null;
+			Integer scale = null; 
+			
+			String[] typeArr = dataTypeRowStr.split("\\(");
+	        if (typeArr.length > 1) {
+	          String lengthOrprecisionScale = typeArr[1].split("\\)")[0];
+	          if (lengthOrprecisionScale.indexOf(",") > 0) {
+	            String precisionStr = lengthOrprecisionScale.split(",")[0];
+	            precision = Integer.parseInt(precisionStr.toString());
+	            String scaleStr = lengthOrprecisionScale.split(",")[1];
+	            scale = Integer.parseInt(scaleStr.toString());
+	          } else {
+	            String lengthStr = lengthOrprecisionScale;
+	            length = Integer.parseInt(lengthStr.toString());
+	          }
+	        }
+			
+	        String dataTypeRow = typeArr[0].replace("UNSIGNED", "").trim();
+	        if (dataTypeRow.equals("BIT")) {
+	          dataTypeRow = "BOOL";
+	          length = null;
+	        }
+	        DataTypeEnum dataType = DataTypeEnum.valueOf(dataTypeRow);
+
+			columnDTO.setDataType(dataType);
+	        columnDTO.setUnsigned(unsigned);
+			columnDTO.setLength(length);
+			columnDTO.setPrecision(precision);
+			columnDTO.setScale(scale);
+			
+			//是否可以为空
+			String isNullable = column.get("Null").toString();
+			if (isNullable.equals("YES")) {
+				columnDTO.setNullable(true);
+			} else {
+				columnDTO.setNullable(false);
+			}
+			
+			String extra = column.get("Extra").toString();
+			if (extra.equals("auto_increment")) {
+				columnDTO.setAutoIncrement(true);
+				columnDTO.setInsertable(false);
+				columnDTO.setDisplayable(true);
+			} else {
+				columnDTO.setAutoIncrement(false);
+			}
+			
+			//默认值
+			Object columnDefault = column.get("Default");
+			String defaultValue = null;
+			if (columnDefault != null) {
+				defaultValue = columnDefault.toString();
+				columnDTO.setDefaultValue(defaultValue);
+			}
+			
+			//索引
+			Map<String, Object> signleIndex = signleIndexMap.get(name);
+			if (signleIndex != null) {
+				Boolean isPrimary = false;
+				Boolean isUnique = false;
+				Boolean isFulltext = false;
+				
+				Object keyNameObj = signleIndex.get("Key_name");
+				if (keyNameObj != null) {
+					isPrimary = keyNameObj.toString().equals("PRIMARY");
+				}
+				
+				Object indexTypeObj = signleIndex.get("Index_type");
+				if (indexTypeObj != null) {
+					isFulltext = indexTypeObj.toString().equals("FULLTEXT");
+				}
+				
+				Object nonuniqueObj = signleIndex.get("Non_unique");
+				if (nonuniqueObj != null) {
+					isUnique = nonuniqueObj.toString().equals("0");
+				}
+				
+				if (isPrimary) {
+					columnDTO.setIndexType(IndexTypeEnum.PRIMARY);
+				} else if (isFulltext) {
+					columnDTO.setIndexType(IndexTypeEnum.FULLTEXT);
+				}  else if (isUnique) {
+					columnDTO.setIndexType(IndexTypeEnum.UNIQUE);
+					columnDTO.setIndexStorage(IndexStorageEnum.valueOf(indexTypeObj.toString()));
+				} else {
+					columnDTO.setIndexType(IndexTypeEnum.INDEX);
+					columnDTO.setIndexStorage(IndexStorageEnum.valueOf(indexTypeObj.toString()));
+				}
+				
+				columnDTO.setIndexName(keyNameObj.toString());
+			}
+			
+			columnDTOList.add(columnDTO);
+		}
+		
+		tableDTO.setColumnDTOList(columnDTOList);
+		
+		List<IndexDTO> indexDTOList =  new ArrayList<IndexDTO>();
+		for (Map.Entry<String, List<Map<String, Object>>>  e : unionIndexMap.entrySet()) {
+			IndexDTO indexDTO = new IndexDTO();
+			String indexName = e.getKey();
+			indexDTO.setName(indexName);
+			indexDTO.setCaption(indexName);
+			
+			List<IndexLineDTO> indexLineDTOList = new ArrayList<IndexLineDTO>();
+			List<Map<String, Object>> values = e.getValue();
+			for (Map<String, Object> t : values) {
+				Object comment = t.get("Comment");
+				String caption = (comment != null ? comment.toString() : indexName);
+				indexDTO.setDescription(caption);
+				
+				String columnName = t.get("Column_name").toString();
+				Boolean isPrimary = false;
+				Boolean isUnique = false;
+				Boolean isFulltext = false;
+				
+				Object keyNameObj = t.get("Key_name");
+				if (keyNameObj != null) {
+					isPrimary = keyNameObj.toString().equals("PRIMARY");
+				}
+				
+				Object indexTypeObj = t.get("Index_type");
+				if (indexTypeObj != null) {
+					isFulltext = indexTypeObj.toString().equals("FULLTEXT");
+				}
+				
+				Object nonuniqueObj = t.get("Non_unique");
+				if (nonuniqueObj != null) {
+					isUnique = nonuniqueObj.toString().equals("0");
+				}
+				
+				ColumnDTO columnDTO = new ColumnDTO();
+				columnDTO.setName(columnName);
+				
+				IndexLineDTO indexLineDTO = new IndexLineDTO();
+				indexLineDTO.setColumnDTO(columnDTO);
+				
+				if (isPrimary) {
+					indexDTO.setIndexType(IndexTypeEnum.PRIMARY);
+				} else if (isFulltext) {
+					indexDTO.setIndexType(IndexTypeEnum.FULLTEXT);
+				}  else if (isUnique) {
+					indexDTO.setIndexType(IndexTypeEnum.UNIQUE);
+					indexDTO.setIndexStorage(IndexStorageEnum.valueOf(indexTypeObj.toString()));
+				} else {
+					indexDTO.setIndexType(IndexTypeEnum.INDEX);
+					indexDTO.setIndexStorage(IndexStorageEnum.valueOf(indexTypeObj.toString()));
+				}
+				
+				indexLineDTOList.add(indexLineDTO);
+			}
+			
+			indexDTO.setIndexLineDTOList(indexLineDTOList);
+			
+			indexDTOList.add(indexDTO);
+		}
+		
+		tableDTO.setIndexDTOList(indexDTOList);
+		
+		return tableDTO;
 	}
+	
 	
 	protected KeyHolder insert(String tableName, Map<String, Object> map, String[] keyColumnNames) {
 		log.info("CrudAbstractRepository->insert {}", tableName);
