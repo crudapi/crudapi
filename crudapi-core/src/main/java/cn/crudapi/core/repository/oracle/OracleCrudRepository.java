@@ -221,10 +221,19 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 		map.put("columnComments", new ArrayList<Map<String, Object>>());
 		
 		sql = processTemplateToString("select-index.sql.ftl", mapParams);
-		List<Map<String, Object>> indexLsit = jdbcTemplate.queryForList(sql);
+		List<Map<String, Object>> indexList = jdbcTemplate.queryForList(sql);
 		
-		map.put("indexs", indexLsit);
-
+		map.put("indexs", indexList);
+		
+		sql = processTemplateToString("select-primary.sql.ftl", mapParams);
+		List<Map<String, Object>> primaryList = jdbcTemplate.queryForList(sql);
+		
+		if (tableList.size() > 0) {
+			map.put("primary", primaryList.get(0));
+		} else {
+			map.put("primary", new HashMap<String, Object>());
+		}
+		
 		map.put("indexComments", new ArrayList<Map<String, Object>>());
 		
 		return map;
@@ -297,6 +306,10 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 			String commentStr = (commentObj != null ? commentObj.toString(): null);
 			indexCommentMap.put(comment.get("indexName").toString(), commentStr);
 		}
+		
+		Boolean isVisitPrimary = false;
+		Map<String, Object> primaryMap = (Map<String, Object>)metaDataMap.get("primary");
+		String primaryIndexName = primaryMap.get("CONSTRAINT_NAME").toString();
 		
 		//组装columnDTOList
 		Integer displayOrder = 1;
@@ -408,11 +421,16 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 				Boolean isUnique = false;
 				
 				String indexName = signleIndex.get("indexName").toString();
-				Object indexTypeObj = signleIndex.get("uniqueness");
-				if (indexTypeObj != null) {
-					isUnique = indexTypeObj.toString().equals("UNIQUE");
+				if (primaryIndexName.equals(indexName)) {
+					isPrimary = true;
+					isVisitPrimary = true;
+				} else {
+					Object indexTypeObj = signleIndex.get("uniqueness");
+					if (indexTypeObj != null) {
+						isUnique = indexTypeObj.toString().equals("UNIQUE");
+					}
 				}
-			
+				
 				if (isPrimary) {
 					columnDTO.setIndexType(IndexTypeEnum.PRIMARY);
 				} else if (isUnique) {
@@ -440,6 +458,10 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 			indexDTO.setCaption(indexName);
 			indexDTO.setDescription(caption);
 			
+			if (isVisitPrimary && primaryIndexName.equals(indexName)) {
+				continue;
+			}
+			
 			List<IndexLineDTO> indexLineDTOList = new ArrayList<IndexLineDTO>();
 			List<Map<String, Object>> values = e.getValue();
 			for (Map<String, Object> t : values) {
@@ -447,11 +469,15 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 				Boolean isPrimary = false;
 				Boolean isUnique = false;
 				
-				Object indexTypeObj = t.get("uniqueness");
-				if (indexTypeObj != null) {
-					isPrimary = indexTypeObj.toString().equals("UNIQUE");
+				if (primaryIndexName.equals(indexName)) {
+					isPrimary = true;
+				} else {
+					Object indexTypeObj = t.get("uniqueness");
+					if (indexTypeObj != null) {
+						isUnique = indexTypeObj.toString().equals("UNIQUE");
+					}
 				}
-			
+				
 				ColumnDTO columnDTO = new ColumnDTO();
 				columnDTO.setName(columnName);
 				
