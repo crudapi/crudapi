@@ -307,7 +307,6 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 			indexCommentMap.put(comment.get("indexName").toString(), commentStr);
 		}
 		
-		Boolean isVisitPrimary = false;
 		Map<String, Object> primaryMap = (Map<String, Object>)metaDataMap.get("primary");
 		String primaryIndexName = primaryMap.get("CONSTRAINT_NAME").toString();
 		
@@ -423,7 +422,10 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 				String indexName = signleIndex.get("indexName").toString();
 				if (primaryIndexName.equals(indexName)) {
 					isPrimary = true;
-					isVisitPrimary = true;
+					//autoIncrement
+					columnDTO.setAutoIncrement(true);
+					columnDTO.setInsertable(false);
+					columnDTO.setDisplayable(true);
 				} else {
 					Object indexTypeObj = signleIndex.get("uniqueness");
 					if (indexTypeObj != null) {
@@ -457,10 +459,6 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 			indexDTO.setName(indexName);
 			indexDTO.setCaption(indexName);
 			indexDTO.setDescription(caption);
-			
-			if (isVisitPrimary && primaryIndexName.equals(indexName)) {
-				continue;
-			}
 			
 			List<IndexLineDTO> indexLineDTOList = new ArrayList<IndexLineDTO>();
 			List<Map<String, Object>> values = e.getValue();
