@@ -231,7 +231,11 @@ public class LeafCondition implements Condition {
         		}  else if (dataType.equals(DataTypeEnum.DECIMAL)) {
         			newObj = new BigDecimal(objStr);
         		} else if (dataType.equals(DataTypeEnum.BOOL)) {
-        			newObj = Boolean.parseBoolean(objStr);
+        			if (objStr.equals("1") || objStr.toUpperCase().equals("TRUE")) {
+        				newObj = true;
+        			} else {
+            			newObj = Boolean.parseBoolean(objStr);
+        			}
         		}
 			} 
 			queryValueMap.put(valueParamNameList.get(i), newObj);

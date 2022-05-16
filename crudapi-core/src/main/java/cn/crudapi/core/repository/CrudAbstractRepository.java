@@ -865,10 +865,15 @@ public abstract class CrudAbstractRepository {
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {
+		
+		List<Map<String, Object>> databaseList =  namedParameterJdbcTemplate.getJdbcTemplate().queryForList("SELECT database() AS tableSchema");
+		String tableSchema = databaseList.get(0).get("tableSchema").toString();
+		
 		List<Map<String, Object>> mapList =  namedParameterJdbcTemplate.getJdbcTemplate().queryForList("SHOW TABLE STATUS");
 		List<Map<String, Object>> newMapList =  new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> t : mapList) {
 			Map<String, Object> newMap = new HashMap<String, Object>();
+			newMap.put("tableSchema", tableSchema);
 			newMap.put("tableName", t.get("Name"));
 			newMap.put("comment", t.get("Comment"));
 			newMapList.add(newMap);
