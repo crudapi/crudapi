@@ -1326,7 +1326,7 @@ public class TableServiceImpl implements TableService {
             if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
                 String fkName = tableRelationDTO.getFromColumnDTO().getName();
                 Object obj = paramMap.get(relationName);
-                if (obj != null) {
+                if (paramMap.get(fkName) == null && obj != null) {
                 	if (tableDTO.getColumn(fkName).getMultipleValue()) {
                 		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
                 		List<String> valueList =  new ArrayList<String>();
