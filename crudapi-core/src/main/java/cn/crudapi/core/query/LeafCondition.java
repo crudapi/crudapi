@@ -274,6 +274,7 @@ public class LeafCondition implements Condition {
             case NOTIN: 
             case IN: 
             	querySql = toQuerySqlForIN();
+            	break;
             case ISNULL:
             	querySql = toQuerySqlForISNULL();
                 break;
