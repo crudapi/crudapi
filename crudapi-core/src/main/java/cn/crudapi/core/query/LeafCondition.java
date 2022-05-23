@@ -183,8 +183,9 @@ public class LeafCondition implements Condition {
 			});
 			
 			return newValueList;
-		} else if (OperatorTypeEnum.INSELECT.equals(operatorType)) {
-			return inCondition.toQueryValues();
+		} else if (OperatorTypeEnum.INSELECT.equals(operatorType)
+			|| OperatorTypeEnum.NOTINSELECT.equals(operatorType)) {
+			return inCondition == null ? new ArrayList<Object>() : inCondition.toQueryValues();
 		}
 		return valueList == null ? new ArrayList<Object>() : valueList;
 	}
@@ -195,8 +196,9 @@ public class LeafCondition implements Condition {
 			throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "condition is not init");
 		}
 		
-		if (OperatorTypeEnum.INSELECT.equals(operatorType)) {
-			return inCondition.toQueryValueMap();
+		if (OperatorTypeEnum.INSELECT.equals(operatorType)
+			|| OperatorTypeEnum.NOTINSELECT.equals(operatorType)) {
+			return inCondition == null ? new HashMap<String, Object>() : inCondition.toQueryValueMap();
 		}
 		
 		List<Object> newValueList = valueList;
@@ -269,9 +271,9 @@ public class LeafCondition implements Condition {
             case BETWEEN:
             	querySql = toQuerySqlForBETWEEN();
                 break;
+            case NOTIN: 
             case IN: 
             	querySql = toQuerySqlForIN();
-                break;
             case ISNULL:
             	querySql = toQuerySqlForISNULL();
                 break;
@@ -279,6 +281,7 @@ public class LeafCondition implements Condition {
             	querySql = toQuerySqlForISNOTNULL();
                 break; 
             case INSELECT:
+            case NOTINSELECT:
             	querySql = toQuerySqlForINSELECT();
                 break;
             default:
@@ -392,7 +395,12 @@ public class LeafCondition implements Condition {
 
        StringBuilder sb = new StringBuilder();
    	   sb.append(toSqlName(columnName));
-       sb.append(" IN (");
+   	   if (operatorType.equals(OperatorTypeEnum.IN)) {
+   		   sb.append(" IN (");
+   	   } else {
+   		   sb.append(" NOT IN ("); 
+   	   }
+       
        sb.append(whereValues);
        sb.append(")");
        
@@ -421,11 +429,17 @@ public class LeafCondition implements Condition {
        String querySql = "";
 
        String selectSql = "SELECT " + toSqlName(inColumnName) + " FROM " + toSqlName(inTableName);
-       selectSql += " WHERE ";
-       selectSql += inCondition.toQuerySql();
+       if (inCondition != null) {
+    	   selectSql += " WHERE ";
+           selectSql += inCondition.toQuerySql();
+       }
        
-       querySql = toSqlName(columnName) + " IN (" + selectSql + ")";
-
+       if (operatorType.equals(OperatorTypeEnum.INSELECT)) {
+    	   querySql = toSqlName(columnName) + " IN (" + selectSql + ")";
+   	   } else {
+   		   querySql = toSqlName(columnName) + " NOT IN (" + selectSql + ")";
+   	   }
+       
        return querySql;
     }
 }
