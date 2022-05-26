@@ -66,19 +66,24 @@ public class LeafCondition implements Condition {
 		
 		return seq;
 	}
-	public String toSqlName(String colunmName) {
-        StringBuilder sb = new StringBuilder();
 
-        if (colunmName.equals("*")) {
-          return colunmName;
-        } else {
-    	  sb.append(sqlQuotation);
-          sb.append(colunmName);
-          sb.append(sqlQuotation);
-        }
-       
-        return sb.toString();
-    }
+	public String toSqlName(String colunmName) {
+		if (colunmName.equals("*")) {
+			return colunmName;
+		} else {
+			String[] colunmNameArray = colunmName.split("\\.");
+			List<String> colunmNameList = new ArrayList<String>();
+			for (String t :colunmNameArray) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(sqlQuotation);
+				sb.append(t);
+				sb.append(sqlQuotation);
+				colunmNameList.add(sb.toString());
+			}
+			return String.join(".", colunmNameList);
+		}
+	}
+
 	
 	public String toSqlValue(String colunmName) {
 		if (!namedParameter) {
