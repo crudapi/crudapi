@@ -370,10 +370,10 @@ CREATE TABLE "ca_meta_table_relation" (
   "fromTableId" INT DEFAULT NULL,
   "toColumnId" INT DEFAULT NULL,
   "toTableId" INT DEFAULT NULL,
-  CONSTRAINT "fk_bsm_table_relation_from_column_id" FOREIGN KEY ("fromColumnId") REFERENCES "ca_meta_column" ("id"),
-  CONSTRAINT "fk_bsm_table_relation_from_table_id" FOREIGN KEY ("fromTableId") REFERENCES "ca_meta_table" ("id"),
-  CONSTRAINT "fk_bsm_table_relation_to_column_id" FOREIGN KEY ("toColumnId") REFERENCES "ca_meta_column" ("id"),
-  CONSTRAINT "fk_bsm_table_relation_to_table_id" FOREIGN KEY ("toTableId") REFERENCES "ca_meta_table" ("id")
+  CONSTRAINT "fk_bsm_t_r_from_column_id" FOREIGN KEY ("fromColumnId") REFERENCES "ca_meta_column" ("id"),
+  CONSTRAINT "fk_bsm_t_r_from_table_id" FOREIGN KEY ("fromTableId") REFERENCES "ca_meta_table" ("id"),
+  CONSTRAINT "fk_bsm_t_r_to_column_id" FOREIGN KEY ("toColumnId") REFERENCES "ca_meta_column" ("id"),
+  CONSTRAINT "fk_bsm_t_r_to_table_id" FOREIGN KEY ("toTableId") REFERENCES "ca_meta_table" ("id")
 );
 
 ALTER TABLE "ca_meta_table_relation" ADD CONSTRAINT "uq_ca_table_relation" UNIQUE("fromTableId","toTableId","relationType","fromColumnId","toColumnId");
@@ -757,7 +757,7 @@ begin
 end;
 /
 
-create or replace trigger "ca_meta_table_relation_tg_insert" before insert on "ca_meta_table_relation" for each row
+create or replace trigger "ca_meta_t_r_tg_insert" before insert on "ca_meta_table_relation" for each row
 begin
   select "ca_meta_table_relation_id".nextval into:new."id" from dual;
 end;
