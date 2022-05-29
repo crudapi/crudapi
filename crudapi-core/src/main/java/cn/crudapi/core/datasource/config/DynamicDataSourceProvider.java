@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -104,9 +105,16 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	List<Map<String, String>> dataSourceNames = this.getDataSourceNames();
     	String dataSource = DataSourceContextHolder.getDataSource();
     	
-    	return dataSourceNames.stream()
+    	Optional<Map<String, String>> op = dataSourceNames.stream()
     	.filter(t -> t.get("name").toString().equals(dataSource))
-    	.findFirst().get().get("database");
+    	.findFirst();
+    	if (op.isPresent()) {
+    		return op.get().get("database");
+    	} else {
+	    	return dataSourceNames.stream()
+	    	.filter(t -> t.get("name").toString().equals("primary"))
+	    	.findFirst().get().get("database");
+    	}
     }
     
     
