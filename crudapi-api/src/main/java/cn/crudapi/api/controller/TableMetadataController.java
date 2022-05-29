@@ -2,14 +2,12 @@ package cn.crudapi.api.controller;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.datasource.config.DataSourceContextHolder;
+import cn.crudapi.core.datasource.config.DynamicDataSourceProvider;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
@@ -41,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags ="表管理")
 @RestController
-@RequestMapping("/api/metadata/tables")
+@RequestMapping("/api/metadata")
 public class TableMetadataController {
 	@Autowired
 	private TableMetadataService tableMetadataService;
@@ -51,9 +51,12 @@ public class TableMetadataController {
 
 	@Autowired
 	private MetadataService metadataService;
+	
+	@Autowired
+	private DynamicDataSourceProvider dynamicDataSourceProvider;
 
 	@ApiOperation(value="创建表")
-	@PostMapping()
+	@PostMapping("/tables")
 	public ResponseEntity<Long> create(@RequestBody @Validated TableDTO tableDTO) {
 		Long tableId = tableMetadataService.create(tableDTO);
 
@@ -62,9 +65,8 @@ public class TableMetadataController {
 
 	
 	@ApiOperation(value="批量创建表")
-	@PostMapping("/batch")
-	public ResponseEntity<List<Long>> batchCreate(@RequestBody @Validated List<TableDTO> tableDTOs) {
-		List<Long> tableIds = new ArrayList<Long>();
+	@PostMapping("/tables/batch")
+	public ResponseEntity<List<Long>> batchCreate(@RequestBody @Validated List<TableDTO> tableDTOs) {List<Long> tableIds = new ArrayList<Long>();
 		for (TableDTO tableDTO : tableDTOs) { 
 			Long tableId = tableMetadataService.create(tableDTO);
 			tableIds.add(tableId);
@@ -74,7 +76,7 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="修改表")
-	@PatchMapping(value = "/{tableId}")
+	@PatchMapping(value = "/tables/{tableId}")
 	public ResponseEntity<Void> update(@PathVariable("tableId") Long tableId, @RequestBody TableDTO tableDTO) {
 		tableMetadataService.update(tableId, tableDTO);
 
@@ -82,7 +84,7 @@ public class TableMetadataController {
 	}
 
 	@ApiOperation(value="获取表")
-	@GetMapping(value = "/{tableId}")
+	@GetMapping(value = "/tables/{tableId}")
 	public ResponseEntity<TableDTO> get(@PathVariable("tableId") Long tableId) {
 		TableDTO tableDTO = tableMetadataService.get(tableId);
 		if (tableDTO == null) {
@@ -93,7 +95,7 @@ public class TableMetadataController {
 	}
 
 	@ApiOperation(value="获取表")
-	@GetMapping(value = "/name/{tableName}")
+	@GetMapping(value = "/tables/name/{tableName}")
 	public ResponseEntity<TableDTO> get(@PathVariable("tableName") String tableName) {
 		TableDTO tableDTO = tableMetadataService.get(tableName);
 		if (tableDTO == null) {
@@ -104,7 +106,7 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="获取表元数据")
-	@GetMapping(value = "/metadatas/{tableName}")
+	@GetMapping(value = "/tables/metadatas/{tableName}")
 	public ResponseEntity<Map<String, Object>> getMetaData(@PathVariable("tableName") String tableName) {
 		Map<String, Object> map = tableMetadataService.getMetaData(tableName);
 		
@@ -112,7 +114,7 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="获取表元数据列表")
-	@GetMapping(value = "/metadatas")
+	@GetMapping(value = "/tables/metadatas")
 	public ResponseEntity<List<Map<String, Object>>> getMetaDatas() {
 		List<Map<String, Object>> mapList = tableMetadataService.getMetaDatas();
 		
@@ -121,7 +123,7 @@ public class TableMetadataController {
 	
 
 	@ApiOperation(value="逆向表")
-	@PostMapping("/metadatas/reverse/{tableName}")
+	@PostMapping("/tables/metadatas/reverse/{tableName}")
 	public ResponseEntity<Long> reverseMetaData(@PathVariable("tableName") String tableName) {
 		Long tableId = tableMetadataService.reverseMetaData(tableName);
 
@@ -129,7 +131,7 @@ public class TableMetadataController {
 	}
 	
 	@ApiOperation(value="批量逆向表")
-	@PostMapping("/metadatas/reverse")
+	@PostMapping("/tables/metadatas/reverse")
 	public ResponseEntity<List<Long>> batchReverseMetaData(@RequestBody(required = false) List<String> tableNameList) {
 		List<Long> ids = new ArrayList<>();
 		if (tableNameList == null || tableNameList.size() == 0) {
@@ -142,7 +144,7 @@ public class TableMetadataController {
 	}
 	
     @ApiOperation(value="查询个数")
-	@GetMapping(value = "/count")
+	@GetMapping(value = "/tables/count")
 	public ResponseEntity<Long> count(@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			HttpServletRequest request) {
@@ -152,26 +154,26 @@ public class TableMetadataController {
 
 		return new ResponseEntity<Long>(count, HttpStatus.OK);
 	}
-    
-	@ApiOperation(value="查询表")
-	@GetMapping()
-	public ResponseEntity<List<TableDTO>> list(@RequestParam(value = "filter", required = false) String filter,
+    @ApiOperation(value="查询表")
+	@GetMapping("/tables")
+	public ResponseEntity<List<TableDTO>> list(
+			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			@RequestParam(value = "offset", required = false) Integer offset,
 			@RequestParam(value = "limit", required = false) Integer limit,
 			@RequestParam(value = "orderby", required = false) String orderby,
 			HttpServletRequest request) {
-		Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
+    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
 		
 		List<TableDTO> tableDTOList = tableMetadataService.list(filter, search, condition, offset, limit, orderby);
 
 		return new ResponseEntity<List<TableDTO>>(tableDTOList, HttpStatus.OK);
 	}
-	
+    
     @ApiOperation(value="导入表")
-	@PostMapping(value = "/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	@PostMapping(value = "/tables/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Void> importData(@RequestPart MultipartFile file) {
-		Map<String, Object> map = fileService.upload(file);
+    	Map<String, Object> map = fileService.upload(file);
 		String fileName = map.get("name").toString();
 		File tempFile = fileService.getFile(fileName);
 		metadataService.importData(tempFile);
@@ -181,14 +183,14 @@ public class TableMetadataController {
     }
     
 	@ApiOperation(value="导出表")
-	@PostMapping("/export")
+	@PostMapping("/tables/export")
     public ResponseEntity<String> getExportFile(@RequestBody(required = false) List<Long> idList) {
 		String fileName = metadataService.getExportFile("crudapi", idList);
         return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
     }
 	
 	@ApiOperation(value="删除表")
-	@DeleteMapping(value = "/{tableId}")
+	@DeleteMapping(value = "/tables/{tableId}")
 	public ResponseEntity<Void> delete(@PathVariable("tableId") Long tableId,
 			@RequestParam(value = "isDropPhysicalTable", required = false) Boolean isDropPhysicalTable) {
 		tableMetadataService.delete(tableId, isDropPhysicalTable);
@@ -197,7 +199,7 @@ public class TableMetadataController {
 	}
 
 	@ApiOperation(value="批量删除表")
-	@DeleteMapping()
+	@DeleteMapping("/tables")
 	public ResponseEntity<Void> batchDelete(@RequestBody(required = false) List<Long> idList,
 			@RequestParam(value = "isDropPhysicalTable", required = false) Boolean isDropPhysicalTable) {
 		if (idList == null) {
@@ -210,5 +212,14 @@ public class TableMetadataController {
 		}
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
+	
+
+	@ApiOperation(value="查询数据源")
+	@GetMapping("/dataSources")
+	public ResponseEntity<List<Map<String, String>>> listDataSource(HttpServletRequest request) {
+		List<Map<String, String>> dataSourceNames = dynamicDataSourceProvider.getDataSourceNames();
+		
+		return new ResponseEntity<List<Map<String, String>>>(dataSourceNames, HttpStatus.OK);
 	}
 }

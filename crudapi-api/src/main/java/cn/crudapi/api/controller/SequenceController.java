@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 import cn.crudapi.core.service.SequenceService;
 
 import io.swagger.annotations.Api;

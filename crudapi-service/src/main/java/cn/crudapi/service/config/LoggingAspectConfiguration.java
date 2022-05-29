@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+import cn.crudapi.service.aop.DataSourceAspect;
 import cn.crudapi.service.aop.LoggingAspect;
 
 @Configuration
@@ -13,4 +14,10 @@ public class LoggingAspectConfiguration {
 	public LoggingAspect loggingAspect() {
 		return new LoggingAspect();
 	}
+	
+	@Bean
+	public DataSourceAspect dataSourceAspect() {
+		return new DataSourceAspect();
+	}
+	
 }

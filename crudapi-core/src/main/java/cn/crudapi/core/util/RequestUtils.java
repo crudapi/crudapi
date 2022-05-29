@@ -24,7 +24,7 @@ public final class RequestUtils {
 	
 
 	public static Map<String, Object> getParams(HttpServletRequest request) {
-	   List<String> blackList = new ArrayList<>(Arrays.asList("select", "expand", "filter", "search", "offset", "limit", "orderby"));
+	   List<String> blackList = new ArrayList<>(Arrays.asList("select", "expand", "filter", "search", "offset", "limit", "orderby", "dataSource"));
 	      
        return getParams(request, blackList);  
 	}

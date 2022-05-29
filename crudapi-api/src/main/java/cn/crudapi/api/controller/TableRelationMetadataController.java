@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 import cn.crudapi.core.dto.TableRelationDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
@@ -92,7 +93,7 @@ public class TableRelationMetadataController {
 	public ResponseEntity<Long> count(@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			HttpServletRequest request) {
-    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
+		Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
     	
     	Long count  = tableRelationMetadataService.count(filter, search, condition);
 
@@ -124,8 +125,7 @@ public class TableRelationMetadataController {
 		    headers.add("Expires", "0");
 		    headers.add("Last-Modified", new Date().toString());
 		    headers.add("ETag", String.valueOf(System.currentTimeMillis()));
-		 
-			List<TableRelationDTO> tableRelationDTOList = tableRelationMetadataService.listAll();
+		    List<TableRelationDTO> tableRelationDTOList = tableRelationMetadataService.listAll();
 
 		    return ResponseEntity
 		            .ok()

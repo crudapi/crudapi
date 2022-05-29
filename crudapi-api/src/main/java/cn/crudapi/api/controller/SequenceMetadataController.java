@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
@@ -49,7 +50,7 @@ public class SequenceMetadataController {
 	@ApiOperation(value="修改序列号")
     @PatchMapping(value = "/{sequenceId}")
     public ResponseEntity<Void> update(@PathVariable("sequenceId") Long sequenceId, @RequestBody SequenceDTO sequenceDTO) {
-        sequenceMetadataService.update(sequenceId, sequenceDTO);
+		sequenceMetadataService.update(sequenceId, sequenceDTO);
 
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
@@ -57,7 +58,7 @@ public class SequenceMetadataController {
 	@ApiOperation(value="获取序列号")
     @GetMapping(value = "/{sequenceId}")
     public ResponseEntity<SequenceDTO> get(@PathVariable("sequenceId") Long sequenceId) {
-        SequenceDTO sequenceDTO = sequenceMetadataService.get(sequenceId);
+		SequenceDTO sequenceDTO = sequenceMetadataService.get(sequenceId);
         if (sequenceDTO == null) {
             throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, sequenceId);
         }
@@ -68,7 +69,7 @@ public class SequenceMetadataController {
 	@ApiOperation(value="获取序列号")
     @GetMapping(value = "/name/{sequenceName}")
     public ResponseEntity<SequenceDTO> getByName(@PathVariable("sequenceName") String sequenceName) {
-        SequenceDTO sequenceDTO = sequenceMetadataService.get(sequenceName);
+		SequenceDTO sequenceDTO = sequenceMetadataService.get(sequenceName);
         if (sequenceDTO == null) {
             throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, sequenceName);
         }
@@ -113,8 +114,7 @@ public class SequenceMetadataController {
 		    headers.add("Expires", "0");
 		    headers.add("Last-Modified", new Date().toString());
 		    headers.add("ETag", String.valueOf(System.currentTimeMillis()));
-		 
-			List<SequenceDTO> sequenceDTOList = sequenceMetadataService.listAll();
+		    List<SequenceDTO> sequenceDTOList = sequenceMetadataService.listAll();
 
 		    return ResponseEntity
 		            .ok()

@@ -31,6 +31,7 @@ import cn.crudapi.core.enumeration.EngineEnum;
 import cn.crudapi.core.enumeration.IndexStorageEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
+import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.query.LeafCondition;
 import cn.crudapi.core.template.TemplateParse;
@@ -51,6 +52,11 @@ public abstract class CrudAbstractRepository {
 	public String getDateBaseName() {
 		return "sql";
 	}
+	
+	public String getSchema() {
+		return "crudapi";
+	}
+	
 	
 	public String getSqlQuotation() {
 		return "`";
@@ -779,12 +785,22 @@ public abstract class CrudAbstractRepository {
 	
 	//SELECT table_name FROM information_schema.TABLES WHERE table_name ='yourname';
 	public boolean isExistTable(String tableName) {
-		LeafCondition condition = new LeafCondition();
-		condition.setColumnName("table_name");
-		condition.setValue(tableName);
-		condition.setOperatorType(OperatorTypeEnum.EQ);
+		LeafCondition condition1 = new LeafCondition();
+		condition1.setColumnName("table_schema");
+		condition1.setValue(getSchema());
+		condition1.setOperatorType(OperatorTypeEnum.EQ);
 		
-		Long count = this.count("information_schema.TABLES", null, condition);
+		LeafCondition condition2 = new LeafCondition();
+		condition2.setColumnName("table_name");
+		condition2.setValue("tableName");
+		condition2.setOperatorType(OperatorTypeEnum.EQ);
+		
+		CompositeCondition condition = new CompositeCondition();
+		condition.add(condition1);
+		condition.add(condition2);
+		
+		
+		Long count = this.count("information_schema.tables", condition);
 		
         return count > 0;
 	}

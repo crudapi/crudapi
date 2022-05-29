@@ -5,7 +5,7 @@
   <parent>
     <groupId>cn.crudapi</groupId>
     <artifactId>crudapi-parent</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
   </parent>
   <artifactId>crudapi-service</artifactId>
   <name>crudapi-service</name>
