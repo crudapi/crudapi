@@ -12,9 +12,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
- 
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -76,11 +79,4 @@ public class DynamicDataSourceConfig {
         return new NamedParameterJdbcTemplate(dynamicDataSource());
     }
 
-	public DataSourceProperties getDataSourceProperties() {
-		return dataSourceProperties;
-	}
-
-	public void setDataSourceProperties(DataSourceProperties dataSourceProperties) {
-		this.dataSourceProperties = dataSourceProperties;
-	}
 }

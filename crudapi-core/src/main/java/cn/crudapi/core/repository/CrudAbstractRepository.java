@@ -19,6 +19,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import cn.crudapi.core.constant.ApiErrorCode;
+import cn.crudapi.core.datasource.config.DynamicDataSourceProvider;
 import cn.crudapi.core.dto.ColumnDTO;
 import cn.crudapi.core.dto.IndexDTO;
 import cn.crudapi.core.dto.IndexLineDTO;
@@ -48,13 +49,17 @@ public abstract class CrudAbstractRepository {
 	@Autowired
 	private TemplateParse templateParse;
 	
+	@Autowired
+	private DynamicDataSourceProvider dynamicDataSourceProvider;
+	
+	
 	
 	public String getDateBaseName() {
 		return "sql";
 	}
 	
 	public String getSchema() {
-		return "crudapi";
+		return dynamicDataSourceProvider.getDatabaseName();
 	}
 	
 	
