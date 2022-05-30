@@ -79,7 +79,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	List<Map<String, String>> dataSourceNames = new ArrayList<Map<String, String>>();
     	Map<String, String> dataSourceNameMap = new HashMap<String, String>();
     	dataSourceNameMap.put("name", "primary");
-    	dataSourceNameMap.put("caption", "primary");
+    	dataSourceNameMap.put("caption", "主数据源");
     	dataSourceNameMap.put("database", parseDatabaseName(dataSourceProperties));
     	dataSourceNames.add(dataSourceNameMap);
     	

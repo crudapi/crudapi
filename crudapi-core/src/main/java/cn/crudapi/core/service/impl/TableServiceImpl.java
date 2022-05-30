@@ -575,8 +575,13 @@ public class TableServiceImpl implements TableService {
     	mainTableQueryData.setTableDataMapList(mainTableDataMapList);
     	tableQueryDataStack.push(mainTableQueryData);
       
+    	int count = 0;
         //遍历栈
         while (!tableQueryDataStack.isEmpty()) {
+        	if (count > 9999) {
+        		throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "表关系出现死循环，异常终止！");
+        	}
+        	++count;
         	//top出栈
         	QueryData topTableQueryData = tableQueryDataStack.pop();
         	TableDTO topTableDTO = topTableQueryData.getTableDTO();
@@ -755,6 +760,8 @@ public class TableServiceImpl implements TableService {
                 }
             }
         }
+        
+        log.info("visit stack count: " + count);
         
         return mainTableDataMapList;
     }
