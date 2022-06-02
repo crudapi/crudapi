@@ -184,9 +184,8 @@ public class TableServiceImpl implements TableService {
                 		String key = columnDTO.getName();
                 		
                 		Cell cell = sheet.getRow(row).getCell(col);
-                		String cellStr = getString(cell);
-                		Object newObj = cellStr;
-                		if (cellStr != null && !cellStr.toString().isEmpty()) {
+                		Object newObj = null;
+                		if (cell != null) {
                 			if (columnDTO.getDataType().equals(DataTypeEnum.BIGINT)) {
                     			newObj = getLong(cell);
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.INT)) {
@@ -200,13 +199,15 @@ public class TableServiceImpl implements TableService {
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.DECIMAL)) {
                     			newObj = getBigDecimal(cell);
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
-                    			newObj = encodePassword(cellStr);
+                    			newObj = encodePassword(getString(cell));
                             } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
                     			newObj = new Timestamp(getDate(cell));
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
                     			newObj = new Date(getDate(cell));
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
                     			newObj = new Time(getDate(cell));
+                    		} else {
+                    			newObj = getString(cell);
                     		}
                 		}
                 		
@@ -822,6 +823,7 @@ public class TableServiceImpl implements TableService {
     private String getString(Cell cell) {
     	String value = null;
 		try {
+			//设置单元格类型
 			cell.setCellType(CellType.STRING);
 			value = cell.getStringCellValue();
 		} catch (Exception e) {
@@ -852,7 +854,6 @@ public class TableServiceImpl implements TableService {
 	private Integer getInteger(Cell cell) {
 		Integer value = null;
 		try {
-			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.intValue();
 		} catch (Exception e) {
@@ -865,7 +866,6 @@ public class TableServiceImpl implements TableService {
 	private Long getLong(Cell cell) {
 		Long value = null;
 		try {
-			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.longValue();
 		} catch (Exception e) {
@@ -878,7 +878,6 @@ public class TableServiceImpl implements TableService {
 	private Double getDouble(Cell cell) {
 		Double value = null;
 		try {
-			cell.setCellType(CellType.NUMERIC);
 			value = cell.getNumericCellValue();
 		} catch (Exception e) {
 			log.info(e.getMessage());
@@ -890,7 +889,6 @@ public class TableServiceImpl implements TableService {
 	private Float getFloat(Cell cell) {
 		Float value = null;
 		try {
-			cell.setCellType(CellType.NUMERIC);
 			Double obj = cell.getNumericCellValue();
 			value = obj.floatValue();
 		} catch (Exception e) {
