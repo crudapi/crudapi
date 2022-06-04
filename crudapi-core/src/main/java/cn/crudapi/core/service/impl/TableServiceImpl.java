@@ -910,13 +910,31 @@ public class TableServiceImpl implements TableService {
 			if (cell.getCellType().equals(CellType.STRING)) {
 				String str = cell.getStringCellValue();
 				if (str != null) {
-					date = sdf.parse(str);
+					try {
+						value = Long.parseLong(str);
+					} catch (Exception e) {
+						log.warn("CellType.STRING try parase long:" + e.getMessage());
+					}
+					
+					if (value == null) {
+						date = sdf.parse(str);
+						value = date.getTime();
+					}
 				}
 			} else {
 				date  = cell.getDateCellValue();
+				log.info(sdf.format(date));
+				value = date.getTime();
+				
+				try {
+					String str = getString(cell);
+					if (str != null) {
+						value = Long.parseLong(str);
+					}
+				} catch (Exception e) {
+					log.warn("CellType.NUMERIC try parase long:" + e.getMessage());
+				}
 			}
-			
-			value = date.getTime();
 		} catch (Exception e) {
 			log.info(e.getMessage());
 		}
