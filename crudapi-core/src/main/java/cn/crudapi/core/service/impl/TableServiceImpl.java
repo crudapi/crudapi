@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -201,11 +202,14 @@ public class TableServiceImpl implements TableService {
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
                     			newObj = encodePassword(getString(cell));
                             } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
-                    			newObj = new Timestamp(getDate(cell));
+                            	Long dateLong = getDate(cell);
+                    			newObj = dateLong != null ? new Timestamp(dateLong) : null;
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
-                    			newObj = new Date(getDate(cell));
+                    			Long dateLong = getDate(cell);
+                    			newObj = dateLong != null ? new Date(dateLong) : null;
                     		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
-                    			newObj = new Time(getDate(cell));
+                    			Long dateLong = getDate(cell);
+                    			newObj = dateLong != null ? new Time(dateLong) : null;
                     		} else {
                     			newObj = getString(cell);
                     		}
@@ -900,8 +904,18 @@ public class TableServiceImpl implements TableService {
 	
 	private Long getDate(Cell cell) {
 		Long value = null;
+		java.util.Date date = null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
-			java.util.Date date  = cell.getDateCellValue();
+			if (cell.getCellType().equals(CellType.STRING)) {
+				String str = cell.getStringCellValue();
+				if (str != null) {
+					date = sdf.parse(str);
+				}
+			} else {
+				date  = cell.getDateCellValue();
+			}
+			
 			value = date.getTime();
 		} catch (Exception e) {
 			log.info(e.getMessage());
