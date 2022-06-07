@@ -900,6 +900,27 @@ public class TableServiceImpl implements TableService {
 		return value;
 	}
 	
+	private Long convertCellToLong(Cell cell) {
+		Long value = null;
+		String str = cell.toString();
+		try {
+			value = Long.parseLong(str);
+		} catch (Exception e) {
+			log.warn("CellType.NUMERIC try parase long:" + e.getMessage());
+		}
+		
+		if (value == null) {
+			try {
+				BigDecimal b = new BigDecimal(str);
+				value = b.longValue();
+			} catch (Exception e) {
+				log.warn("CellType.NUMERIC try parase BigDecimal long:" + e.getMessage());
+			}
+		}
+		
+		return value;
+	}
+	
 	private Long getDate(Cell cell) {
 		Long value = null;
 		java.util.Date date = null;
@@ -924,13 +945,9 @@ public class TableServiceImpl implements TableService {
 				log.info(sdf.format(date));
 				value = date.getTime();
 				
-				try {
-					String str = cell.toString();
-					if (str != null) {
-						value = Long.parseLong(str);
-					}
-				} catch (Exception e) {
-					log.warn("CellType.NUMERIC try parase long:" + e.getMessage());
+				Long newValue = convertCellToLong(cell);
+				if (newValue != null) {
+					value = newValue;
 				}
 			}
 		} catch (Exception e) {
