@@ -827,8 +827,6 @@ public class TableServiceImpl implements TableService {
     private String getString(Cell cell) {
     	String value = null;
 		try {
-			//设置单元格类型
-			cell.setCellType(CellType.STRING);
 			value = cell.getStringCellValue();
 		} catch (Exception e) {
 			log.info(e.getMessage());
@@ -927,7 +925,7 @@ public class TableServiceImpl implements TableService {
 				value = date.getTime();
 				
 				try {
-					String str = getString(cell);
+					String str = cell.toString();
 					if (str != null) {
 						value = Long.parseLong(str);
 					}
