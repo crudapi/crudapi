@@ -229,6 +229,11 @@ public class FileServiceImpl implements FileService {
     }
 	
 	@Override
+	public String getUploadFullPathByUrl(String url) {
+		return ossFilePath + url;
+    }
+	
+	@Override
 	public String getFullUrl(String fileName) {
 		return ossUploadDomain + "/" + ossUploadPath + "/" + fileName;
     }

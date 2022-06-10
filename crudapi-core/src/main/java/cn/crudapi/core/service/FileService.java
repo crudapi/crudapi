@@ -40,4 +40,6 @@ public interface FileService {
 	String getUploadFullPath(String fileName);
 
 	String getUrl(String fileName);
+
+	String getUploadFullPathByUrl(String url);
 }
