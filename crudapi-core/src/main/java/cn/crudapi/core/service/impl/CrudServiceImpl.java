@@ -322,6 +322,12 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
+	public List<Map<String, Object>> list(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudServiceImpl->list");
+		return crudTemplate.list(sql, paramMap);
+	}
+	
+	@Override
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudServiceImpl->getJdbcTemplate");
 		return crudTemplate.getJdbcTemplate();
@@ -349,5 +355,25 @@ public class CrudServiceImpl implements CrudService {
 	public TableDTO reverseMetaData(String tableName) {
 		log.debug("CrudServiceImpl->reverseMetaData");
 		return crudTemplate.reverseMetaData(tableName);
+	}
+	
+	@Override
+	public String processTemplateToString(String templateName, String key, Object value) {
+		return crudTemplate.processTemplateToString(templateName, key, value);
+	}
+	
+	@Override
+	public String processTemplateToString(String templateName, Object dataModel) {
+		return crudTemplate.processTemplateToString(templateName, dataModel);
+	}
+	
+	@Override
+	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
+		return crudTemplate.processTemplateToString(templateBase,  templateName, key, value);
+	}
+	
+	@Override
+	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
+		return crudTemplate.processTemplateToString(templateBase,templateName, map);
 	}
 }

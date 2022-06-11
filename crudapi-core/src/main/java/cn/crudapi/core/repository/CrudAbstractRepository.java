@@ -836,6 +836,14 @@ public abstract class CrudAbstractRepository {
 
         return mapList;
 	}
+	
+	public List<Map<String, Object>> list(String sql, Map<String, Object> paramMap) {
+		List<Map<String, Object>> mapList = this.queryForList(sql, paramMap);
+		
+		log.info("CrudAbstractRepository->list->{}", mapList.size());
+
+        return mapList;
+	}
 
 	public List<Map<String, Object>> list(String tableName, Map<String, DataTypeEnum> dataTypeMap, Condition condition, String orderby, Integer offset, Integer limit) {
         return this.list(tableName, dataTypeMap, null, condition, orderby, offset, limit);
@@ -1190,6 +1198,14 @@ public abstract class CrudAbstractRepository {
 	
 	public String processTemplateToString(String templateName, Object dataModel) {
 		return templateParse.processTemplateToString(getDateBaseName(), templateName, dataModel);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
+		return templateParse.processTemplateToString(templateBase, getDateBaseName(), templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
+		return templateParse.processTemplateToString(templateBase, getDateBaseName(), templateName, map);
 	}
 	
 	private Map<String, Object> convertToKeyMap(Long id) { 

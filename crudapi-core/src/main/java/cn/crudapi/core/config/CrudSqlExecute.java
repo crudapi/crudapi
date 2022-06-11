@@ -17,6 +17,7 @@ import cn.crudapi.core.enumeration.EngineEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.repository.CrudAbstractFactory;
+import cn.crudapi.core.repository.CrudAbstractRepository;
 
 public class CrudSqlExecute {
 	private static final Logger log = LoggerFactory.getLogger(CrudSqlExecute.class);
@@ -286,6 +287,11 @@ public class CrudSqlExecute {
 		return crudFactory.list(tableName, classType);
 	}
 	
+	public List<Map<String, Object>> list(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudSqlExecute->list");
+		return crudFactory.list(sql, paramMap);
+	}
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudSqlExecute->getJdbcTemplate");
 		return crudFactory.getJdbcTemplate();
@@ -309,5 +315,21 @@ public class CrudSqlExecute {
 	public TableDTO reverseMetaData(String tableName) {
 		log.debug("CrudServiceImpl->reverseMetaData");
 		return crudFactory.reverseMetaData(tableName);
+	}
+	
+	public String processTemplateToString(String templateName, String key, Object value) {
+		return crudFactory.processTemplateToString(templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateName, Object dataModel) {
+		return crudFactory.processTemplateToString(templateName, dataModel);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
+		return crudFactory.processTemplateToString(templateBase,  templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
+		return crudFactory.processTemplateToString(templateBase,templateName, map);
 	}
 }

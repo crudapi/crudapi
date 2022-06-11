@@ -107,6 +107,8 @@ public interface CrudService {
 
 	List<Map<String, Object>> list(String tableName);
 	
+	List<Map<String, Object>> list(String sql, Map<String, Object> paramMap);
+
 	<T> List<T> list(String tableName, Condition condition, String orderby, Integer offset, Integer limit, Class<T> classType);
 
 	<T> List<T> list(String tableName, String orderby, Integer offset, Integer limit, Class<T> classType);
@@ -122,5 +124,14 @@ public interface CrudService {
 	Map<String, Object> getMetaData(String tableName);
 	
 	TableDTO reverseMetaData(String tableName);
+
+	String processTemplateToString(String templateName, String key, Object value);
+
+	String processTemplateToString(String templateName, Object dataModel);
+
+	String processTemplateToString(String templateBase, String templateName, String key, Object value);
+
+	String processTemplateToString(String templateBase, String templateName, Map<String, Object> map);
+
 
 }

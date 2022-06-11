@@ -316,6 +316,12 @@ public abstract class CrudAbstractFactory {
 		return repository.list(tableName, classType);
 	}
 	
+	public List<Map<String, Object>> list(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudAbstractFactory->list");
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.list(sql, paramMap);
+	}
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudAbstractFactory->getJdbcTemplate");
 		CrudAbstractRepository repository = this.getCrudRepository();
@@ -344,5 +350,26 @@ public abstract class CrudAbstractFactory {
 		log.debug("CrudAbstractFactory->reverseMetaData");
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.reverseMetaData(tableName);
+	}
+	
+
+	public String processTemplateToString(String templateName, String key, Object value) {
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.processTemplateToString(templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateName, Object dataModel) {
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.processTemplateToString(templateName, dataModel);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.processTemplateToString(templateBase,  templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.processTemplateToString(templateBase,templateName, map);
 	}
 }

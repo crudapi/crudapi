@@ -280,6 +280,11 @@ public class CrudTemplate {
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().list(tableName, classType);
 	}
 	
+	public List<Map<String, Object>> list(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudTemplate->list");
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().list(sql, paramMap);
+	}
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudTemplate->getJdbcTemplate");
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getJdbcTemplate();
@@ -303,5 +308,20 @@ public class CrudTemplate {
 	public TableDTO reverseMetaData(String tableName) {
 		log.debug("CrudServiceImpl->reverseMetaData");
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().reverseMetaData(tableName);
+	}
+	public String processTemplateToString(String templateName, String key, Object value) {
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().processTemplateToString(templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateName, Object dataModel) {
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().processTemplateToString(templateName, dataModel);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().processTemplateToString(templateBase,  templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().processTemplateToString(templateBase,templateName, map);
 	}
 }

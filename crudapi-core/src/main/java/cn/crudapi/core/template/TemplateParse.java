@@ -42,17 +42,20 @@ public class TemplateParse {
         return value;   
 	}
 	
-	private String getTemplate(String database, String templateName) {
+	private String getTemplate(String templateBase, String database, String templateName) {
 		ClassPathResource resource = null;
 		String templateValue = null;
         try {
-        	resource = new ClassPathResource(TEMPLTE_BASE + "/" + database + "/" + templateName);
+        	if (templateBase == null) {
+        		templateBase = TEMPLTE_BASE;
+        	}
+        	resource = new ClassPathResource(templateBase + "/" + database + "/" + templateName);
         	log.info(resource.getPath());
         	
         	templateValue = readInputStream(resource);
         	
         	if (database != "sql" && templateValue == null) {
-        		resource = new ClassPathResource(TEMPLTE_BASE + "/sql/" + templateName);
+        		resource = new ClassPathResource(templateBase + "/sql/" + templateName);
             	log.info("retry read:" + resource.getPath());
             	
             	templateValue = readInputStream(resource);
@@ -65,19 +68,13 @@ public class TemplateParse {
         return templateValue;
     }
 	
-	public String processTemplateToString(String database, String templateName, String key, Object value) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(key, value);
-		return processTemplateToString(database, templateName, map);
-	}
-	
-	public String processTemplateToString(String database, String templateName, Object dataModel) {
+	private String processTemplateToStringByModel(String templateBase, String database, String templateName, Object dataModel) {
 		String str = null;
         StringWriter stringWriter = new StringWriter();
         try {
             Configuration config = new Configuration(Configuration.VERSION_2_3_31);
             config.setNumberFormat("#");
-            String templateValue = getTemplate(database, templateName);
+            String templateValue = getTemplate(templateBase, database, templateName);
         	if (templateValue == null) {
         		return str;
         	}
@@ -95,4 +92,30 @@ public class TemplateParse {
         return str;
     }
 	
+	private String processTemplateToStringByKeyValue(String templateBase, String database, String templateName, String key, Object value) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(key, value);
+		return processTemplateToStringByModel(templateBase, database, templateName, map);
+	}
+	
+	
+	public String processTemplateToString(String database, String templateName, String key, Object value) {
+		return processTemplateToStringByKeyValue(null, database, templateName, key, value);
+	}
+	
+	public String processTemplateToString(String database, String templateName, Map<String, Object> map) {
+		return processTemplateToStringByModel(null, database, templateName, map);
+    }
+
+	public String processTemplateToString(String database, String templateName, Object dataModel) {
+		return processTemplateToStringByModel(null, database, templateName, dataModel);
+    }
+	
+	public String processTemplateToString(String templateBase, String database, String templateName, String key, Object value) {
+		return processTemplateToStringByKeyValue(templateBase, database, templateName, key, value);
+	}
+	
+	public String processTemplateToString(String templateBase, String database, String templateName, Map<String, Object> map) {
+		return processTemplateToStringByModel(templateBase, database, templateName, map);
+    }
 }
