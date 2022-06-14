@@ -937,7 +937,7 @@ public abstract class CrudAbstractRepository {
 		EngineEnum engineEnum = EngineEnum.valueOf(engine);
 
 		tableDTO.setPluralName(tableName);
-		tableDTO.setCaption(tableName);
+		tableDTO.setCaption(tableCaption);
 		tableDTO.setDescription(tableCaption);
 		tableDTO.setTableName(tableName);
 		tableDTO.setEngine(engineEnum);
@@ -986,7 +986,7 @@ public abstract class CrudAbstractRepository {
 			Object commentObj = column.get("Comment");
 			String caption = (commentObj != null ? commentObj.toString() : name);
 			columnDTO.setName(name);
-			columnDTO.setCaption(name);
+			columnDTO.setCaption(caption);
 			columnDTO.setDescription(caption);
 			columnDTO.setInsertable(true);
 			columnDTO.setUpdatable(true);

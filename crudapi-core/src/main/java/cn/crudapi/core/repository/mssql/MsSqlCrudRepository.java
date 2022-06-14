@@ -235,7 +235,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 			String comment = columnCommentMap.get(name);
 			String caption = (comment != null ? comment : name);
 			columnDTO.setName(name);
-			columnDTO.setCaption(name);
+			columnDTO.setCaption(caption);
 			columnDTO.setDescription(caption);
 			columnDTO.setInsertable(true);
 			columnDTO.setUpdatable(true);

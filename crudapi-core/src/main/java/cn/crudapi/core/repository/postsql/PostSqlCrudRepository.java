@@ -148,7 +148,7 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 		String tableCaption = (tableComment != null ? tableComment.toString() : tableName);
 		
 		tableDTO.setPluralName(tableName);
-		tableDTO.setCaption(tableName);
+		tableDTO.setCaption(tableCaption);
 		tableDTO.setDescription(tableCaption);
 		tableDTO.setTableName(tableName);
 		tableDTO.setEngine(EngineEnum.INNODB);
@@ -214,7 +214,7 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 			String comment = columnCommentMap.get(name);
 			String caption = (comment != null ? comment : name);
 			columnDTO.setName(name);
-			columnDTO.setCaption(name);
+			columnDTO.setCaption(caption);
 			columnDTO.setDescription(caption);
 			columnDTO.setInsertable(true);
 			columnDTO.setUpdatable(true);
