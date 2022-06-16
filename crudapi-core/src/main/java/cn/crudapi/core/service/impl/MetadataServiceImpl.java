@@ -87,8 +87,8 @@ public class MetadataServiceImpl implements MetadataService {
 				log.info(tableDTO.getName() + " oldTableId:" + tableDTO.getId());
 				
 				if (!Boolean.TRUE.equals(tableDTO.getReverse()) 
-					&& tableMetadataService.isExist(tableDTO.getName())) {
-					log.info("skip isExist table:" + tableDTO.getName());
+					&& tableMetadataService.isExist(tableDTO.getTableName())) {
+					log.info("skip isExist table:" + tableDTO.getTableName());
 					tableMap.put(tableDTO.getId(), tableDTO.getId());
 					continue;
 				}

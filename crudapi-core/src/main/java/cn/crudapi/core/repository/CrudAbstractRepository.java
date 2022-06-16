@@ -797,7 +797,7 @@ public abstract class CrudAbstractRepository {
 		
 		LeafCondition condition2 = new LeafCondition();
 		condition2.setColumnName("table_name");
-		condition2.setValue("tableName");
+		condition2.setValue(tableName);
 		condition2.setOperatorType(OperatorTypeEnum.EQ);
 		
 		CompositeCondition condition = new CompositeCondition();
