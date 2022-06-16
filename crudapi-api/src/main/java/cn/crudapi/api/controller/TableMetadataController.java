@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 import cn.crudapi.core.datasource.config.DynamicDataSourceProvider;
+import cn.crudapi.core.dto.MetadataDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
@@ -171,7 +172,7 @@ public class TableMetadataController {
 	}
     
     @ApiOperation(value="导入表")
-	@PostMapping(value = "/tables/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	@PostMapping(value = "/tables/file/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Void> importData(@RequestPart MultipartFile file) {
     	Map<String, Object> map = fileService.upload(file);
 		String fileName = map.get("name").toString();
@@ -181,6 +182,14 @@ public class TableMetadataController {
 		
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
+    
+    @ApiOperation(value="导入表")
+   	@PostMapping(value = "/tables/import")
+       public ResponseEntity<Void> importData(@RequestBody(required = true) MetadataDTO metadataDTO) {
+   		metadataService.importData(metadataDTO);
+   		
+       return new ResponseEntity<Void>(HttpStatus.CREATED);
+   }
     
 	@ApiOperation(value="导出表")
 	@PostMapping("/tables/export")

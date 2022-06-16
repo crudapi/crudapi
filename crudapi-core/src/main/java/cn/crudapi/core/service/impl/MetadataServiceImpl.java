@@ -53,6 +53,15 @@ public class MetadataServiceImpl implements MetadataService {
 			
 			MetadataDTO metadataDTO = JsonUtils.toObject(body, new TypeReference<MetadataDTO>(){});
 			
+			this.importData(metadataDTO);
+		} catch (Exception e) {
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "导入失败！" + e.getMessage()); 
+		}
+	}
+	
+	@Override
+	public void importData(MetadataDTO metadataDTO) {
+		try {
 			//seq
 			List<SequenceDTO> sequenceDTOs = metadataDTO.getSequenceDTOList();
 			Map<Long, Long> seqMap = new HashMap<Long, Long>();
