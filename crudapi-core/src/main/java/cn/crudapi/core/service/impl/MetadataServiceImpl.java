@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -59,7 +60,9 @@ public class MetadataServiceImpl implements MetadataService {
 		}
 	}
 	
+	
 	@Override
+	@Transactional
 	public void importData(MetadataDTO metadataDTO) {
 		try {
 			//seq
@@ -90,7 +93,7 @@ public class MetadataServiceImpl implements MetadataService {
 			}
 			
 			//table
-			Map<Long, Long> tableMap = new HashMap<Long, Long>();
+			Map<Long, TableDTO> tableMap = new HashMap<Long, TableDTO>();
 			List<Long> tableIds = new ArrayList<Long>();
 			for (TableDTO tableDTO : tableDTOs) { 
 				log.info(tableDTO.getName() + " oldTableId:" + tableDTO.getId());
@@ -98,25 +101,41 @@ public class MetadataServiceImpl implements MetadataService {
 				if (!Boolean.TRUE.equals(tableDTO.getReverse()) 
 					&& tableMetadataService.isExist(tableDTO.getTableName())) {
 					log.info("skip isExist table:" + tableDTO.getTableName());
-					tableMap.put(tableDTO.getId(), tableDTO.getId());
+					tableMap.put(tableDTO.getId(), tableDTO);
 					continue;
 				}
 				
 				Long newTableId = tableMetadataService.create(tableDTO);
-				log.info(tableDTO.getName() + " newTableId:" + newTableId);
-				tableMap.put(tableDTO.getId(), newTableId);
+				TableDTO newTableDTO = tableMetadataService.get(newTableId);
+				
+				log.info(tableDTO.getName() + " newTableId:" + newTableId +  ", newTableName:" + newTableDTO.getName());
+				tableMap.put(tableDTO.getId(), newTableDTO);
 				tableIds.add(newTableId);
 			}
 			
 			//relation
 			List<TableRelationDTO> tableRelationDTOs = metadataDTO.getTableRelationDTOList();
 			for (TableRelationDTO tableRelationDTO : tableRelationDTOs) {
+				Long fromTableId = tableRelationDTO.getFromTableDTO().getId();
+				Long toTableId = tableRelationDTO.getToTableDTO().getId();
+				
+				TableDTO newFromTable = tableMap.get(fromTableId);
+				TableDTO newToTable = tableMap.get(toTableId);
+				
+				if (newFromTable != null && newToTable != null) {
+					if (newFromTable.getId().equals(fromTableId)
+					&& newToTable.getId().equals(toTableId)) {
+						log.info(newFromTable.getName() + "," + newToTable.getName() + "relation is exist, skip!");
+						continue;
+					}
+				}
+				
 				tableRelationMetadataService.create(tableRelationDTO.getRelationType(), 
 						tableRelationDTO.getName(), 
 						tableRelationDTO.getCaption(), 
-						tableRelationDTO.getFromTableDTO().getName(), 
+						newFromTable == null ? tableRelationDTO.getFromTableDTO().getName() : newFromTable.getName(),
 						tableRelationDTO.getFromColumnDTO().getName(),
-						tableRelationDTO.getToTableDTO().getName(), 
+						newToTable == null ? tableRelationDTO.getToTableDTO().getName() : newToTable.getName(),
 						tableRelationDTO.getToColumnDTO().getName());
 			}
 		} catch (Exception e) {
