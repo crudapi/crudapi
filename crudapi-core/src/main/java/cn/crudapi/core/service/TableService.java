@@ -25,9 +25,9 @@ public interface TableService {
 	
 	void importData(String name, String fileName);
 
-	void update(String name, String id, Map<String, Object> newMap);
+	void update(String name, String id, Map<String, Object> newMap, Long userId);
 
-	String create(String name, Map<String, Object> map);
+	String create(String name, Map<String, Object> map, Long userId);
 
 	Condition convertConditon(String name, String filter, String search, Condition condition);
 

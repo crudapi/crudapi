@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cn.crudapi.core.service.TableService;
-import cn.crudapi.security.dto.GrantedAuthorityDTO;
-import cn.crudapi.security.dto.ResourceDTO;
+import cn.crudapi.core.dto.GrantedAuthorityDTO;
+import cn.crudapi.core.dto.ResourceDTO;
 import cn.crudapi.security.service.ResourceService;
 
 @Service

@@ -12,7 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.util.JwtUtil;
 
 import java.io.IOException;

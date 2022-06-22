@@ -2,8 +2,8 @@ package cn.crudapi.security.service;
 
 import java.util.List;
 
-import cn.crudapi.security.dto.GrantedAuthorityDTO;
-import cn.crudapi.security.dto.ResourceDTO;
+import cn.crudapi.core.dto.GrantedAuthorityDTO;
+import cn.crudapi.core.dto.ResourceDTO;
 
 public interface ResourceService {
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.service.CaUserDetailsService;
 
 import io.swagger.annotations.Api;

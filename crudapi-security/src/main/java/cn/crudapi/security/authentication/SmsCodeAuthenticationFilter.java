@@ -9,7 +9,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.util.JwtUtil;
 
 import java.io.IOException;

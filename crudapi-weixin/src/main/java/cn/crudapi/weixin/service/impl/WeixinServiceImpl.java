@@ -100,7 +100,7 @@ public class WeixinServiceImpl implements WeixinService {
 				map.put("enable", false);
 				map.put("log", data.toString());
 				
-				tableService.update(TABLE_NAME, "1", map);
+				tableService.update(TABLE_NAME, "1", map, null);
 			}
 			throw new BusinessException(ApiErrorCode.REST_ERROR, data.toString());
 		}
@@ -116,7 +116,7 @@ public class WeixinServiceImpl implements WeixinService {
 		map.put("jsapiTicket", jsapiTicket);
 		map.put("log", "success");
 		
-		tableService.update(TABLE_NAME, "1", map);
+		tableService.update(TABLE_NAME, "1", map, null);
 		
 		return data;
 	}

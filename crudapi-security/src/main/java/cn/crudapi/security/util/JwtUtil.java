@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.crudapi.core.util.JsonUtils;
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.service.impl.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

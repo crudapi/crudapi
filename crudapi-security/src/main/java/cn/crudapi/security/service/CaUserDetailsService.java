@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.UserDTO;
 
 public interface CaUserDetailsService {
 	UserDetails loadUserByOpenId(String openId);

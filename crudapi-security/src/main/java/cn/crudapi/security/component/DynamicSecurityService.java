@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.stereotype.Component;
 
-import cn.crudapi.security.dto.ResourceDTO;
+import cn.crudapi.core.dto.ResourceDTO;
 import cn.crudapi.security.service.ResourceService;
 
 @Component

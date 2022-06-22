@@ -26,10 +26,10 @@ import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
-import cn.crudapi.security.dto.GrantedAuthorityDTO;
-import cn.crudapi.security.dto.ResourceDTO;
-import cn.crudapi.security.dto.RoleDTO;
-import cn.crudapi.security.dto.UserDTO;
+import cn.crudapi.core.dto.GrantedAuthorityDTO;
+import cn.crudapi.core.dto.ResourceDTO;
+import cn.crudapi.core.dto.RoleDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.service.ResourceService;
 import cn.crudapi.security.service.CaUserDetailsService;
 
@@ -240,7 +240,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 	
 	@Override
 	public String create(Map<String, Object> map) {
-		return tableService.create(USER_TABLE_NAME, map);
+		return tableService.create(USER_TABLE_NAME, map, null);
 	}
 	
 	@Override

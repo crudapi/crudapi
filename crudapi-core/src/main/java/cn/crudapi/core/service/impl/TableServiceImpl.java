@@ -71,6 +71,10 @@ public class TableServiceImpl implements TableService {
 	
     public static final String COLUMN_CRAEAED_DATE = "createdDate";
     public static final String COLUMN_LAST_MODIFIED_DATE = "lastModifiedDate";
+    public static final String COLUMN_CRAEAE_BY_ID = "createById";
+    public static final String COLUMN_UPDATE_BY_ID= "updateById";
+    public static final String COLUMN_OWNER_ID = "ownerId";
+    
 
     private Pattern BCRYPT_PATTERN = Pattern
 			.compile("\\A\\$2(a|y|b)?\\$(\\d\\d)\\$[./0-9A-Za-z]{53}");
@@ -98,12 +102,12 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public String create(String name, Map<String, Object> map) {
+    public String create(String name, Map<String, Object> map, Long userId) {
         tableMetadataService.checkTable();
         
         TableDTO tableDTO = tableMetadataService.get(name);
         
-        Map<String, Object> recId = insertRecursion(tableDTO, map);
+        Map<String, Object> recId = insertRecursion(tableDTO, map, userId);
 
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
@@ -342,14 +346,14 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void update(String name, String id, Map<String, Object> newMap) {
+    public void update(String name, String id, Map<String, Object> newMap, Long userId) {
         TableDTO tableDTO = tableMetadataService.get(name);
         
         log.info("newMap = " + newMap.toString());
         
         Map<String, Object> recId = convertToRecId(tableDTO, id);
         
-        updateRecursion(tableDTO, recId, newMap);
+        updateRecursion(tableDTO, recId, newMap, userId);
         
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
@@ -1086,8 +1090,11 @@ public class TableServiceImpl implements TableService {
     }
     
 
-    private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap) {
-        List<String> columnNameList = new ArrayList<String>();
+    private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap, Long userId) {
+    	//userId
+    	newMap.put(COLUMN_UPDATE_BY_ID, userId);
+    	
+    	List<String> columnNameList = new ArrayList<String>();
         List<Object> valueList = new ArrayList<Object>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
             if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
@@ -1137,7 +1144,7 @@ public class TableServiceImpl implements TableService {
     	crudService.patch(physicalTableName, recId, dataMap);
     }
     
-    private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap) {
+    private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap,  Long userId) {
     	//获取旧表数据
         Map<String, Object> oldMap = selectRecursion(tableDTO, recId, null, null);
         log.info("oldMap = " + oldMap.toString());
@@ -1188,7 +1195,7 @@ public class TableServiceImpl implements TableService {
         }
         
         //3. 修改本表字段
-        updateMainOnly(tableDTO, recId, newMap);
+        updateMainOnly(tableDTO, recId, newMap, userId);
         
         //4. 一对多，删除，修改，添加, 一对一，修改，添加
         for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
@@ -1244,12 +1251,12 @@ public class TableServiceImpl implements TableService {
                         t.put(fkName, recId.get(pkName));
                         Map<String, Object> relationRecId = generateRecId(relationTableDTO, t);
                         log.info("updateRecursion relationRecId: " + relationRecId);
-                        updateRecursion(relationTableDTO, relationRecId, t);
+                        updateRecursion(relationTableDTO, relationRecId, t, userId);
                     });
                     
             		insertMapList.stream().forEach(t -> {
                         t.put(fkName, recId.get(pkName));
-                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t);
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userId);
                         log.info("insertRecursion relationRecId: " + relationRecId);
                     });
                 }
@@ -1266,12 +1273,12 @@ public class TableServiceImpl implements TableService {
                     
                     String newItemId = generateId(relationTableDTO, obj);
         			if (StringUtils.isAllEmpty(newItemId)) {
-                		Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj);
+                		Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userId);
                         log.info("insertRecursion relationRecId: " + relationRecId);
                 	} else {
                 		Map<String, Object> relationRecId = generateRecId(relationTableDTO, obj);
                         log.info("updateRecursion relationRecId: " + relationRecId);
-                        updateRecursion(relationTableDTO, relationRecId, obj);
+                        updateRecursion(relationTableDTO, relationRecId, obj, userId);
                 	}
                 }
             } 
@@ -1369,7 +1376,7 @@ public class TableServiceImpl implements TableService {
         return fullTextBodyMap;
     }
     
-    private Map<String, Object> insertRecursion(TableDTO tableDTO, Map<String, Object> paramMap) {
+    private Map<String, Object> insertRecursion(TableDTO tableDTO, Map<String, Object> paramMap, Long userId) {
         // 1. 多对一，一对一：本表字段平铺
         Long tableId = tableDTO.getId();
         List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
@@ -1399,7 +1406,7 @@ public class TableServiceImpl implements TableService {
         }
 
         // 2. 插入本表数据
-        Map<String, Object> recId = insertMainOnly(tableDTO, paramMap);
+        Map<String, Object> recId = insertMainOnly(tableDTO, paramMap, userId);
 
         // 3. 插入关联表数据
         for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
@@ -1415,7 +1422,7 @@ public class TableServiceImpl implements TableService {
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) paramMap.get(relationName);
                     mapList.stream().forEach(t -> {
                         t.put(fkName, recId.get(pkName));
-                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t);
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userId);
                         log.info("relationRecId: " + relationRecId);
                     });
                 }
@@ -1429,7 +1436,7 @@ public class TableServiceImpl implements TableService {
                     String pkName = tableRelationDTO.getFromColumnDTO().getName();
                     String fkName = tableRelationDTO.getToColumnDTO().getName();
                     obj.put(fkName, recId.get(pkName));
-                    Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj);
+                    Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userId);
                     log.info("relationRecId: " + relationRecId);
                 }
             } 
@@ -1438,7 +1445,14 @@ public class TableServiceImpl implements TableService {
         return recId;
     }
 
-    private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap) {
+    private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap, Long userId) {
+    	//userId
+    	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
+    	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+    	if (paramMap.get(COLUMN_OWNER_ID) == null) {
+    		paramMap.put(COLUMN_OWNER_ID, userId);
+    	}
+    	
     	Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
         if (fullTextBodyMap != null) {
           	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();

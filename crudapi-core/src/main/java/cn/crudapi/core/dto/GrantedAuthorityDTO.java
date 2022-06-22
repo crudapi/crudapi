@@ -1,4 +1,4 @@
-package cn.crudapi.security.dto;
+package cn.crudapi.core.dto;
 
 import java.util.Objects;
 

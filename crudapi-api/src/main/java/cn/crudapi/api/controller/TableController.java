@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,10 +24,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import cn.crudapi.core.annotation.CurrentUser;
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 import cn.crudapi.core.dto.ColumnDTO;
 import cn.crudapi.core.dto.TableDTO;
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
 import cn.crudapi.core.exception.BusinessException;
 import cn.crudapi.core.query.Condition;
@@ -54,8 +57,10 @@ public class TableController {
 
     @ApiOperation(value="添加数据")
     @PostMapping(value = "/{name}")
-    public ResponseEntity<String> create(@PathVariable("name") String name, @RequestBody Map<String, Object> map) {
-    	String id = tableService.create(name, map);
+    public ResponseEntity<String> create(@PathVariable("name") String name, 
+    		@RequestBody Map<String, Object> map,
+    		@CurrentUser UserDTO userDTO) {
+    	String id = tableService.create(name, map, userDTO.getId());
 
         return new ResponseEntity<String>(id, HttpStatus.CREATED);
     }
@@ -105,8 +110,10 @@ public class TableController {
     @ApiOperation(value="修改数据")
     @PatchMapping(value = "/{name}/{id}")
     public ResponseEntity<Void> update(@PathVariable("name") String name,
-    		@PathVariable("id") String id, @RequestBody Map<String, Object> map) {
-    	tableService.update(name, id, map);
+    		@PathVariable("id") String id,
+    		@RequestBody Map<String, Object> map,
+    		@CurrentUser UserDTO userDTO) {
+    	tableService.update(name, id, map, userDTO.getId());
 
     	return new ResponseEntity<Void>(HttpStatus.OK);
     }
