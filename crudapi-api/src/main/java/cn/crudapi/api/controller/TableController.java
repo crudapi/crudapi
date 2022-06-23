@@ -67,19 +67,23 @@ public class TableController {
     
     @ApiOperation(value="批量添加数据")
     @PostMapping(value = "/{name}/batch")
-    public ResponseEntity<Void> batchCreate(@PathVariable("name") String name, @RequestBody List<Map<String, Object>> mapList) {
-    	tableService.importData(name, mapList);
+    public ResponseEntity<Void> batchCreate(@PathVariable("name") String name, 
+    		@RequestBody List<Map<String, Object>> mapList,
+    		@CurrentUser UserDTO userDTO) {
+    	tableService.importData(name, mapList, userDTO.getId());
 
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
     
     @ApiOperation(value="导入数据")
 	@PostMapping(value = "/{name}/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Void> importData(@PathVariable("name") String name, @RequestPart MultipartFile file) {
+    public ResponseEntity<Void> importData(@PathVariable("name") String name, 
+    		@RequestPart MultipartFile file,
+    		@CurrentUser UserDTO userDTO) {
     	Map<String, Object> map = fileService.upload(file);
 		String fileName = map.get("name").toString();
 		File tempFile = fileService.getFile(fileName);
-		tableService.importData(name, tempFile);
+		tableService.importData(name, tempFile, userDTO.getId());
 		fileService.delete(fileName);
 		
         return new ResponseEntity<Void>(HttpStatus.CREATED);

@@ -117,13 +117,20 @@ public class TableServiceImpl implements TableService {
     
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void importData(String name, List<Map<String, Object>> mapList) {
+    public void importData(String name, List<Map<String, Object>> mapList, Long userId) {
     	tableMetadataService.checkTable();
     	 
     	TableDTO tableDTO = tableMetadataService.get(name);
 
     	for (Map<String, Object> paramMap :  mapList) {
-    		 Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
+    		//userId
+        	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
+        	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+        	if (paramMap.get(COLUMN_OWNER_ID) == null) {
+        		paramMap.put(COLUMN_OWNER_ID, userId);
+        	}
+        	
+    		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
 
 	        if (fullTextBodyMap != null) {
 	        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
@@ -138,13 +145,13 @@ public class TableServiceImpl implements TableService {
     }
     
     @Override
-	public void importData(String name, String fileName) {
+	public void importData(String name, String fileName, Long userId) {
 		File tempFile = fileService.getFile(fileName);
-		importData(name, tempFile);
+		importData(name, tempFile, userId);
 	}
 
 	@Override
-	public void importData(String name, File file) {
+	public void importData(String name, File file, Long userId) {
 		try {
 			Workbook wb = null;
 	        FileInputStream in = new FileInputStream(file);
@@ -232,7 +239,7 @@ public class TableServiceImpl implements TableService {
             }
            
             log.info(mapList.toString());
-            importData(name, mapList);
+            importData(name, mapList, userId);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
