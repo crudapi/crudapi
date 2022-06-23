@@ -13,9 +13,9 @@ public interface TableService {
 
     Long count(String name, String filter, String search, Condition condition);
 
-    void delete(String name, String id);
+    void delete(String name, String id, Boolean isSoftDelete, Long userId);
     
-    void delete(String name, List<String> idList);
+    void delete(String name, List<String> idList, Boolean isSoftDelete,  Long userId);
     
 	void deleteAll(List<String> nameList);
 

@@ -74,7 +74,7 @@ public class TableServiceImpl implements TableService {
     public static final String COLUMN_CRAEAE_BY_ID = "createById";
     public static final String COLUMN_UPDATE_BY_ID= "updateById";
     public static final String COLUMN_OWNER_ID = "ownerId";
-    
+    public static final String COLUMN_IS_DELETED = "isDeleted";
 
     private Pattern BCRYPT_PATTERN = Pattern
 			.compile("\\A\\$2(a|y|b)?\\$(\\d\\d)\\$[./0-9A-Za-z]{53}");
@@ -360,23 +360,23 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public void delete(String name, String id) {
+    public void delete(String name, String id, Boolean isSoftDelete, Long userId) {
         TableDTO tableDTO = tableMetadataService.get(name);
 
         Map<String, Object> recId = convertToRecId(tableDTO, id);
         
-        deleteRecursion(tableDTO, recId);
+        deleteRecursion(tableDTO, recId, isSoftDelete, userId);
         
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
     }
 
 	@Override
-	public void delete(String name, List<String> idList) {
+	public void delete(String name, List<String> idList, Boolean isSoftDelete,  Long userId) {
 		TableDTO tableDTO = tableMetadataService.get(name);
 		 for (String id : idList) { 
 			 Map<String, Object> recId = convertToRecId(tableDTO, id);
-			 deleteRecursion(tableDTO, recId);
+			 deleteRecursion(tableDTO, recId, isSoftDelete, userId);
 		 }
 		 
 		 BusinessEvent businessEvent = new BusinessEvent(this, name);
@@ -1244,7 +1244,7 @@ public class TableServiceImpl implements TableService {
                     String fkName = tableRelationDTO.getToColumnDTO().getName();
                     for (String deleteId : deleteIds) {
                     	 Map<String, Object> deleteRecId = convertToRecId(relationTableDTO, deleteId);
-                    	 deleteRecursion(relationTableDTO, deleteRecId);
+                    	 deleteRecursion(relationTableDTO, deleteRecId, false, userId);
                     }
                     
                     updateMapList.stream().forEach(t -> {
@@ -1514,11 +1514,21 @@ public class TableServiceImpl implements TableService {
         return crudService.delete(tableName, cond);
     }
     
-    private int deleteMainOnly(String tableName, Map<String, Object> recId) {
-    	return this.delete(tableName, ConditionUtils.toCondition(recId));	
+    private int deleteMainOnly(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, Long userId) {
+    	if (isSoftDelete != null && Boolean.TRUE.equals(isSoftDelete)) {
+    		//userId
+    		Map<String, Object> dataMap = new HashMap<String, Object>();
+    		dataMap.put(COLUMN_LAST_MODIFIED_DATE, DateTimeUtils.sqlTimestamp());
+    		dataMap.put(COLUMN_UPDATE_BY_ID, userId);
+    		dataMap.put(COLUMN_IS_DELETED, true);
+    		this.updateMainOnly(tableDTO, recId, dataMap, userId);
+    		return 1;
+    	} else {
+    		return this.delete(tableDTO.getTableName(), ConditionUtils.toCondition(recId));	
+    	}
     }
 
-    private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId) {
+    private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, Long userId) {
         log.info("deleteRecursion = " + tableDTO.getName() + ", recId:" + recId);
 
         // 1. 一对多，一对一
@@ -1536,13 +1546,13 @@ public class TableServiceImpl implements TableService {
                 List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.toDataTypeMap(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("relationRecId = " + relationRecId);
-                    deleteRecursion(relationTableDTO, relationRecId);
+                    deleteRecursion(relationTableDTO, relationRecId, isSoftDelete, userId);
                 }
             }
         }
 
         // 2. 删除本表数据
-        deleteMainOnly(tableDTO.getTableName(), recId);
+        deleteMainOnly(tableDTO, recId, isSoftDelete, userId);
     }
     
 	private String getSubExpandKey(String expand) {

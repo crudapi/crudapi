@@ -246,13 +246,13 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 	@Override
 	public void delete(String id) {
 		log.info("delete {}", id);
-		tableService.delete(USER_TABLE_NAME, id);
+		tableService.delete(USER_TABLE_NAME, id, false, null);
 	}
 	
 
 	@Override
 	public void delete(List<String> ids) {
-		tableService.delete(USER_TABLE_NAME, ids);
+		tableService.delete(USER_TABLE_NAME, ids, false, null);
 	}
 
 	@Override

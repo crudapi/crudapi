@@ -179,16 +179,22 @@ public class TableController {
 
     @ApiOperation(value="删除数据")
 	@DeleteMapping(value = "/{name}/{id}")
-	public ResponseEntity<Void> delete(@PathVariable("name") String name, @PathVariable("id") String id) {
-    	tableService.delete(name, id);
+	public ResponseEntity<Void> delete(@PathVariable("name") String name,
+			@PathVariable("id") String id,
+			@RequestParam(value = "isSoftDelete", required = false) Boolean isSoftDelete,
+			@CurrentUser UserDTO userDTO) {
+    	tableService.delete(name, id, isSoftDelete, userDTO.getId());
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
     
     @ApiOperation(value="批量删除数据")
 	@DeleteMapping(value = "/{name}")
-	public ResponseEntity<Void> batchDelete(@PathVariable("name") String name, @RequestBody List<String> idList) {
-    	tableService.delete(name, idList);
+	public ResponseEntity<Void> batchDelete(@PathVariable("name") String name, 
+			@RequestBody List<String> idList,
+			@RequestParam(value = "isSoftDelete", required = false) Boolean isSoftDelete,
+			@CurrentUser UserDTO userDTO) {
+    	tableService.delete(name, idList, isSoftDelete, userDTO.getId());
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
