@@ -100,6 +100,11 @@ public class TableServiceImpl implements TableService {
 	@Autowired
 	private FileService fileService;
 
+    @Override
+    public String create(String name, Map<String, Object> map) {
+    	return this.create(name, map, null);
+    }
+    
     @Transactional(rollbackFor = Exception.class)
     @Override
     public String create(String name, Map<String, Object> map, Long userId) {
@@ -350,6 +355,10 @@ public class TableServiceImpl implements TableService {
 		}
 	}
 
+    @Override
+    public void update(String name, String id, Map<String, Object> newMap) {
+       this.update(name, id, newMap, null);
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -365,7 +374,13 @@ public class TableServiceImpl implements TableService {
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
     }
+    
+    @Override
+    public void delete(String name, String id) {
+       this.delete(name, id, false, null);
+    }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String name, String id, Boolean isSoftDelete, Long userId) {
         TableDTO tableDTO = tableMetadataService.get(name);
@@ -377,9 +392,15 @@ public class TableServiceImpl implements TableService {
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
     }
+    
+    @Override
+	public void delete(String name, List<String> idList) {
+		this.delete(name, idList, false, null);
+	}
 
+    @Transactional(rollbackFor = Exception.class)
 	@Override
-	public void delete(String name, List<String> idList, Boolean isSoftDelete,  Long userId) {
+	public void delete(String name, List<String> idList, Boolean isSoftDelete, Long userId) {
 		TableDTO tableDTO = tableMetadataService.get(name);
 		 for (String id : idList) { 
 			 Map<String, Object> recId = convertToRecId(tableDTO, id);

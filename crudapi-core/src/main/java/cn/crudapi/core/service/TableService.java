@@ -12,6 +12,10 @@ public interface TableService {
     List<Map<String, Object>> list(String name, String select, String expand, String filter, String search, Condition condition, Integer offset, Integer limit, String orderby);
 
     Long count(String name, String filter, String search, Condition condition);
+    
+    void delete(String name, String id);
+    
+    void delete(String name, List<String> idList);
 
     void delete(String name, String id, Boolean isSoftDelete, Long userId);
     
@@ -26,8 +30,12 @@ public interface TableService {
 	void importData(String name, String fileName, Long userId);
 
 	void update(String name, String id, Map<String, Object> newMap, Long userId);
+	
+	void update(String name, String id, Map<String, Object> newMap);
 
 	String create(String name, Map<String, Object> map, Long userId);
+	
+	String create(String name, Map<String, Object> map);
 
 	Condition convertConditon(String name, String filter, String search, Condition condition);
 
