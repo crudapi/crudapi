@@ -108,6 +108,14 @@ public class TableServiceImpl implements TableService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public String create(String name, Map<String, Object> map, Long userId) {
+    	if (map.get(COLUMN_CRAEAED_DATE) != null) {
+    		map.remove(COLUMN_CRAEAED_DATE);
+    	}
+
+    	if (map.get(COLUMN_LAST_MODIFIED_DATE) != null) {
+    		map.remove(COLUMN_LAST_MODIFIED_DATE);
+    	}
+    	
         tableMetadataService.checkTable();
         
         TableDTO tableDTO = tableMetadataService.get(name);
@@ -133,6 +141,14 @@ public class TableServiceImpl implements TableService {
         	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
         	if (paramMap.get(COLUMN_OWNER_ID) == null) {
         		paramMap.put(COLUMN_OWNER_ID, userId);
+        	}
+        	
+        	if (paramMap.get(COLUMN_CRAEAED_DATE) != null) {
+        		paramMap.remove(COLUMN_CRAEAED_DATE);
+        	}
+
+        	if (paramMap.get(COLUMN_LAST_MODIFIED_DATE) != null) {
+        		paramMap.remove(COLUMN_LAST_MODIFIED_DATE);
         	}
         	
     		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);

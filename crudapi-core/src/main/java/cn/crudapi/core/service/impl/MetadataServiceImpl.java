@@ -28,12 +28,15 @@ import cn.crudapi.core.service.MetadataService;
 import cn.crudapi.core.service.SequenceMetadataService;
 import cn.crudapi.core.service.TableMetadataService;
 import cn.crudapi.core.service.TableRelationMetadataService;
+import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.JsonUtils;
 
 @Service
 public class MetadataServiceImpl implements MetadataService {
 	private static final Logger log = LoggerFactory.getLogger(MetadataServiceImpl.class);
+	
+	private static final String TABLLE_FROM_BUILDER = "tableFormBuilder";
 	
 	@Autowired
 	private FileService fileService;
@@ -47,6 +50,9 @@ public class MetadataServiceImpl implements MetadataService {
 	@Autowired
 	private TableRelationMetadataService tableRelationMetadataService;
 
+	@Autowired
+	private TableService tableService;
+	
 	@Override
 	public void importData(File file) {
 		try {
@@ -138,6 +144,44 @@ public class MetadataServiceImpl implements MetadataService {
 						newToTable == null ? tableRelationDTO.getToTableDTO().getName() : newToTable.getName(),
 						tableRelationDTO.getToColumnDTO().getName());
 			}
+			
+			List<Map<String, Object>> tableBuilderList = metadataDTO.getTableBuilderList();
+			for (Map<String, Object> tableBuilder : tableBuilderList) {
+				Long oldTableId = Long.parseLong(tableBuilder.get("tableId").toString());
+				
+				Long newTableId = oldTableId;
+				TableDTO newTable = tableMap.get(oldTableId);
+				if (newTable != null) {
+					if (!newTable.getId().equals(oldTableId)) {
+						newTableId = newTable.getId();
+						tableBuilder.put("tableId", newTableId);
+						if (tableBuilder.get("id") != null) {
+							tableBuilder.remove("id");
+						}
+						
+						TableDTO oldTable = tableDTOs.stream().filter(t -> t.getId().equals(oldTableId)).findFirst().get();
+						
+						String body = tableBuilder.get("body").toString();
+						
+						List<Map<String, Object>> tableBuilderColumnList = JsonUtils.toObject(body, new TypeReference<List<Map<String, Object>>>(){});
+						for (Map<String, Object> tableBuilderColumn : tableBuilderColumnList) {
+							Long oldColumnId = Long.parseLong(tableBuilderColumn.get("columnId").toString());
+							ColumnDTO oldColumnDTO = oldTable.getColumnDTOList().stream().filter(t -> t.getId().equals(oldColumnId)).findFirst().get();
+							String oldColumnName = oldColumnDTO.getName();
+							
+							ColumnDTO newColumnDTO = newTable.getColumnDTOList().stream().filter(t -> t.getName().equals(oldColumnName)).findFirst().get();
+							
+							tableBuilderColumn.put("columnId", newColumnDTO.getId());
+							log.info(tableBuilderColumn.toString());
+						}
+						
+						tableBuilder.put("body", JsonUtils.toJson(tableBuilderColumnList));
+						
+						tableService.create(TABLLE_FROM_BUILDER, tableBuilder);
+					}
+				}
+			}
+
 		} catch (Exception e) {
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "导入失败！" + e.getMessage()); 
 		}
@@ -171,11 +215,19 @@ public class MetadataServiceImpl implements MetadataService {
 			//relation
 			List<TableRelationDTO> tableRelationDTOs = tableRelationMetadataService.list(ids);
 			
+			List<Object> values = new ArrayList<Object>();
+			for (Long id : ids) {
+				values.add(id);
+			}
+			
+			Condition condition = ConditionUtils.toCondition("tableId", values);
+			List<Map<String, Object>> tableBuilderList = tableService.list(TABLLE_FROM_BUILDER, null, null, null, null, condition, null, null, null);
+			
 			MetadataDTO metadataDTO = new MetadataDTO();
 			metadataDTO.setSequenceDTOList(sequenceDTOs);
 			metadataDTO.setTableDTOList(tableDTOs);
 			metadataDTO.setTableRelationDTOList(tableRelationDTOs);
-			
+			metadataDTO.setTableBuilderList(tableBuilderList);
 			String body = JsonUtils.toJson(metadataDTO);
 			log.info(body);
 			FileUtils.writeStringToFile(file, body, "utf-8");

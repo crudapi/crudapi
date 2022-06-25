@@ -1,6 +1,7 @@
 package cn.crudapi.core.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +15,8 @@ public class MetadataDTO {
 	private List<TableDTO> tableDTOList;
 
 	private List<TableRelationDTO> tableRelationDTOList;
+	
+	private List<Map<String, Object>> tableBuilderList;
 
 	@JsonProperty("sequences")
 	public List<SequenceDTO> getSequenceDTOList() {
@@ -40,5 +43,14 @@ public class MetadataDTO {
 
 	public void setTableRelationDTOList(List<TableRelationDTO> tableRelationDTOList) {
 		this.tableRelationDTOList = tableRelationDTOList;
+	}
+
+	@JsonProperty("tableBuilders")
+	public List<Map<String, Object>> getTableBuilderList() {
+		return tableBuilderList;
+	}
+
+	public void setTableBuilderList(List<Map<String, Object>> tableBuilderList) {
+		this.tableBuilderList = tableBuilderList;
 	}
 }
