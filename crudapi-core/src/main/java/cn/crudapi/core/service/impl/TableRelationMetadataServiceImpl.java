@@ -2,6 +2,8 @@ package cn.crudapi.core.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +45,30 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	
 	private static final String RELATION_TABLE_NAME = "ca_meta_table_relation";
 	
+	private static final String USER_TABLE_NAME = "user";
+	private static final String COLUMN_ID = "id";
+	private static final String COLUMN_CRAEAE_BY_ID = "createById";
+	private static final String COLUMN_UPDATE_BY_ID = "updateById";
+	private static final String COLUMN_OWNER_ID = "ownerId";
+	
+	private static Map<String, String> relationNameMap = new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put(COLUMN_CRAEAE_BY_ID, "createBy");
+			put(COLUMN_UPDATE_BY_ID, "updateBy");
+			put(COLUMN_OWNER_ID, "owner");
+		}
+	};
+	
+	private static Map<String, String> relationCaptionMap = new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put(COLUMN_CRAEAE_BY_ID, "创建者");
+			put(COLUMN_UPDATE_BY_ID, "修改者");
+			put(COLUMN_OWNER_ID, "所有者");
+		}
+	};
+    
 	@Autowired
     private CrudService crudService;
 	  
@@ -296,6 +322,33 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
  	    List<TableRelationEntity> tableRelationEntityList = 
  	    		crudService.list(RELATION_TABLE_NAME, cond, null, null, null, TableRelationEntity.class);
  	    
+ 	    //内置用户字段关联
+    	TableDTO userTableDTO = tableMetadataService.get(USER_TABLE_NAME);
+    	TableDTO fromTableDTO = tableMetadataService.get(fromTableId);
+    	
+    	ColumnDTO userIdColumnDTO = userTableDTO.getColumn(COLUMN_ID);
+    	for (ColumnDTO columnDTO : fromTableDTO.getColumnDTOList()) {
+    		String columnName = columnDTO.getName();
+    		String relationName = relationNameMap.get(columnName);
+    		String relationCaption = relationCaptionMap.get(columnName);
+    		
+    		if (columnName.equals(COLUMN_CRAEAE_BY_ID)
+    			|| columnName.equals(COLUMN_UPDATE_BY_ID)
+    			|| columnName.equals(COLUMN_OWNER_ID)) {
+    			TableRelationEntity tableRelationEntity = new TableRelationEntity();
+    			tableRelationEntity.setName(relationName);
+    			tableRelationEntity.setCaption(relationCaption);
+    			tableRelationEntity.setFromTableId(fromTableId);
+    			tableRelationEntity.setFromColumnId(columnDTO.getId());
+    			tableRelationEntity.setToTableId(userTableDTO.getId());
+    			tableRelationEntity.setToColumnId(userIdColumnDTO.getId());
+    			tableRelationEntity.setRelationType(TableRelationTypeEnum.ManyToOne);
+    			
+    			tableRelationEntityList.add(tableRelationEntity);
+    		}
+    	}
+    	
+    	
  	    lazyFetch(tableRelationEntityList);
  	    
  	    return tableRelationEntityList;

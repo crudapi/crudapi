@@ -1027,7 +1027,14 @@ public class TableServiceImpl implements TableService {
 		try {
 			value = cell.getStringCellValue();
 		} catch (Exception e) {
-			log.info(e.getMessage());
+			log.warn(e.getMessage());
+			value = getStringByToString(cell);
+			String[] arr = value.split("\\.");
+			if (arr.length > 1) {
+				if (arr[1].equals("0")) {
+					value = arr[0];
+				}
+			}
 		}
 		
 		return value;
