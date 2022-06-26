@@ -23,12 +23,18 @@ public interface TableService {
     
 	void deleteAll(List<String> nameList);
 
-	void importData(String name, List<Map<String, Object>> mapList, Long userId);
+	void importData(String name, String fileName);
+	
+	void importData(String name, File file);
+	
+	void importData(String name, List<Map<String, Object>> mapList);
+	
+	void importData(String name, String fileName, Long userId);
 	
 	void importData(String name, File file, Long userId);
 	
-	void importData(String name, String fileName, Long userId);
-
+	void importData(String name, List<Map<String, Object>> mapList, Long userId);
+	
 	void update(String name, String id, Map<String, Object> newMap, Long userId);
 	
 	void update(String name, String id, Map<String, Object> newMap);

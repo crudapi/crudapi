@@ -128,6 +128,125 @@ public class TableServiceImpl implements TableService {
         return convertToId(tableDTO, recId);
     }
     
+    @Override
+ 	public void importData(String name, String fileName) {
+ 		this.importData(name, fileName, null);
+     }
+    
+    @Override
+    public void importData(String name, File file) {
+    	this.importData(name, file, null);
+	}
+
+    @Override
+    public void importData(String name, List<Map<String, Object>> mapList) {
+  		this.importData(name, mapList, null);
+  	}
+    
+    @Override
+	public void importData(String name, String fileName, Long userId) {
+		File tempFile = fileService.getFile(fileName);
+		this.importData(name, tempFile, userId);
+	}
+
+  	@Override
+  	public void importData(String name, File file, Long userId) {
+  		try {
+  			Workbook wb = null;
+  	        FileInputStream in = new FileInputStream(file);
+  	        if(file.getName().endsWith(EXCEL_XLS)){     //Excel&nbsp;2003
+  	            wb = new HSSFWorkbook(in);
+  	        } else if(file.getName().endsWith(EXCEL_XLSX)){    // Excel 2007/2010
+  	            wb = new XSSFWorkbook(in);
+  	        }
+  	        
+  	        // Excel的页签数量
+  	        int sheet_size = wb.getNumberOfSheets();
+  	        if (sheet_size == 0) {
+  				throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "Sheet页不能为0");
+  	        }
+  	        
+  	        Sheet sheet = wb.getSheetAt(0);
+  	        
+  	        int maxRow = sheet.getLastRowNum();
+              log.info("总行数为：" + maxRow);
+              
+              List<String> columnCaptionList = new ArrayList<String>();
+              List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+              
+              TableDTO tableDTO = tableMetadataService.get(name);
+              
+              for (int row = 0; row <= maxRow; row++) {
+                  int maxCol = sheet.getRow(row).getLastCellNum();
+                  
+                  Map<String, Object> map = new HashMap<String, Object>();
+              
+                  for (int col = 0; col < maxCol; col++) {
+                  	if (row == 0) {
+                  		String columnCaption = sheet.getRow(row).getCell(col).toString();
+                  		columnCaptionList.add(columnCaption);
+                  		log.info(columnCaption);
+                  	} else {
+                  		String caption = columnCaptionList.get(col);
+                  		ColumnDTO columnDTO = tableDTO.getColumnDTOList()
+                  		.stream()
+                  		.filter(t -> t.getCaption().equalsIgnoreCase(caption))
+                  		.findFirst().get();
+                  		String key = columnDTO.getName();
+                  		
+                  		Cell cell = sheet.getRow(row).getCell(col);
+                  		Object newObj = null;
+                  		if (cell != null) {
+                  			if (columnDTO.getDataType().equals(DataTypeEnum.BIGINT)) {
+                      			newObj = getLong(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.INT)) {
+                      			newObj = getInteger(cell);
+                      		}  else if (columnDTO.getDataType().equals(DataTypeEnum.TINYINT)) {
+                      			newObj = getInteger(cell);
+                      		}  else if (columnDTO.getDataType().equals(DataTypeEnum.BOOL)) {
+                      			newObj = getBoolean(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DOUBLE)) {
+                      			newObj = getDouble(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.FLOAT)) {
+                      			newObj = getFloat(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DECIMAL)) {
+                      			newObj = getBigDecimal(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
+                      			newObj = encodePassword(getString(cell));
+                              } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
+                              	Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Timestamp(dateLong) : null;
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
+                      			Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Date(dateLong) : null;
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
+                      			Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Time(dateLong) : null;
+                      		} else {
+                      			newObj = getString(cell);
+                      		}
+                  		}
+                  		
+                  		if (caption.equalsIgnoreCase("名称")) {
+                  			map.put("name", newObj);
+                  		}
+              			map.put(key, newObj);
+                  	}
+                  }
+                 
+                  if (row > 0) {
+                  	mapList.add(map);
+                  }
+              }
+             
+              log.info(mapList.toString());
+              this.importData(name, mapList, userId);
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+  		}
+  	}
+  	
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void importData(String name, List<Map<String, Object>> mapList, Long userId) {
@@ -164,109 +283,7 @@ public class TableServiceImpl implements TableService {
         BusinessEvent businessEvent = new BusinessEvent(this, name);
 	    applicationContext.publishEvent(businessEvent);
     }
-    
-    @Override
-	public void importData(String name, String fileName, Long userId) {
-		File tempFile = fileService.getFile(fileName);
-		importData(name, tempFile, userId);
-	}
-
-	@Override
-	public void importData(String name, File file, Long userId) {
-		try {
-			Workbook wb = null;
-	        FileInputStream in = new FileInputStream(file);
-	        if(file.getName().endsWith(EXCEL_XLS)){     //Excel&nbsp;2003
-	            wb = new HSSFWorkbook(in);
-	        } else if(file.getName().endsWith(EXCEL_XLSX)){    // Excel 2007/2010
-	            wb = new XSSFWorkbook(in);
-	        }
-	        
-	        // Excel的页签数量
-	        int sheet_size = wb.getNumberOfSheets();
-	        if (sheet_size == 0) {
-				throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "Sheet页不能为0");
-	        }
-	        
-	        Sheet sheet = wb.getSheetAt(0);
-	        
-	        int maxRow = sheet.getLastRowNum();
-            log.info("总行数为：" + maxRow);
-            
-            List<String> columnCaptionList = new ArrayList<String>();
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-            
-            TableDTO tableDTO = tableMetadataService.get(name);
-            
-            for (int row = 0; row <= maxRow; row++) {
-                int maxCol = sheet.getRow(row).getLastCellNum();
-                
-                Map<String, Object> map = new HashMap<String, Object>();
-            
-                for (int col = 0; col < maxCol; col++) {
-                	if (row == 0) {
-                		String columnCaption = sheet.getRow(row).getCell(col).toString();
-                		columnCaptionList.add(columnCaption);
-                		log.info(columnCaption);
-                	} else {
-                		String caption = columnCaptionList.get(col);
-                		ColumnDTO columnDTO = tableDTO.getColumnDTOList()
-                		.stream()
-                		.filter(t -> t.getCaption().equalsIgnoreCase(caption))
-                		.findFirst().get();
-                		String key = columnDTO.getName();
-                		
-                		Cell cell = sheet.getRow(row).getCell(col);
-                		Object newObj = null;
-                		if (cell != null) {
-                			if (columnDTO.getDataType().equals(DataTypeEnum.BIGINT)) {
-                    			newObj = getLong(cell);
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.INT)) {
-                    			newObj = getInteger(cell);
-                    		}  else if (columnDTO.getDataType().equals(DataTypeEnum.TINYINT)) {
-                    			newObj = getInteger(cell);
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DOUBLE)) {
-                    			newObj = getDouble(cell);
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.FLOAT)) {
-                    			newObj = getFloat(cell);
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DECIMAL)) {
-                    			newObj = getBigDecimal(cell);
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
-                    			newObj = encodePassword(getString(cell));
-                            } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
-                            	Long dateLong = getDate(cell);
-                    			newObj = dateLong != null ? new Timestamp(dateLong) : null;
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
-                    			Long dateLong = getDate(cell);
-                    			newObj = dateLong != null ? new Date(dateLong) : null;
-                    		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
-                    			Long dateLong = getDate(cell);
-                    			newObj = dateLong != null ? new Time(dateLong) : null;
-                    		} else {
-                    			newObj = getString(cell);
-                    		}
-                		}
-                		
-                		if (caption.equalsIgnoreCase("名称")) {
-                			map.put("name", newObj);
-                		}
-            			map.put(key, newObj);
-                	}
-                }
-               
-                if (row > 0) {
-                	mapList.add(map);
-                }
-            }
-           
-            log.info(mapList.toString());
-            importData(name, mapList, userId);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
-		}
-	}
-	
+  
 	@Override
 	public String getImportTemplate(String name, String type) {
 		String fileName = null;
@@ -313,7 +330,6 @@ public class TableServiceImpl implements TableService {
 		}
 	}
 	
-
 	@Override
 	public String exportData(String name, String type, String filter, String search, Condition condition) {
 		String fileName = null;
@@ -340,20 +356,74 @@ public class TableServiceImpl implements TableService {
 	        TableDTO tableDTO = tableMetadataService.get(name);
 	        int i = 0;
 	        for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        	 if (IndexTypeEnum.FULLTEXT.equals(columnDTO.getIndexType())) {
+	        		 continue;
+	        	 }
+	        	
 	        	 Cell cell = row.createCell(i++);
 	        	 cell.setCellValue(columnDTO.getCaption());
 	        }
 	        
+	        Long tableId = tableDTO.getId();
+	        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+	        
+	        //数据转换
+	        List<Map<String, Object>> mapList = list(name, null, null, filter, search, condition, null, null, null);
+	        for (Map<String, Object> map : mapList) {
+	        	 for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+	 	            String relationName = tableRelationDTO.getName();
+	 	            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+	 	                String fkName = tableRelationDTO.getFromColumnDTO().getName();
+	 	                Object obj = map.get(relationName);
+	 	                if (obj != null) {
+	 	                	if (tableDTO.getColumn(fkName).getMultipleValue()) {
+	 	                		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
+	 	                		List<String> valueList =  new ArrayList<String>();
+	 	                		for (Map<String, Object> relationMap : relationMapList) {
+	 	                			Object valueObj = relationMap.get("name");
+	 	                			if (valueObj != null) {
+	 	                				valueList.add(valueObj.toString());
+	 	                			}
+	 	                		}
+	 	                		
+	 	                		map.put(fkName, String.join(",", valueList));
+	 	                	} else {
+	 	                		Map<String, Object> relationMap = (Map<String, Object>) obj;
+	 	                		map.put(fkName, relationMap.get("name"));
+	 	                	}
+	 	                }
+	 	            }
+	 	        }
+	        }
+	        
+
 	        int rowIndex = 1;
-	        List<Map<String, Object>> mapList = listMain(name, null, null, filter, search, condition, null, null, null);
 	        for (Map<String, Object> map : mapList) {
 	        	 Row dataRow = sheet.createRow(rowIndex++);
 	        	 
 	        	 int cellIndex = 0;
 	        	 for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        		 if (IndexTypeEnum.FULLTEXT.equals(columnDTO.getIndexType())) {
+		        		 continue;
+		        	 }
+	        		 
 	        		 Cell dataCell = dataRow.createCell(cellIndex++);
 	        		 Object value = map.get(columnDTO.getName());
-	        		 dataCell.setCellValue(value != null ? value.toString() : "");
+	        		 String newValue = null;
+	        		 if (value != null) {
+	        			 if (columnDTO.getDataType().equals(DataTypeEnum.BOOL)) {
+	        				 if (Boolean.parseBoolean(value.toString())) {
+	        					 newValue = "是";
+	        				 } else {
+	        					 newValue = "否";
+        				 	 }
+		        		 } else {
+		        			 newValue = value.toString();
+		        		 }
+	        		 }
+	        		 
+	        		 
+	        		 dataCell.setCellValue(newValue);
 		         }
 	        }
 	        
@@ -907,6 +977,23 @@ public class TableServiceImpl implements TableService {
 			Double obj = cell.getNumericCellValue();
 			value = obj.intValue();
 		} catch (Exception e) {
+			log.info(e.getMessage());
+		}
+		
+		return value;
+	}
+	
+	private Boolean getBoolean(Cell cell) {
+		Boolean value = null;
+		try {
+			value = cell.getBooleanCellValue();
+			
+		} catch (Exception e) {
+			if (cell != null) {
+				String s = cell.toString();
+				value = ((s != null) && (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("是")));
+			}
+			
 			log.info(e.getMessage());
 		}
 		
