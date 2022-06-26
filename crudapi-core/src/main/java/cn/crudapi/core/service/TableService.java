@@ -35,6 +35,12 @@ public interface TableService {
 	
 	void importData(String name, List<Map<String, Object>> mapList, Long userId);
 	
+	List<Map<String, Object>> convertExecelToData(String name, File file);
+
+	void importData(File jsonFile, Long userId);
+
+	Map<String, Object> convertJsonToData(File jsonFile);
+	
 	void update(String name, String id, Map<String, Object> newMap, Long userId);
 	
 	void update(String name, String id, Map<String, Object> newMap);

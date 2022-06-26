@@ -75,7 +75,7 @@ public class TableController {
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
     
-    @ApiOperation(value="导入数据")
+    @ApiOperation(value="导入EXCEL数据")
 	@PostMapping(value = "/{name}/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Void> importData(@PathVariable("name") String name, 
     		@RequestPart MultipartFile file,
@@ -84,6 +84,21 @@ public class TableController {
 		String fileName = map.get("name").toString();
 		File tempFile = fileService.getFile(fileName);
 		tableService.importData(name, tempFile, userDTO.getId());
+		fileService.delete(fileName);
+		
+        return new ResponseEntity<Void>(HttpStatus.CREATED);
+    }
+    
+
+    @ApiOperation(value="导入JSON数据")
+	@PostMapping(value = "/import", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Void> importJsonData(
+    		@RequestPart MultipartFile file,
+    		@CurrentUser UserDTO userDTO) {
+    	Map<String, Object> map = fileService.upload(file);
+		String fileName = map.get("name").toString();
+		File tempFile = fileService.getFile(fileName);
+		tableService.importData(tempFile, userDTO.getId());
 		fileService.delete(fileName);
 		
         return new ResponseEntity<Void>(HttpStatus.CREATED);
