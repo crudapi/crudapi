@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.sql.Date;
@@ -19,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -168,6 +166,39 @@ public class TableServiceImpl implements TableService {
     public void importData(String name, List<Map<String, Object>> mapList, Long userId) {
     	tableMetadataService.checkTable();
 
+    	TableDTO tableDTO = tableMetadataService.get(name);
+
+    	for (Map<String, Object> paramMap :  mapList) {
+    		//userId
+        	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
+        	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+        	if (paramMap.get(COLUMN_OWNER_ID) == null) {
+        		paramMap.put(COLUMN_OWNER_ID, userId);
+        	}
+        	
+        	if (paramMap.get(COLUMN_CRAEAED_DATE) != null) {
+        		paramMap.remove(COLUMN_CRAEAED_DATE);
+        	}
+
+        	if (paramMap.get(COLUMN_LAST_MODIFIED_DATE) != null) {
+        		paramMap.remove(COLUMN_LAST_MODIFIED_DATE);
+        	}
+        	
+    		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
+
+	        if (fullTextBodyMap != null) {
+	        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
+	        	paramMap.put(item.getKey(), item.getValue());
+	        }
+    	}
+     
+        batchInsert(tableDTO, mapList);
+        
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+	    applicationContext.publishEvent(businessEvent);
+    }
+    
+    private void convertDic(String name, List<Map<String, Object>> mapList) {
     	Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
 
     	TableDTO tableDTO = tableMetadataService.get(name);
@@ -250,35 +281,6 @@ public class TableServiceImpl implements TableService {
 	             }
             }
         }
-
-    	for (Map<String, Object> paramMap :  mapList) {
-    		//userId
-        	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
-        	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
-        	if (paramMap.get(COLUMN_OWNER_ID) == null) {
-        		paramMap.put(COLUMN_OWNER_ID, userId);
-        	}
-        	
-        	if (paramMap.get(COLUMN_CRAEAED_DATE) != null) {
-        		paramMap.remove(COLUMN_CRAEAED_DATE);
-        	}
-
-        	if (paramMap.get(COLUMN_LAST_MODIFIED_DATE) != null) {
-        		paramMap.remove(COLUMN_LAST_MODIFIED_DATE);
-        	}
-        	
-    		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
-
-	        if (fullTextBodyMap != null) {
-	        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
-	        	paramMap.put(item.getKey(), item.getValue());
-	        }
-    	}
-     
-        batchInsert(tableDTO, mapList);
-        
-        BusinessEvent businessEvent = new BusinessEvent(this, name);
-	    applicationContext.publishEvent(businessEvent);
     }
   
 	@Override
@@ -373,6 +375,8 @@ public class TableServiceImpl implements TableService {
               }
              
               log.info(mapList.toString());
+              
+              convertDic(name, mapList);
   		} catch (Exception e) {
   			e.printStackTrace();
   			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
