@@ -69,6 +69,7 @@ public class TableServiceImpl implements TableService {
 	private static final String EXCEL_XLS = "xls";
 	private static final String EXCEL_XLSX = "xlsx";
 	
+	public static final String COLUMN_NAME = "name";
     public static final String COLUMN_CRAEAED_DATE = "createdDate";
     public static final String COLUMN_LAST_MODIFIED_DATE = "lastModifiedDate";
     public static final String COLUMN_CRAEAE_BY_ID = "createById";
@@ -228,7 +229,7 @@ public class TableServiceImpl implements TableService {
                   		}
                   		
                   		if (caption.equalsIgnoreCase("名称")) {
-                  			map.put("name", newObj);
+                  			map.put(COLUMN_NAME, newObj);
                   		}
               			map.put(key, newObj);
                   	}
@@ -251,8 +252,89 @@ public class TableServiceImpl implements TableService {
     @Override
     public void importData(String name, List<Map<String, Object>> mapList, Long userId) {
     	tableMetadataService.checkTable();
-    	 
+
+    	Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
+
     	TableDTO tableDTO = tableMetadataService.get(name);
+
+        Long tableId = tableDTO.getId();
+        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+            TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+            	QueryModel relationQueryModel = new QueryModel();
+                relationQueryModel.setTableDTO(relationTableDTO);
+
+            	 String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+	           	 String pkColumnName = tableRelationDTO.getToColumnDTO().getName();
+	           	 String relatiobTableName = relationTableDTO.getName();
+
+	           	 List<String> relationMainSelectList = new ArrayList<String>();
+	           	 relationMainSelectList.addAll(relationTableDTO.getPrimaryNameList());
+              	 relationMainSelectList.add(pkColumnName);
+                 for (ColumnDTO t : relationTableDTO.getColumnDTOList()) {
+                   	if (t.getDisplayable()) {
+                   		relationMainSelectList.add(t.getName());
+                   	}
+                 }
+
+                 relationMainSelectList = relationMainSelectList.stream().distinct().collect(Collectors.toList());
+                 relationQueryModel.setSelectList(relationMainSelectList);
+
+                 //字典表主键
+	           	 List<Object> values = getValuesByColumnName(tableDTO, mapList, fkColumnName);
+	           	 log.info(relatiobTableName + " values" + values.toString());
+
+	           	 Condition relationCondition = ConditionUtils.toCondition(COLUMN_NAME, values);
+                 relationQueryModel.setCondition(relationCondition);
+
+                 List<Map<String, Object>> relationTableDataMapList = new ArrayList<Map<String, Object>>();
+                 if (relationCondition != null) {
+                	 relationTableDataMapList = queryForList(relationQueryModel);
+
+               	    //缓存dic
+                    dicTableDataCacheMap.put(relatiobTableName, relationTableDataMapList);
+                }
+            }
+        }
+
+        for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+            Long relationTableId = tableRelationDTO.getToTableDTO().getId();
+            TableDTO relationTableDTO = tableMetadataService.get(relationTableId);
+
+            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+            	String fkColumnName = tableRelationDTO.getFromColumnDTO().getName();
+	           	String relatiobTableName = relationTableDTO.getName();
+	            String pkColumnName = tableRelationDTO.getToColumnDTO().getName();
+	            
+	           	List<Map<String, Object>> relationTableDataMapList = dicTableDataCacheMap.get(relatiobTableName);
+	           	 //更新主表关联字段
+	             for (Map<String, Object> paramMap : mapList) {
+	             	Object value = paramMap.get(fkColumnName);
+	              	if (value != null) {
+	              		if (tableDTO.getColumn(fkColumnName).getMultipleValue()) {
+	              			List<Map<String, Object>> subRelationTableDataMapList =
+	              					getMultipleDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
+	             			if (subRelationTableDataMapList.size() > 0) {
+	             				List<String> strs = new ArrayList<String>();
+		             			for (Map<String, Object> t: subRelationTableDataMapList) {
+		             				strs.add(t.get(pkColumnName).toString());
+		             			}
+		             			paramMap.put(fkColumnName, String.join(",", strs));
+	             			}
+	              		} else {
+	              			Map<String, Object> subRelationTableDataMap =
+	                 				getOneDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
+	              			if (subRelationTableDataMap != null) {
+	             				paramMap.put(fkColumnName, subRelationTableDataMap.get(pkColumnName));
+	             			}
+	              		}
+	              	}
+	             }
+            }
+        }
 
     	for (Map<String, Object> paramMap :  mapList) {
     		//userId
@@ -380,7 +462,7 @@ public class TableServiceImpl implements TableService {
 	 	                		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
 	 	                		List<String> valueList =  new ArrayList<String>();
 	 	                		for (Map<String, Object> relationMap : relationMapList) {
-	 	                			Object valueObj = relationMap.get("name");
+	 	                			Object valueObj = relationMap.get(COLUMN_NAME);
 	 	                			if (valueObj != null) {
 	 	                				valueList.add(valueObj.toString());
 	 	                			}
@@ -389,7 +471,7 @@ public class TableServiceImpl implements TableService {
 	 	                		map.put(fkName, String.join(",", valueList));
 	 	                	} else {
 	 	                		Map<String, Object> relationMap = (Map<String, Object>) obj;
-	 	                		map.put(fkName, relationMap.get("name"));
+	 	                		map.put(fkName, relationMap.get(COLUMN_NAME));
 	 	                	}
 	 	                }
 	 	            }
@@ -547,8 +629,6 @@ public class TableServiceImpl implements TableService {
          }
     	 
     	 return values.stream().distinct().collect(Collectors.toList());
-    	 
-    	 //return values;
     }
     
     private List<Map<String, Object>> getListDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
