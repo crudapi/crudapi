@@ -1072,7 +1072,14 @@ public class TableServiceImpl implements TableService {
     private String getString(Cell cell) {
     	String value = null;
 		try {
-			value = cell.getStringCellValue();
+			if (cell.getCellType().equals(CellType.STRING)) {
+				value = cell.getStringCellValue();
+			} else {
+				Long newValue = convertCellToLong(cell);
+				if (newValue != null) {
+					value = newValue.toString();
+				}
+			}
 		} catch (Exception e) {
 			log.warn(e.getMessage());
 			value = getStringByToString(cell);
