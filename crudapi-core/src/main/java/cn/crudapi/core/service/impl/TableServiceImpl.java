@@ -121,6 +121,10 @@ public class TableServiceImpl implements TableService {
     		map.remove(COLUMN_LAST_MODIFIED_DATE);
     	}
     	
+    	if (map.get(COLUMN_IS_DELETED) == null) {
+    		map.put(COLUMN_IS_DELETED, false);
+    	}
+    	
         tableMetadataService.checkTable();
         
         TableDTO tableDTO = tableMetadataService.get(name);
@@ -182,6 +186,10 @@ public class TableServiceImpl implements TableService {
 
         	if (paramMap.get(COLUMN_LAST_MODIFIED_DATE) != null) {
         		paramMap.remove(COLUMN_LAST_MODIFIED_DATE);
+        	}
+        	
+        	if (paramMap.get(COLUMN_IS_DELETED) == null) {
+        		paramMap.put(COLUMN_IS_DELETED, false);
         	}
         	
     		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
