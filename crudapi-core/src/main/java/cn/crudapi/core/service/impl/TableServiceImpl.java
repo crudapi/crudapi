@@ -1733,6 +1733,10 @@ public class TableServiceImpl implements TableService {
     		paramMap.put(COLUMN_OWNER_ID, userId);
     	}
     	
+    	if (paramMap.get(COLUMN_IS_DELETED) == null) {
+    		paramMap.put(COLUMN_IS_DELETED, false);
+    	}
+    	
     	Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
         if (fullTextBodyMap != null) {
           	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
