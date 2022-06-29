@@ -31,6 +31,13 @@ public class DynamicAccessDecisionManager implements AccessDecisionManager {
             return;
         }
         
+        for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
+            if (grantedAuthority.getAuthority().equals("ROLE_SUPER_ADMIN")) {
+            	log.info("ROLE_SUPER_ADMIN decide passed！");
+                return;
+            }
+        }
+        
         FilterInvocation fi = (FilterInvocation) object;
         
         String method = fi.getRequest().getMethod();
@@ -59,7 +66,7 @@ public class DynamicAccessDecisionManager implements AccessDecisionManager {
             if (isAuth == null) {
             	isAuth = isPassed;
             } else {
-            	isAuth &= isPassed;
+            	isAuth |= isPassed;
             }
         }
         
