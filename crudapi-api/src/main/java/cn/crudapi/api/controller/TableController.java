@@ -1,12 +1,14 @@
 package cn.crudapi.api.controller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -185,11 +187,21 @@ public class TableController {
 	}
     
     @ApiOperation(value="获取指定编号所有数据")
- 	@PostMapping(value = "/{name}/all")
+ 	@GetMapping(value = "/{name}/all")
  	public ResponseEntity<List<Map<String, Object>>> listAllByIds(@PathVariable("name") String name,
- 			@RequestBody List<String> idList,
+ 			@RequestParam(value = "ids", required = true) String ids,
  			@RequestParam(value = "select", required = false) String select,
  			@RequestParam(value = "expand", required = false) String expand) {
+    	List<String> idList = new ArrayList<String>();
+    	if (!StringUtils.isBlank(ids)) {
+    		String[] idArr = ids.split(",");
+    		for (String id : idArr) {
+    			if (!StringUtils.isBlank(id)) {
+    				idList.add(id);
+    			}
+    		}
+    	}
+    	
     	List<Map<String, Object>> mapList = tableService.listAllByIds(name, idList, select, expand);
 
  		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);

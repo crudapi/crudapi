@@ -71,7 +71,7 @@ public class DynamicAccessDecisionManager implements AccessDecisionManager {
         }
         
         if (!isAuth) {
-        	 throw new AccessDeniedException("对不起，您没有资源：" + String.join(",", needAuthorityList) +"的访问权限！");
+        	 throw new AccessDeniedException("对不起，您没有资源：" + String.join(",", needAuthorityList) + "的任一个" + method + "访问权限！");
         }
     }
 

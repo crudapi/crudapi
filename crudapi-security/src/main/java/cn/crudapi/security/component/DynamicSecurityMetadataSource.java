@@ -63,8 +63,9 @@ public class DynamicSecurityMetadataSource implements FilterInvocationSecurityMe
             String pattern = iterator.next();
             //log.info("match = " + pattern);
             if (pathMatcher.match(pattern, path)) {
-            	log.info("match success = " + pattern + ", " + path);
-                configAttributes.add(configAttributeMap.get(pattern));
+            	ConfigAttribute configAttribute = configAttributeMap.get(pattern);
+            	log.info("match success = " + pattern + ", " + configAttribute + "<-" + path);
+                configAttributes.add(configAttribute);
             }
         }
         // 未设置操作请求权限，返回空集合
