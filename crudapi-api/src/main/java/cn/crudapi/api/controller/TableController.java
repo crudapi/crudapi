@@ -116,7 +116,7 @@ public class TableController {
     
     
     @ApiOperation(value="导出数据")
-   	@GetMapping(value = "/{name}/export")
+   	@PostMapping(value = "/{name}/export")
     public ResponseEntity<String> exportData(@PathVariable("name") String name,
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
