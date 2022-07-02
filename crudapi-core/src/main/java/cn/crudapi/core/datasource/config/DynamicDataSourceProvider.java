@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.stereotype.Component;
 
+
 @Component
 @EnableConfigurationProperties(DataSourceProperties.class)
 @ConfigurationProperties(prefix = "spring.datasource.hikari")
@@ -27,6 +28,8 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
 	
 	private List<Map<String, DataSourceProperties>> dataSources;
     
+	private Map<Object,Object> targetDataSourcesMap;
+	
 	@Resource
 	private DataSourceProperties dataSourceProperties;
     
@@ -55,6 +58,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
             });
             
             //更新dynamicDataSource
+            this.targetDataSourcesMap = targetDataSourcesMap;
             dynamicDataSource.setTargetDataSources(targetDataSourcesMap);
             dynamicDataSource.afterPropertiesSet();
     	}
@@ -136,4 +140,8 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	
     	return databaseName;
     }
+
+	public Map<Object,Object> getTargetDataSourcesMap() {
+		return targetDataSourcesMap;
+	}
 }

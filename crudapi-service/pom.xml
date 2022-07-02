@@ -122,10 +122,14 @@
       <version>21.5.0.0</version>
       <scope>runtime</scope>
     </dependency>
- 	  <dependency>
+ 	<dependency>
 	    <groupId>org.apache.commons</groupId>
 	    <artifactId>commons-csv</artifactId>
-	  </dependency>
+	</dependency>
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
     <dependency>
       <groupId>cn.crudapi</groupId>
       <artifactId>crudapi-core</artifactId>
