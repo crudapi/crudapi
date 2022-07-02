@@ -45,29 +45,34 @@ public class FlywayConfig {
     	Map<String, FlywayProperties> flywayPropertiesMap = getFlywayPropertiesMap();
     	
         Map<Object, Object> dataSources = dynamicDataSourceProvider.getTargetDataSourcesMap();
-        dataSources.forEach((k, v) -> {
-        	String datasourceName = k.toString();
-        	log.info("datasource = " + datasourceName);
-        	FlywayProperties properties = flywayPropertiesMap.get(k);
-        	if (properties != null) {
-        		log.info("datasource " + datasourceName + " do flyway migrate!");
-        		
-        		DataSource dataSource = (DataSource)v;
-                
-                FluentConfiguration fluentConfiguration = Flyway.configure().dataSource(dataSource);
-                configureProperties(fluentConfiguration, properties); 
-                
-                Location[] locations = fluentConfiguration.getLocations();
-                for (Location location: locations) {
-                	 log.info("datasource " + datasourceName + " locations = " + location.toString());
-                }
-               
-                Flyway flyway = fluentConfiguration.load();
-                flyway.migrate();
-        	} else {
-        		log.info("datasource " + datasourceName + " skip flyway migrate!");
-        	}
-        });
+        if (dataSources != null) {
+        	dataSources.forEach((k, v) -> {
+            	String datasourceName = k.toString();
+            	log.info("datasource = " + datasourceName);
+            	FlywayProperties properties = flywayPropertiesMap.get(k);
+            	if (properties != null) {
+            		log.info("datasource " + datasourceName + " do flyway migrate!");
+            		
+            		DataSource dataSource = (DataSource)v;
+                    
+                    FluentConfiguration fluentConfiguration = Flyway.configure().dataSource(dataSource);
+                    configureProperties(fluentConfiguration, properties); 
+                    
+                    Location[] locations = fluentConfiguration.getLocations();
+                    for (Location location: locations) {
+                    	 log.info("datasource " + datasourceName + " locations = " + location.toString());
+                    }
+                   
+                    Flyway flyway = fluentConfiguration.load();
+                    flyway.migrate();
+            	} else {
+            		log.info("datasource " + datasourceName + " skip flyway migrate!");
+            	}
+            });
+        } else {
+        	log.info("migrate multi datasources is null, skip!");
+        }
+        
         
         log.info("migrate multi datasource is done!");
     }
