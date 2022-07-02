@@ -41,6 +41,12 @@ spring.datasource.username=postgres
 spring.datasource.password=postgres
 ```
 
+## oralce
+```sql
+SELECT * FROM ALL_OBJECTS WHERE OWNER = 'CRUDAPI';
+purge recyclebin;
+```
+
 ### run
 ```bash
 java -jar ./target/crudapi-service-1.6.0.jar
