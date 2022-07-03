@@ -333,10 +333,18 @@ public class TableServiceImpl implements TableService {
                   		log.info(columnCaption);
                   	} else {
                   		String caption = columnCaptionList.get(col);
-                  		ColumnDTO columnDTO = tableDTO.getColumnDTOList()
+                  		
+                  		Optional<ColumnDTO> op = tableDTO.getColumnDTOList()
                   		.stream()
                   		.filter(t -> t.getCaption().equalsIgnoreCase(caption))
-                  		.findFirst().get();
+                  		.findFirst();
+                  		if (!op.isPresent()) {
+                  			log.warn(caption + "不存在，请移除该列！");
+                  			continue;
+                  		}
+                  		
+                  		ColumnDTO columnDTO = op.get();
+                  				
                   		String key = columnDTO.getName();
                   		
                   		Cell cell = sheet.getRow(row).getCell(col);
