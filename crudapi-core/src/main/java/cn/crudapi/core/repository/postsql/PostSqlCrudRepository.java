@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -144,8 +145,9 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 		TableDTO tableDTO = new TableDTO();
 		tableDTO.setName(tableName);
 		
-		Object tableComment = ((Map<String, Object>)metaDataMap.get("tableComment")).get("comment");
-		String tableCaption = (tableComment != null ? tableComment.toString() : tableName);
+		Object tableCommentObj = ((Map<String, Object>)metaDataMap.get("tableComment")).get("comment");
+		String tableCommentStr = (tableCommentObj == null) ? null : tableCommentObj.toString();
+		String tableCaption = StringUtils.isBlank(tableCommentStr) ?  tableName: tableCommentStr;
 		
 		tableDTO.setPluralName(tableName);
 		tableDTO.setCaption(tableCaption);
@@ -212,7 +214,8 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 
 			String name = column.get("column_name").toString();
 			String comment = columnCommentMap.get(name);
-			String caption = (comment != null ? comment : name);
+			String caption = StringUtils.isBlank(comment) ? name : comment;
+			
 			columnDTO.setName(name);
 			columnDTO.setCaption(caption);
 			columnDTO.setDescription(caption);

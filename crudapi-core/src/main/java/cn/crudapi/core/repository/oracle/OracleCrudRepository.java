@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -246,8 +247,9 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 		TableDTO tableDTO = new TableDTO();
 		tableDTO.setName(tableName);
 		
-		Object tableComment = metaDataMap.get("tableComment");
-		String tableCaption = (tableComment != null ? tableComment.toString() : tableName);
+		Object tableCommentObj =  metaDataMap.get("tableComment");
+		String tableCommentStr = (tableCommentObj == null) ? null : tableCommentObj.toString();
+		String tableCaption = StringUtils.isBlank(tableCommentStr) ?  tableName: tableCommentStr;
 		
 		tableDTO.setPluralName(tableName);
 		tableDTO.setCaption(tableCaption);
@@ -318,7 +320,9 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 
 			String name = column.get("columnName").toString();
 			Object commentObj = column.get("comment");
-			String caption = (commentObj != null ? commentObj.toString() : name);
+			String commentStr = (commentObj == null) ? null : commentObj.toString();
+			String caption = StringUtils.isBlank(commentStr) ? name : commentStr;
+			
 			columnDTO.setName(name);
 			columnDTO.setCaption(caption);
 			columnDTO.setDescription(caption);

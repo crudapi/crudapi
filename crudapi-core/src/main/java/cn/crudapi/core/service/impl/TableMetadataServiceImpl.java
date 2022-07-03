@@ -67,7 +67,8 @@ public class TableMetadataServiceImpl implements TableMetadataService {
 				|| tableName.equalsIgnoreCase("ca_meta_column")
 				|| tableName.equalsIgnoreCase("spring_session")
 				|| tableName.equalsIgnoreCase("spring_session_attributes")
-				|| tableName.equalsIgnoreCase("persistent_logins")) {
+				|| tableName.equalsIgnoreCase("persistent_logins")
+				|| tableName.equalsIgnoreCase("crudapi_flyway_schema_history")) {
 				 continue;
 			 }
 			 
