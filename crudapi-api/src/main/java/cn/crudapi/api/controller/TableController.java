@@ -106,6 +106,13 @@ public class TableController {
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
     
+	@ApiOperation(value="导出JSON数据")
+	@PostMapping("/export")
+    public ResponseEntity<String> exportJsonData(@RequestBody(required = false) List<Long> idList) {
+		String fileName = tableService.exportJsonData("crudapi", idList);
+        return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
+    }    
+    
     @ApiOperation(value="获取导入数据模板")
 	@GetMapping(value = "/{name}/import/template")
     public ResponseEntity<String> getImportTemplate(@PathVariable("name") String name) {

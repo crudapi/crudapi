@@ -42,6 +42,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
+import cn.crudapi.core.dto.MetadataDTO;
+import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
 import cn.crudapi.core.enumeration.DataTypeEnum;
@@ -420,6 +422,35 @@ public class TableServiceImpl implements TableService {
 		
 		return map;
 	}
+	
+	@Override
+    public String exportJsonData(String name, List<Long> ids) {
+		String fileName = null;
+		try {
+			fileName = fileService.getRandomFileName(name + ".json");
+			File file = fileService.getFile(fileName);
+
+			log.info(file.getAbsolutePath());
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			//table
+			List<TableDTO> tableDTOs = tableMetadataService.listAll(ids);
+			for (TableDTO tableDTO : tableDTOs) {
+				String tableName = tableDTO.getName();
+				List<Map<String, Object>> mapList = this.list(tableName, null, null, null, null, null, null, null, null);
+				map.put(tableName, mapList);
+			}
+			
+			String body = JsonUtils.toJson(map);
+			//log.info(body);
+			FileUtils.writeStringToFile(file, body, "utf-8");
+ 			return fileName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}	
     
 	@Override
 	public String getImportTemplate(String name, String type) {
