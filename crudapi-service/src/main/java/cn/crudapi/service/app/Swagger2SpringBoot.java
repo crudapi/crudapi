@@ -36,6 +36,16 @@ public class Swagger2SpringBoot {
     }
     
     @Bean
+    public Docket caSqlApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("SQL接口")
+                .apiInfo(apiInfo())
+                .select()
+                .paths(caSqlPaths())
+                .build();
+    }
+    
+    @Bean
     public Docket fileApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("文件管理")
@@ -82,6 +92,10 @@ public class Swagger2SpringBoot {
 
     private Predicate<String> caBusinessPaths() {
         return regex("/api/business.*");
+    }
+    
+    private Predicate<String> caSqlPaths() {
+        return regex("/api/sqlapi.*");
     }
     
     private Predicate<String> filePaths() {

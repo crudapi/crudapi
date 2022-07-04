@@ -2297,6 +2297,18 @@ public class TableServiceImpl implements TableService {
             }
         });
     }
+    
+    private void checkBlackSql(String sql) {
+    	String upperSql = sql.toUpperCase();
+    	
+    	if (upperSql.indexOf("DELETE") >= 0
+    	|| upperSql.indexOf("ALTER") >= 0
+    	|| upperSql.indexOf("CREATE") >= 0
+    	|| upperSql.indexOf("DROP") >= 0
+    	|| upperSql.indexOf("UPDATE") >= 0) {
+    		throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "非法SQL");
+    	} 
+    }
 
     private Condition covertToSqlCondition(String group, String name) {
     	Condition condition1 = ConditionUtils.toCondition("group", group);
@@ -2322,6 +2334,7 @@ public class TableServiceImpl implements TableService {
 		Map<String, Object> sqlApi = this.getSqlApi(group, name, userId);
 		String countSql = sqlApi.get(COLUMN_COUNT_SQL).toString();
 		log.info(countSql);
+		checkBlackSql(countSql);
 		return crudService.count(countSql, paramMap);
 	}
     
@@ -2330,6 +2343,7 @@ public class TableServiceImpl implements TableService {
 		Map<String, Object> sqlApi =  this.getSqlApi(group, name, userId);
 		String dataSql = sqlApi.get(COLUMN_DATA_SQL).toString();
 		log.info(dataSql);
+		checkBlackSql(dataSql);
 		List<Map<String, Object>> mapList = crudService.list(dataSql, paramMap);
 		
 		return mapList;
