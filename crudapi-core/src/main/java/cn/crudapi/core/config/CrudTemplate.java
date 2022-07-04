@@ -285,6 +285,12 @@ public class CrudTemplate {
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().list(sql, paramMap);
 	}
 	
+	public Long count(String sql, Map<String, Object> paramMap) {
+		log.debug("CrudTemplate->count");
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().count(sql, paramMap);
+	}
+	
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudTemplate->getJdbcTemplate");
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getJdbcTemplate();

@@ -292,6 +292,11 @@ public class CrudSqlExecute {
 		return crudFactory.list(sql, paramMap);
 	}
 	
+	public Long count(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudSqlExecute->list");
+		return crudFactory.count(sql, paramMap);
+	}
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudSqlExecute->getJdbcTemplate");
 		return crudFactory.getJdbcTemplate();

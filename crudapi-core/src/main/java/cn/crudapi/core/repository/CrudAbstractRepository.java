@@ -845,6 +845,14 @@ public abstract class CrudAbstractRepository {
 
         return mapList;
 	}
+	
+	public Long count(String sql, Map<String, Object> paramMap) {
+		Long count = this.queryForSingleColumnValue(sql, paramMap, Long.class);
+		
+		log.info("CrudAbstractRepository->count->{}", count);
+
+        return count;
+	}
 
 	public List<Map<String, Object>> list(String tableName, Map<String, DataTypeEnum> dataTypeMap, Condition condition, String orderby, Integer offset, Integer limit) {
         return this.list(tableName, dataTypeMap, null, condition, orderby, offset, limit);

@@ -322,6 +322,12 @@ public abstract class CrudAbstractFactory {
 		return repository.list(sql, paramMap);
 	}
 	
+	public Long count(String sql, Map<String, Object> paramMap) {
+		log.debug("CrudAbstractFactory->count");
+		CrudAbstractRepository repository = this.getCrudRepository();
+		return repository.count(sql, paramMap);
+	}
+	
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudAbstractFactory->getJdbcTemplate");
 		CrudAbstractRepository repository = this.getCrudRepository();

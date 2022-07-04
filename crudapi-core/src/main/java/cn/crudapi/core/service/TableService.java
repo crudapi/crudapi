@@ -60,6 +60,9 @@ public interface TableService {
 	List<Map<String, Object>> listMain(String name, String select, String expand, String filter, String search,
 			Condition condition, Integer offset, Integer limit, String orderby);
 
-	String exportJsonData(String name, List<Long> ids);
+	List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, Long userId);
 
+	Long count(String group, String name, Map<String, Object> paramMap, Long userId);
+	
+	String exportJsonData(String name, List<Long> ids);
 }

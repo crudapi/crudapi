@@ -95,6 +95,8 @@ public interface CrudService {
 	
 	Long count(String tableName);
 	
+	Long count(String sql, Map<String, Object> paramMap);
+
 	boolean isExistTable(String tableName);
 	
 	void dropTable(TableEntity tableEntity);
@@ -132,6 +134,5 @@ public interface CrudService {
 	String processTemplateToString(String templateBase, String templateName, String key, Object value);
 
 	String processTemplateToString(String templateBase, String templateName, Map<String, Object> map);
-
 
 }

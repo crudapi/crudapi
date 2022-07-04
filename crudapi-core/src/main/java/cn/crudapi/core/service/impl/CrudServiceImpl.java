@@ -328,6 +328,12 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
+	public Long count(String sql, Map<String, Object> paramMap) {
+		log.debug("CrudServiceImpl->count");
+		return crudTemplate.count(sql, paramMap);
+	}
+	
+	@Override
 	public JdbcTemplate getJdbcTemplate() {
 		log.debug("CrudServiceImpl->getJdbcTemplate");
 		return crudTemplate.getJdbcTemplate();

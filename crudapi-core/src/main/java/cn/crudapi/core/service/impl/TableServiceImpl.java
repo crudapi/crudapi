@@ -42,8 +42,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
-import cn.crudapi.core.dto.MetadataDTO;
-import cn.crudapi.core.dto.SequenceDTO;
 import cn.crudapi.core.dto.TableDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
 import cn.crudapi.core.enumeration.DataTypeEnum;
@@ -74,6 +72,10 @@ public class TableServiceImpl implements TableService {
 	
 	private static final String EXCEL_XLS = "xls";
 	private static final String EXCEL_XLSX = "xlsx";
+	
+	public static final String TABLCE_SQL_API = "sqlapi";
+	public static final String COLUMN_COUNT_SQL = "countSql";
+	public static final String COLUMN_DATA_SQL = "dataSql";
 	
 	public static final String COLUMN_NAME = "name";
     public static final String COLUMN_CRAEAED_DATE = "createdDate";
@@ -2295,4 +2297,41 @@ public class TableServiceImpl implements TableService {
             }
         });
     }
+
+    private Condition covertToSqlCondition(String group, String name) {
+    	Condition condition1 = ConditionUtils.toCondition("group", group);
+    	Condition condition2 = ConditionUtils.toCondition("name", name);
+    	Condition condition = ConditionUtils.toCondition(condition1, condition2);
+    	
+    	return condition;
+    }
+    
+    private Map<String, Object> getSqlApi(String group, String name, Long userId) {
+    	Condition condition = covertToSqlCondition(group, name);
+    	List<Map<String, Object>> sqlApis = this.list(TABLCE_SQL_API, null, null, null, null, condition, null, null, null);
+		if (sqlApis.size() <= 0) {
+			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, "找不到SQL");
+		}
+		
+		Map<String, Object> sqlApi = sqlApis.get(0);
+		return sqlApi;
+	}
+    
+	@Override
+	public Long count(String group, String name, Map<String, Object> paramMap, Long userId) {
+		Map<String, Object> sqlApi = this.getSqlApi(group, name, userId);
+		String countSql = sqlApi.get(COLUMN_COUNT_SQL).toString();
+		log.info(countSql);
+		return crudService.count(countSql, paramMap);
+	}
+    
+	@Override
+	public List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, Long userId) {
+		Map<String, Object> sqlApi =  this.getSqlApi(group, name, userId);
+		String dataSql = sqlApi.get(COLUMN_DATA_SQL).toString();
+		log.info(dataSql);
+		List<Map<String, Object>> mapList = crudService.list(dataSql, paramMap);
+		
+		return mapList;
+	}
 }

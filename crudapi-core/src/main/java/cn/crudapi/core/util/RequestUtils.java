@@ -15,7 +15,7 @@ public final class RequestUtils {
        Map<String, Object> parameterMap = new HashMap<String,Object>();
        while (parameterNameEnumeration.hasMoreElements()){
            String parameterName = parameterNameEnumeration.nextElement();  
-           if (!blackList.contains(parameterName)) {
+           if (blackList == null || !blackList.contains(parameterName)) {
                parameterMap.put(parameterName, request.getParameter(parameterName));  
            }
        }
