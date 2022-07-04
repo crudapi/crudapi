@@ -39,6 +39,8 @@ public class SqlApiController {
 			@CurrentUser UserDTO userDTO,
 			HttpServletRequest request) {
     	Map<String, Object> paramMap = RequestUtils.getParams(request, null);
+    	paramMap.put("offset", offset);
+    	paramMap.put("limit", limit);
     	
 		List<Map<String, Object>> mapList = tableService.list(group, name, paramMap, userDTO.getId());
 
