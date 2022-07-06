@@ -821,6 +821,19 @@ public class TableServiceImpl implements TableService {
         return mainSelectList.stream().distinct().collect(Collectors.toList());
     }
     
+    //强制补充主键
+    private void supplementPkColumnName(TableDTO tableDTO, List<String> selectList) {
+    	if (selectList.size() > 0) {
+            List<String> primaryNameList = tableDTO.getPrimaryNameList();
+            for (String t : primaryNameList) {
+            	if (!selectList.contains(t)) {
+            		selectList.add(t);
+            	}
+            }
+        }
+    }
+    
+    //补充外键
     private void supplementFkColumnName(List<TableRelationDTO> tableRelationDTOList, List<String> mainSelectList) {
     	if (!CollectionUtils.isEmpty(mainSelectList)) {
   		  for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
@@ -852,6 +865,7 @@ public class TableServiceImpl implements TableService {
         List<String> mainSelectList = getMainSelectAndSubSelectMap(selectList, subSelectMap);
         
         supplementFkColumnName(tableRelationService.getFromTable(mainTableDTO.getId()), mainSelectList);
+        supplementPkColumnName(mainTableDTO, mainSelectList);
         
     	//主表查询参数
         QueryModel mainTableQueryModel = new QueryModel();
@@ -925,10 +939,12 @@ public class TableServiceImpl implements TableService {
                     relationQueryData.setTableDTO(relationTableDTO);
                     relationQueryData.setSubSelectMap(relationSubSelectMap);
                     
-                    //关联字段需要查询
-                    if (!CollectionUtils.isEmpty(relationMainSelectList) && !relationMainSelectList.contains(relationName)) {
+                    //主子表场景，作为子表时，补充和上一层主表的关联的字段fkColumnName
+                    if (!CollectionUtils.isEmpty(relationMainSelectList) && !relationMainSelectList.contains(fkColumnName)) {
                     	relationMainSelectList.add(fkColumnName);
                     }
+                    
+                    supplementPkColumnName(relationTableDTO, relationMainSelectList);
                     
                     relationQueryData.setSelectList(relationMainSelectList);
                     relationQueryModel.setSelectList(relationMainSelectList);
