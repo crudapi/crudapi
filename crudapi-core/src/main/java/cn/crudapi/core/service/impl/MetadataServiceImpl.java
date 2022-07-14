@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -159,7 +160,11 @@ public class MetadataServiceImpl implements MetadataService {
 							tableBuilder.remove("id");
 						}
 						
-						TableDTO oldTable = tableDTOs.stream().filter(t -> t.getId().equals(oldTableId)).findFirst().get();
+						Optional<TableDTO> oldTableOp = tableDTOs.stream().filter(t -> t.getId().equals(oldTableId)).findFirst();
+						if (!oldTableOp.isPresent()) {
+							throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, oldTableId + " is not present"); 
+						}
+						TableDTO oldTable = oldTableOp.get();
 						
 						String body = tableBuilder.get("body").toString();
 						
