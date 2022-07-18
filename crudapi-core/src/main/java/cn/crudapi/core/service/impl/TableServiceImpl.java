@@ -2051,7 +2051,9 @@ public class TableServiceImpl implements TableService {
                              relationRecId.put(pkColumnName, f);
                              
                              Map<String, Object> relationMap = queryForMap(relationTableDTO, relationSelectColumnNameList, relationRecId);
-                             relationMapList.add(relationMap);
+                             if (relationMap != null) {
+                            	 relationMapList.add(relationMap);
+                             }
                  		 }
                  		 
                  		 map.put(relationName, relationMapList);
