@@ -204,8 +204,10 @@ public class TableServiceImpl implements TableService {
 	        }
     	}
      
-        batchInsert(tableDTO, mapList);
-        
+    	for (Map<String, Object> paramMap :  mapList) {
+    		insertRecursion(tableDTO, paramMap, userId);
+    	}
+    	
         BusinessEvent businessEvent = new BusinessEvent(this, name);
 	    applicationContext.publishEvent(businessEvent);
     }
