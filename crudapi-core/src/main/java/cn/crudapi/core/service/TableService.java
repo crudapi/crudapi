@@ -65,4 +65,6 @@ public interface TableService {
 	Long count(String group, String name, Map<String, Object> paramMap, Long userId);
 	
 	String exportJsonData(String name, List<Long> ids);
+
+	void batchImportData(String name, List<Map<String, Object>> mapList, Long userId);
 }

@@ -212,6 +212,47 @@ public class TableServiceImpl implements TableService {
 	    applicationContext.publishEvent(businessEvent);
     }
     
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void batchImportData(String name, List<Map<String, Object>> mapList, Long userId) {
+    	tableMetadataService.checkTable();
+
+    	TableDTO tableDTO = tableMetadataService.get(name);
+
+    	for (Map<String, Object> paramMap :  mapList) {
+    		//userId
+        	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
+        	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+        	if (paramMap.get(COLUMN_OWNER_ID) == null) {
+        		paramMap.put(COLUMN_OWNER_ID, userId);
+        	}
+        	
+        	if (paramMap.get(COLUMN_CRAEAED_DATE) != null) {
+        		paramMap.remove(COLUMN_CRAEAED_DATE);
+        	}
+
+        	if (paramMap.get(COLUMN_LAST_MODIFIED_DATE) != null) {
+        		paramMap.remove(COLUMN_LAST_MODIFIED_DATE);
+        	}
+        	
+        	if (paramMap.get(COLUMN_IS_DELETED) == null) {
+        		paramMap.put(COLUMN_IS_DELETED, false);
+        	}
+        	
+    		Map<String, Object> fullTextBodyMap = getFullTextBody(tableDTO, paramMap);
+
+	        if (fullTextBodyMap != null) {
+	        	Entry<String, Object> item = fullTextBodyMap.entrySet().iterator().next();
+	        	paramMap.put(item.getKey(), item.getValue());
+	        }
+    	}
+     
+    	this.batchInsert(tableDTO, mapList);
+    	
+        BusinessEvent businessEvent = new BusinessEvent(this, name);
+	    applicationContext.publishEvent(businessEvent);
+    }
+    
     private void convertDic(String name, List<Map<String, Object>> mapList) {
     	Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
 
