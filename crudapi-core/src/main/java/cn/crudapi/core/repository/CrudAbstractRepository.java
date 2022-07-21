@@ -145,8 +145,8 @@ public abstract class CrudAbstractRepository {
     	Map<String, Object> map = new HashMap<String, Object>();
     	map.put("tableName", tableEntity.getTableName());
 		map.put("oldColumnName", oldColumnEntity.getName());
-		map.put("oldColumnNullable", oldColumnEntity.getNullable());
-		map.put("oldColumnEntity", oldColumnEntity);
+        map.put("oldIndexType", oldColumnEntity.getIndexType());
+ 	    map.put("oldIndexName", oldColumnEntity.getIndexName());
 		map.put("columnEntity", columnEntity);
 		
 		return processTemplateToString("update-column-index.sql.ftl", map);
