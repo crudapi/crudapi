@@ -63,13 +63,13 @@ public class TableMapper {
 				if (!columnNames.contains(columnEntity.getName())) {
 					columnNames.add(columnEntity.getName());
 				} else {
-					throw new BusinessException(ApiErrorCode.DUPLICATE_COLUMN_NAME, "列英文名称不能重复！");
+					throw new BusinessException(ApiErrorCode.DUPLICATE_COLUMN_NAME, "列英文名称：" + columnEntity.getName() + "不能重复！");
 				}
 				
 				if (!columnCaptions.contains(columnEntity.getCaption())) {
 					columnCaptions.add(columnEntity.getCaption());
 				} else {
-					throw new BusinessException(ApiErrorCode.DUPLICATE_COLUMN_CAPTION, "列中文不能重复！");
+					throw new BusinessException(ApiErrorCode.DUPLICATE_COLUMN_CAPTION, "列中文名称：" + columnEntity.getCaption() + "不能重复！");
 				}
 			}
 		}
