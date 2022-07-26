@@ -17,6 +17,8 @@ public class ApiErrorCode {
     public static final String COLUMN_NOT_EMPTY = "COLUMN_NOT_EMPTY";
     public static final String COLUMN_NAME_NOT_EMPTY = "COLUMN_NAME_NOT_EMPTY";
     public static final String COLUMN_TYPE_NOT_EMPTY = "COLUMN_TYPE_NOT_EMPTY";
+    public static final String DUPLICATE_COLUMN_NAME = "DUPLICATE_COLUMN_NAME";
+    public static final String DUPLICATE_COLUMN_CAPTION = "DUPLICATE_COLUMN_CAPTION";
     public static final String INDEX_NAME_NOT_EMPTY = "INDEX_NAME_NOT_EMPTY";
     public static final String INDEX_TYPE_NOT_EMPTY = "INDEX_TYPE_NOT_EMPTY";
     public static final String INDEX_LINE_NOT_EMPTY = "INDEX_LINE_NOT_EMPTY";
