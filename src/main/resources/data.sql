@@ -1,0 +1,1 @@
+insert into blog(id,title) values(1,'crudapi增删改查接口');
