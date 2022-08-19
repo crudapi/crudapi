@@ -755,7 +755,7 @@ public class TableServiceImpl implements TableService {
          	Object value = map.get(columnName);
          	if (value != null) {
          		if (tableDTO.getColumn(columnName).getMultipleValue()) {
-         			String[] valueArr = value.toString().trim().split(",");
+         			String[] valueArr = value.toString().trim().replaceAll("，", ",").split(",");
         			for (String v : valueArr) { 
         				if (!v.isEmpty()) {
         					values.add(v);
@@ -814,7 +814,7 @@ public class TableServiceImpl implements TableService {
         List<Object> values = new ArrayList<>();
         
         if (value != null) {
-        	String[] valueArr = value.toString().trim().split(",");
+        	String[] valueArr = value.toString().trim().replaceAll("，", ",").split(",");
     		for (String v : valueArr) { 
     			if (!v.isEmpty()) {
     				values.add(v);
@@ -2081,7 +2081,7 @@ public class TableServiceImpl implements TableService {
                      
                      if (tableDTO.getColumn(fkColumnName).getMultipleValue()) {
                     	 List<Object> fkUqValues = new ArrayList<>();
-                     	 String[] fkUqValueArr = fkUqValue.toString().trim().split(",");
+                     	 String[] fkUqValueArr = fkUqValue.toString().trim().replaceAll("，", ",").split(",");
                  		 for (String f : fkUqValueArr) { 
                  			if (!f.isEmpty()) {
                  				fkUqValues.add(f);
