@@ -2267,10 +2267,13 @@ public class TableServiceImpl implements TableService {
         		if (obj != null && !obj.toString().isEmpty()) {
         			String objStr = obj.toString();
         			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
+        				objStr = objStr.replaceAll(",", "");
             			newObj = Long.parseLong(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
+            			objStr = objStr.replaceAll(",", "");
             			newObj = Integer.parseInt(objStr);
             		}  else if (t.getDataType().equals(DataTypeEnum.TINYINT)) {
+            			objStr = objStr.replaceAll(",", "");
             			newObj = Integer.parseInt(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.DOUBLE)) {
             			newObj = Double.parseDouble(objStr);
