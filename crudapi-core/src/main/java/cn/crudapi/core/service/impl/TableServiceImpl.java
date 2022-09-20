@@ -448,6 +448,100 @@ public class TableServiceImpl implements TableService {
   		return mapList;
   	}
 	
+	@Override
+  	public List<Map<String, Object>> convertExecelSheetToData(String name, Sheet sheet) {
+    	List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+         
+  		try {
+  	        int maxRow = sheet.getLastRowNum();
+              log.info("总行数为：" + maxRow);
+              
+              List<String> columnCaptionList = new ArrayList<String>();
+             
+              TableDTO tableDTO = tableMetadataService.get(name);
+              
+              for (int row = 0; row <= maxRow; row++) {
+                  int maxCol = sheet.getRow(row).getLastCellNum();
+                  
+                  Map<String, Object> map = new HashMap<String, Object>();
+              
+                  for (int col = 0; col < maxCol; col++) {
+                  	if (row == 0) {
+                  		String columnCaption = sheet.getRow(row).getCell(col).toString();
+                  		columnCaptionList.add(columnCaption);
+                  		log.info(columnCaption);
+                  	} else {
+                  		String caption = columnCaptionList.get(col);
+                  		
+                  		Optional<ColumnDTO> op = tableDTO.getColumnDTOList()
+                  		.stream()
+                  		.filter(t -> t.getCaption().equalsIgnoreCase(caption))
+                  		.findFirst();
+                  		if (!op.isPresent()) {
+                  			log.warn(caption + "不存在，请移除该列！");
+                  			continue;
+                  		}
+                  		
+                  		ColumnDTO columnDTO = op.get();
+                  				
+                  		String key = columnDTO.getName();
+                  		
+                  		Cell cell = sheet.getRow(row).getCell(col);
+                  		Object newObj = null;
+                  		if (cell != null) {
+                  			if (columnDTO.getDataType().equals(DataTypeEnum.BIGINT)) {
+                      			newObj = getLong(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.INT)) {
+                      			newObj = getInteger(cell);
+                      		}  else if (columnDTO.getDataType().equals(DataTypeEnum.TINYINT)) {
+                      			newObj = getInteger(cell);
+                      		}  else if (columnDTO.getDataType().equals(DataTypeEnum.BOOL)) {
+                      			newObj = getBoolean(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DOUBLE)) {
+                      			newObj = getDouble(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.FLOAT)) {
+                      			newObj = getFloat(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DECIMAL)) {
+                      			newObj = getBigDecimal(cell);
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.PASSWORD)) {
+                      			newObj = encodePassword(getString(cell));
+                              } else if (columnDTO.getDataType().equals(DataTypeEnum.DATETIME)) {
+                              	Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Timestamp(dateLong) : null;
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.DATE)) {
+                      			Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Date(dateLong) : null;
+                      		} else if (columnDTO.getDataType().equals(DataTypeEnum.TIME)) {
+                      			Long dateLong = getDate(cell);
+                      			newObj = dateLong != null ? new Time(dateLong) : null;
+                      		} else {
+                      			newObj = getString(cell);
+                      		}
+                  		}
+                  		
+                  		if (caption.equalsIgnoreCase("名称")) {
+                  			map.put(COLUMN_NAME, newObj);
+                  		}
+              			map.put(key, newObj);
+                  	}
+                  }
+                 
+                  if (row > 0) {
+                  	mapList.add(map);
+                  }
+              }
+             
+              log.info(mapList.toString());
+              
+              convertDic(name, mapList);
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+  		}
+  		
+  		return mapList;
+  	}
+	
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void importData(File jsonFile, Long userId) {

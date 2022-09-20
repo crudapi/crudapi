@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Sheet;
+
 import cn.crudapi.core.query.Condition;
 
 public interface TableService {
@@ -37,6 +39,8 @@ public interface TableService {
 	
 	List<Map<String, Object>> convertExecelToData(String name, File file);
 
+	List<Map<String, Object>> convertExecelSheetToData(String name, Sheet sheet);
+	
 	void importData(File jsonFile, Long userId);
 
 	Map<String, Object> convertJsonToData(File jsonFile);
