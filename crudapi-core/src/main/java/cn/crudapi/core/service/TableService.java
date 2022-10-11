@@ -71,4 +71,6 @@ public interface TableService {
 	String exportJsonData(String name, List<Long> ids);
 
 	void batchImportData(String name, List<Map<String, Object>> mapList, Long userId);
+
+	List<Map<String, Object>> convertExecelSheetToRawData(Sheet sheet);
 }

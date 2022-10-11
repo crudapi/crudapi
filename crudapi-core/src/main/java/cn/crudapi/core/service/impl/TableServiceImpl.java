@@ -522,6 +522,12 @@ public class TableServiceImpl implements TableService {
                   		if (caption.equalsIgnoreCase("名称")) {
                   			map.put(COLUMN_NAME, newObj);
                   		}
+                  		
+                  		//try get string
+                  		if (newObj == null) {
+                  			newObj = getString(cell);
+                  		}
+                  		
               			map.put(key, newObj);
                   	}
                   }
@@ -541,6 +547,56 @@ public class TableServiceImpl implements TableService {
   		
   		return mapList;
   	}
+	
+	@Override
+	public List<Map<String, Object>> convertExecelSheetToRawData(Sheet sheet) {
+    	List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+         
+  		try {
+  	        int maxRow = sheet.getLastRowNum();
+              log.info("总行数为：" + maxRow);
+              
+              List<String> columnCaptionList = new ArrayList<String>();
+             
+              for (int row = 0; row <= maxRow; row++) {
+                  int maxCol = sheet.getRow(row).getLastCellNum();
+                  
+                  Map<String, Object> map = new HashMap<String, Object>();
+              
+                  for (int col = 0; col < maxCol; col++) {
+                  	if (row == 0) {
+                  		String columnCaption = sheet.getRow(row).getCell(col).toString();
+                  		columnCaptionList.add(columnCaption);
+                  		log.info(columnCaption);
+                  	} else {
+                  		String caption = columnCaptionList.get(col);
+                  		
+                  		
+                  		Cell cell = sheet.getRow(row).getCell(col);
+                  		Object newObj = null;
+                  		if (cell != null) {
+                  			newObj = getString(cell);
+                  		}
+                  		
+              			map.put(caption, newObj);
+                  	}
+                  }
+                 
+                  if (row > 0) {
+                  	mapList.add(map);
+                  }
+              }
+             
+              log.info(mapList.toString());
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+  		}
+  		
+  		return mapList;
+  	}
+	
+	
 	
 	@Transactional(rollbackFor = Exception.class)
 	@Override
