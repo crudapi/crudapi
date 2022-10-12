@@ -1341,10 +1341,12 @@ public class TableServiceImpl implements TableService {
 		} catch (Exception e) {
 			log.warn(e.getMessage());
 			value = getStringByToString(cell);
-			String[] arr = value.split("\\.");
-			if (arr.length > 1) {
-				if (arr[1].equals("0")) {
-					value = arr[0];
+			if (value != null) {
+				String[] arr = value.split("\\.");
+				if (arr.length > 1) {
+					if (arr[1].equals("0")) {
+						value = arr[0];
+					}
 				}
 			}
 		}
