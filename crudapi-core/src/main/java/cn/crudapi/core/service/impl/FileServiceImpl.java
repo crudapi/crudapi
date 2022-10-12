@@ -42,11 +42,18 @@ public class FileServiceImpl implements FileService {
 	
 	@Value("${oss.upload.path}")
 	private String ossUploadPath;
-	
-    @Autowired
-    private TableService tableService;
-    
-    /**
+
+	@Override
+    public String getOssFilePath() {
+		return ossFilePath;
+	}
+
+	@Override
+	public String getOssUploadPath() {
+		return ossUploadPath;
+	}
+
+	/**
      * 分块上传文件
      * @param md5
      * @param size
@@ -161,60 +168,6 @@ public class FileServiceImpl implements FileService {
 	    }
 	}
 	
-	@Override
-	public void clean() {
-		File folder = new File(ossFilePath + "/" + ossUploadPath);
-		deleteFolder(folder);
-	}
-	
-	private void deleteFolder(File folder) {
-		log.info("deleteFolder " + folder.getAbsolutePath());
-		File[] files = folder.listFiles();
-        for (File tmpFile :files){
-            if (tmpFile.isDirectory()){//当前是文件夹 继续递归
-            	log.info("skip directory");
-            } else {//当前是文件
-            	Instant creationTime = getCreationTime(tmpFile);
-            	Instant now = Instant.now();
-            	Instant yestdayNow = Instant.now().minusMillis(TimeUnit.HOURS.toMillis(24));
-            	
-            	log.info("creationTime = " + creationTime);
-            	log.info("now = " + now);
-            	log.info("yestdayNow = " + yestdayNow);
-            	
-            	if (creationTime.compareTo(yestdayNow) > 0) {
-            		log.info("creationTime > yestdayNow, skip file which created in 24 hours!");
-            		continue;
-            	}
-            	
-            	String fileName = tmpFile.getName();
-            	String url = getUrl(fileName);
-            	Condition cond = ConditionUtils.toCondition("url", url);
-            	Long count = tableService.count("file", null, null, cond);
-            	if (count.longValue() == 0) {
-            		log.info("fileName = " + fileName);
-            		log.info("url = " + url + " is not in file table, delete it!");
-            		FileSystemUtils.deleteRecursively(tmpFile);
-            	}
-            }
-        }
-	}
-	
-	private Instant getCreationTime(File file) {
-		BasicFileAttributes attr = null;
-        try {
-            Path path =  file.toPath();
-            attr = Files.readAttributes(path, BasicFileAttributes.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // 创建时间
-        Instant instant = attr.creationTime().toInstant();
-        
-        //log.info("instant = " + instant);
-        
-        return instant;
-	}
 	
 	@Override
 	public String getRandomFileName(String fileName) {

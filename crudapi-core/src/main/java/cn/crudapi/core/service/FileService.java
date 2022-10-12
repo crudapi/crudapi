@@ -11,8 +11,6 @@ public interface FileService {
 	
 	void delete(String fileName);
 
-	void clean();
-	
 	/**
 	 * 分块上传文件
 	 * @param md5
@@ -42,4 +40,8 @@ public interface FileService {
 	String getUrl(String fileName);
 
 	String getUploadFullPathByUrl(String url);
+
+	String getOssFilePath();
+
+	String getOssUploadPath();
 }
