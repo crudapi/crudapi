@@ -125,12 +125,13 @@ public class TableController {
     @ApiOperation(value="导出数据")
    	@PostMapping(value = "/{name}/export")
     public ResponseEntity<String> exportData(@PathVariable("name") String name,
+    		@RequestParam(value = "select", required = false) String select,
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			HttpServletRequest request) {
     	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
     	
-   		String fileName = tableService.exportData(name, null, filter, search, condition);
+   		String fileName = tableService.exportData(name, null, select, filter, search, condition);
    		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }

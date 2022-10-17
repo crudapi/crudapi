@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -702,7 +703,7 @@ public class TableServiceImpl implements TableService {
 	}
 	
 	@Override
-	public String exportData(String name, String type, String filter, String search, Condition condition) {
+	public String exportData(String name, String type, String select, String filter, String search, Condition condition) {
 		String fileName = null;
 		try {
 			if (StringUtils.isEmpty(type)) {
@@ -724,10 +725,20 @@ public class TableServiceImpl implements TableService {
 	        Sheet sheet = wb.createSheet(name);
 	        Row row = sheet.createRow(0);
 	        
+	        List<String> selectList = null;
+	        if (!StringUtils.isEmpty(select)) {
+       		  String[] selectArr = select.split(",");
+       		  selectList = Arrays.asList(selectArr);
+       	    }
+       	
 	        TableDTO tableDTO = tableMetadataService.get(name);
 	        int i = 0;
 	        for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
 	        	 if (IndexTypeEnum.FULLTEXT.equals(columnDTO.getIndexType())) {
+	        		 continue;
+	        	 }
+	        	 
+	        	 if (selectList != null && selectList.indexOf(columnDTO.getName()) < 0) {
 	        		 continue;
 	        	 }
 	        	
@@ -739,7 +750,7 @@ public class TableServiceImpl implements TableService {
 	        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
 	        
 	        //数据转换
-	        List<Map<String, Object>> mapList = list(name, null, null, filter, search, condition, null, null, null);
+	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null);
 	        for (Map<String, Object> map : mapList) {
 	        	 for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
 	 	            String relationName = tableRelationDTO.getName();
@@ -778,6 +789,10 @@ public class TableServiceImpl implements TableService {
 		        		 continue;
 		        	 }
 	        		 
+	        		 if (selectList != null && selectList.indexOf(columnDTO.getName()) < 0) {
+		        		 continue;
+		        	 }
+	        		 
 	        		 Cell dataCell = dataRow.createCell(cellIndex++);
 	        		 Object value = map.get(columnDTO.getName());
 	        		 String newValue = null;
@@ -810,6 +825,11 @@ public class TableServiceImpl implements TableService {
 			e.printStackTrace();
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
 		}
+	}
+	
+	@Override
+	public String exportData(String name, String type, String filter, String search, Condition condition) {
+		return this.exportData(name, type, null, filter, search, condition);
 	}
 
     @Override
