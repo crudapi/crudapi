@@ -75,4 +75,6 @@ public interface TableService {
 	void batchImportData(String name, List<Map<String, Object>> mapList, Long userId);
 
 	List<Map<String, Object>> convertExecelSheetToRawData(Sheet sheet);
+
+	String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption);
 }

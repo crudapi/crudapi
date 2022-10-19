@@ -65,6 +65,7 @@ import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
 import cn.crudapi.core.util.DateTimeUtils;
 import cn.crudapi.core.util.JsonUtils;
+import cn.crudapi.core.util.XmlUtils;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -831,6 +832,102 @@ public class TableServiceImpl implements TableService {
 	public String exportData(String name, String type, String filter, String search, Condition condition) {
 		return this.exportData(name, type, null, filter, search, condition);
 	}
+	
+	@Override
+	public String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption) {
+		String fileName = null;
+		try {
+			fileName = fileService.getRandomFileName(name + ".xml" );
+			File file = fileService.getFile(fileName);
+			
+			log.info(file.getAbsolutePath());
+			
+	        List<String> selectList = null;
+	        if (!StringUtils.isEmpty(select)) {
+       		  String[] selectArr = select.split(",");
+       		  selectList = Arrays.asList(selectArr);
+       	    }
+       	
+	        TableDTO tableDTO = tableMetadataService.get(name);
+	     
+	        Long tableId = tableDTO.getId();
+	        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
+	        
+	        //数据转换
+	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null);
+	        for (Map<String, Object> map : mapList) {
+	        	 for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
+	 	            String relationName = tableRelationDTO.getName();
+	 	            if (tableRelationDTO.getRelationType() == TableRelationTypeEnum.ManyToOne || tableRelationDTO.getRelationType() == TableRelationTypeEnum.OneToOneSubToMain) {
+	 	                String fkName = tableRelationDTO.getFromColumnDTO().getName();
+	 	                Object obj = map.get(relationName);
+	 	                if (obj != null) {
+	 	                	if (tableDTO.getColumn(fkName).getMultipleValue()) {
+	 	                		List<Map<String, Object>> relationMapList = (List<Map<String, Object>>) obj;
+	 	                		List<String> valueList =  new ArrayList<String>();
+	 	                		for (Map<String, Object> relationMap : relationMapList) {
+	 	                			Object valueObj = relationMap.get(COLUMN_NAME);
+	 	                			if (valueObj != null) {
+	 	                				valueList.add(valueObj.toString());
+	 	                			}
+	 	                		}
+	 	                		
+	 	                		map.put(fkName, String.join(",", valueList));
+	 	                	} else {
+	 	                		Map<String, Object> relationMap = (Map<String, Object>) obj;
+	 	                		map.put(fkName, relationMap.get(COLUMN_NAME));
+	 	                	}
+	 	                }
+	 	            }
+	 	        }
+	        }
+	        
+	        List<Map<String, Object>> selectMapList = new ArrayList<Map<String, Object>>();
+	        
+	        for (Map<String, Object> map : mapList) {
+	        	 Map<String, Object> selectMap = new HashMap<String, Object>();
+	        	 for (ColumnDTO columnDTO : tableDTO.getColumnDTOList()) {
+	        		 if (IndexTypeEnum.FULLTEXT.equals(columnDTO.getIndexType())) {
+		        		 continue;
+		        	 }
+	        		 
+	        		 if (selectList != null && selectList.indexOf(columnDTO.getName()) < 0) {
+		        		 continue;
+		        	 }
+	        		 
+	        		 Object value = map.get(columnDTO.getName());
+	        		 String newValue = null;
+	        		 if (value != null) {
+	        			 if (columnDTO.getDataType().equals(DataTypeEnum.BOOL)) {
+	        				 if (Boolean.parseBoolean(value.toString())) {
+	        					 newValue = "是";
+	        				 } else {
+	        					 newValue = "否";
+        				 	 }
+		        		 } else {
+		        			 newValue = value.toString();
+		        		 }
+	        		 }
+	        		 
+	        		 selectMap.put(Boolean.TRUE.equals(isDisplayCaption) ? columnDTO.getCaption(): columnDTO.getName(), newValue);
+		         }
+	        	 
+	        	 selectMapList.add(selectMap);
+	        }
+	        
+	        Map<String, Object> xmlMap = new HashMap<String, Object>();
+	        xmlMap.put(Boolean.TRUE.equals(isDisplayCaption) ? tableDTO.getCaption() : tableDTO.getName(), selectMapList);
+	        String xml = XmlUtils.createXmlByMap(xmlMap, "data");
+	        log.info(xml);
+	        	
+	        FileUtils.writeStringToFile(file, xml);
+ 			return fileName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
+		}
+	}
+	
 
     @Override
     public void update(String name, String id, Map<String, Object> newMap) {

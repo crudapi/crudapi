@@ -2,6 +2,7 @@ package cn.crudapi.api.controller;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,24 @@ public class TableController {
     	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
     	
    		String fileName = tableService.exportData(name, null, select, filter, search, condition);
+   		String url = fileService.getUrl(fileName);
+        return new ResponseEntity<String>(url, HttpStatus.CREATED);
+    }
+    
+    
+    @ApiOperation(value="导出XML数据")
+   	@PostMapping(value = "/{name}/export/xml")
+    public ResponseEntity<String> exportToXmlData(@PathVariable("name") String name,
+    		@RequestParam(value = "select", required = false) String select,
+			@RequestParam(value = "filter", required = false) String filter,
+			@RequestParam(value = "search", required = false) String search,
+			@RequestParam(value = "isDisplayCaption", required = false) Boolean isDisplayCaption,
+			HttpServletRequest request) {
+    	List<String> blackList = new ArrayList<>(Arrays.asList("select", "expand", "filter", "search", "offset", "limit", "orderby", "dataSource", "isDisplayCaption"));
+ 	     
+    	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request, blackList));
+    	
+   		String fileName = tableService.exportToXmlData(name, select, filter, search, condition, isDisplayCaption);
    		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
