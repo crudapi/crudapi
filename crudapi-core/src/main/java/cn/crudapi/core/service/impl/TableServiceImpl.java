@@ -313,29 +313,31 @@ public class TableServiceImpl implements TableService {
 	            String pkColumnName = tableRelationDTO.getToColumnDTO().getName();
 	            
 	           	List<Map<String, Object>> relationTableDataMapList = dicTableDataCacheMap.get(relatiobTableName);
-	           	 //更新主表关联字段
-	             for (Map<String, Object> paramMap : mapList) {
-	             	Object value = paramMap.get(fkColumnName);
-	              	if (value != null) {
-	              		if (tableDTO.getColumn(fkColumnName).getMultipleValue()) {
-	              			List<Map<String, Object>> subRelationTableDataMapList =
-	              					getMultipleDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
-	             			if (subRelationTableDataMapList.size() > 0) {
-	             				List<String> strs = new ArrayList<String>();
-		             			for (Map<String, Object> t: subRelationTableDataMapList) {
-		             				strs.add(t.get(pkColumnName).toString());
+	           	if (relationTableDataMapList != null) {
+	           	//更新主表关联字段
+		             for (Map<String, Object> paramMap : mapList) {
+		             	Object value = paramMap.get(fkColumnName);
+		              	if (value != null) {
+		              		if (tableDTO.getColumn(fkColumnName).getMultipleValue()) {
+		              			List<Map<String, Object>> subRelationTableDataMapList =
+		              					getMultipleDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
+		             			if (subRelationTableDataMapList.size() > 0) {
+		             				List<String> strs = new ArrayList<String>();
+			             			for (Map<String, Object> t: subRelationTableDataMapList) {
+			             				strs.add(t.get(pkColumnName).toString());
+			             			}
+			             			paramMap.put(fkColumnName, String.join(",", strs));
 		             			}
-		             			paramMap.put(fkColumnName, String.join(",", strs));
-	             			}
-	              		} else {
-	              			Map<String, Object> subRelationTableDataMap =
-	                 				getOneDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
-	              			if (subRelationTableDataMap != null) {
-	             				paramMap.put(fkColumnName, subRelationTableDataMap.get(pkColumnName));
-	             			}
-	              		}
-	              	}
-	             }
+		              		} else {
+		              			Map<String, Object> subRelationTableDataMap =
+		                 				getOneDataByColumnName(relationTableDataMapList, COLUMN_NAME, value);
+		              			if (subRelationTableDataMap != null) {
+		             				paramMap.put(fkColumnName, subRelationTableDataMap.get(pkColumnName));
+		             			}
+		              		}
+		              	}
+		             }
+	           	}
             }
         }
     }
