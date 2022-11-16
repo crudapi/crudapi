@@ -41,10 +41,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import cn.crudapi.core.annotation.CurrentUser;
 import cn.crudapi.core.constant.ApiErrorCode;
 import cn.crudapi.core.dto.ColumnDTO;
 import cn.crudapi.core.dto.TableDTO;
+import cn.crudapi.core.dto.TablePermissionDTO;
 import cn.crudapi.core.dto.TableRelationDTO;
+import cn.crudapi.core.dto.UserDTO;
+import cn.crudapi.core.enumeration.ConditionTypeEnum;
 import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.enumeration.OperatorTypeEnum;
@@ -118,7 +122,7 @@ public class TableServiceImpl implements TableService {
     
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public String create(String name, Map<String, Object> map, Long userId) {
+    public String create(String name, Map<String, Object> map, UserDTO userDTO) {
     	if (map.get(COLUMN_CRAEAED_DATE) != null) {
     		map.remove(COLUMN_CRAEAED_DATE);
     	}
@@ -135,7 +139,7 @@ public class TableServiceImpl implements TableService {
         
         TableDTO tableDTO = tableMetadataService.get(name);
         
-        Map<String, Object> recId = insertRecursion(tableDTO, map, userId);
+        Map<String, Object> recId = insertRecursion(tableDTO, map, userDTO);
 
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
@@ -159,21 +163,22 @@ public class TableServiceImpl implements TableService {
   	}
     
     @Override
-	public void importData(String name, String fileName, Long userId) {
+	public void importData(String name, String fileName, UserDTO userDTO) {
 		File tempFile = fileService.getFile(fileName);
-		this.importData(name, tempFile, userId);
+		this.importData(name, tempFile, userDTO);
 	}
 
   	@Override
-  	public void importData(String name, File file, Long userId) {
+  	public void importData(String name, File file, UserDTO userDTO) {
   		List<Map<String, Object>> mapList = this.convertExecelToData(name, file);
-  		this.importData(name, mapList, userId);
+  		this.importData(name, mapList, userDTO);
   	}
   	
   	
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void importData(String name, List<Map<String, Object>> mapList, Long userId) {
+    public void importData(String name, List<Map<String, Object>> mapList, UserDTO userDTO) {
+    	Long userId = userDTO.getId();
     	tableMetadataService.checkTable();
 
     	TableDTO tableDTO = tableMetadataService.get(name);
@@ -207,7 +212,7 @@ public class TableServiceImpl implements TableService {
     	}
      
     	for (Map<String, Object> paramMap :  mapList) {
-    		insertRecursion(tableDTO, paramMap, userId);
+    		insertRecursion(tableDTO, paramMap, userDTO);
     	}
     	
         BusinessEvent businessEvent = new BusinessEvent(this, name);
@@ -216,7 +221,9 @@ public class TableServiceImpl implements TableService {
     
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void batchImportData(String name, List<Map<String, Object>> mapList, Long userId) {
+    public void batchImportData(String name, List<Map<String, Object>> mapList, UserDTO userDTO) {
+    	Long userId = userDTO.getId();
+    	
     	tableMetadataService.checkTable();
 
     	TableDTO tableDTO = tableMetadataService.get(name);
@@ -295,7 +302,7 @@ public class TableServiceImpl implements TableService {
 
                  List<Map<String, Object>> relationTableDataMapList = new ArrayList<Map<String, Object>>();
                  if (relationCondition != null) {
-                	 relationTableDataMapList = queryForList(relationQueryModel);
+                	 relationTableDataMapList = queryForList(relationQueryModel, null);
 
                	    //缓存dic
                     dicTableDataCacheMap.put(relatiobTableName, relationTableDataMapList);
@@ -604,14 +611,14 @@ public class TableServiceImpl implements TableService {
 	
 	@Transactional(rollbackFor = Exception.class)
 	@Override
-	public void importData(File jsonFile, Long userId) {
+	public void importData(File jsonFile, UserDTO userDTO) {
 		Map<String, Object> map = convertJsonToData(jsonFile);
 		if (map != null) {
 			for (Map.Entry<String, Object> m : map.entrySet()) {
 				String name = m.getKey();
 				Object value = m.getValue();
 				List<Map<String, Object>> mapList = (List<Map<String, Object>>)value;
-				this.importData(name, mapList, userId);
+				this.importData(name, mapList, userDTO);
             }
 		}
 	}
@@ -631,7 +638,7 @@ public class TableServiceImpl implements TableService {
 	}
 	
 	@Override
-    public String exportJsonData(String name, List<Long> ids) {
+    public String exportJsonData(String name, List<Long> ids, UserDTO userDTO) {
 		String fileName = null;
 		try {
 			fileName = fileService.getRandomFileName(name + ".json");
@@ -645,7 +652,7 @@ public class TableServiceImpl implements TableService {
 			List<TableDTO> tableDTOs = tableMetadataService.listAll(ids);
 			for (TableDTO tableDTO : tableDTOs) {
 				String tableName = tableDTO.getName();
-				List<Map<String, Object>> mapList = this.list(tableName, null, null, null, null, null, null, null, null);
+				List<Map<String, Object>> mapList = this.list(tableName, null, null, null, null, null, null, null, null, userDTO);
 				map.put(tableName, mapList);
 			}
 			
@@ -707,6 +714,11 @@ public class TableServiceImpl implements TableService {
 	
 	@Override
 	public String exportData(String name, String type, String select, String filter, String search, Condition condition) {
+		return this.exportData(name, type, select, filter, search, condition, null);
+	}
+	
+	@Override
+	public String exportData(String name, String type, String select, String filter, String search, Condition condition, UserDTO userDTO) {
 		String fileName = null;
 		try {
 			if (StringUtils.isEmpty(type)) {
@@ -753,7 +765,7 @@ public class TableServiceImpl implements TableService {
 	        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
 	        
 	        //数据转换
-	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null);
+	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null, userDTO);
 	        for (Map<String, Object> map : mapList) {
 	        	 for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
 	 	            String relationName = tableRelationDTO.getName();
@@ -836,7 +848,7 @@ public class TableServiceImpl implements TableService {
 	}
 	
 	@Override
-	public String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption) {
+	public String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption, UserDTO userDTO) {
 		String fileName = null;
 		try {
 			fileName = fileService.getRandomFileName(name + ".xml" );
@@ -856,7 +868,7 @@ public class TableServiceImpl implements TableService {
 	        List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
 	        
 	        //数据转换
-	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null);
+	        List<Map<String, Object>> mapList = list(name, select, null, filter, search, condition, null, null, null, userDTO);
 	        for (Map<String, Object> map : mapList) {
 	        	 for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
 	 	            String relationName = tableRelationDTO.getName();
@@ -938,14 +950,14 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void update(String name, String id, Map<String, Object> newMap, Long userId) {
+    public void update(String name, String id, Map<String, Object> newMap, UserDTO userDTO) {
         TableDTO tableDTO = tableMetadataService.get(name);
         
         log.info("newMap = " + newMap.toString());
         
         Map<String, Object> recId = convertToRecId(tableDTO, id);
         
-        updateRecursion(tableDTO, recId, newMap, userId);
+        updateRecursion(tableDTO, recId, newMap, userDTO);
         
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
@@ -958,12 +970,12 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void delete(String name, String id, Boolean isSoftDelete, Long userId) {
+    public void delete(String name, String id, Boolean isSoftDelete, UserDTO userDTO) {
         TableDTO tableDTO = tableMetadataService.get(name);
 
         Map<String, Object> recId = convertToRecId(tableDTO, id);
         
-        deleteRecursion(tableDTO, recId, isSoftDelete, userId);
+        deleteRecursion(tableDTO, recId, isSoftDelete, userDTO);
         
         BusinessEvent businessEvent = new BusinessEvent(this, name);
         applicationContext.publishEvent(businessEvent);
@@ -976,11 +988,11 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(rollbackFor = Exception.class)
 	@Override
-	public void delete(String name, List<String> idList, Boolean isSoftDelete, Long userId) {
+	public void delete(String name, List<String> idList, Boolean isSoftDelete, UserDTO userDTO) {
 		TableDTO tableDTO = tableMetadataService.get(name);
 		 for (String id : idList) { 
 			 Map<String, Object> recId = convertToRecId(tableDTO, id);
-			 deleteRecursion(tableDTO, recId, isSoftDelete, userId);
+			 deleteRecursion(tableDTO, recId, isSoftDelete, userDTO);
 		 }
 		 
 		 BusinessEvent businessEvent = new BusinessEvent(this, name);
@@ -989,33 +1001,46 @@ public class TableServiceImpl implements TableService {
 	
     @Override
     public Map<String, Object> get(String name, String id, String select, String expand) {
-      	List<String> selectColumnNameList = convertSelect(select);
-    	List<String> expandList = convertExpand(expand);
-
+    	return this.get(name, id, select, expand, null);
+    }
+    
+	@Override
+    public Map<String, Object> get(String name, String id, String select, String expand, UserDTO userDTO) {
     	TableDTO tableDTO = tableMetadataService.get(name);
     	
     	Map<String, Object> recId = convertToRecId(tableDTO, id);
     	
-        return selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
+    	Condition condition = ConditionUtils.toCondition(recId);
+    	
+    	List<Map<String, Object>> mapList = this.list(name, select, expand, null, null, condition, null, null, null, userDTO);
+      	
+        return mapList.get(0);
     }
     
-    @Override
+	 @Override
     public List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand) {
+    	return this.listAllByIds(name, idList, select, expand, null);
+    }
+        
+	@Override
+    public List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand, UserDTO userDTO) {
         TableDTO tableDTO = tableMetadataService.get(name);
       
-        List<Map<String, Object>> maplist = new ArrayList<Map<String, Object>>();
-
-      	List<String> selectColumnNameList = convertSelect(select);
-    	List<String> expandList = convertExpand(expand);
-
+    	List<Condition> conditions = new ArrayList<Condition>();
     	for (String id : idList) {
             log.info("listAllByIds->id = " + id);
             Map<String, Object> recId = convertToRecId(tableDTO, id);
-            Map<String, Object> map = selectRecursion(tableDTO, recId, selectColumnNameList, expandList);
-            maplist.add(map);
+            Condition condition = ConditionUtils.toCondition(recId);
+            conditions.add(condition);
         }
-
-        return maplist;
+    	
+    	CompositeCondition compositeCondition = new CompositeCondition();
+		compositeCondition.setConditionList(conditions);
+		compositeCondition.setConditionType(ConditionTypeEnum.OR);
+    	
+		List<Map<String, Object>> mapList = this.list(name, select, expand, null, null, compositeCondition, null, null, null, userDTO);
+      	
+        return mapList;
     }
     
     private List<Object> getValuesByColumnName(TableDTO tableDTO, List<Map<String, Object>> mapList, String columnName) {
@@ -1160,10 +1185,16 @@ public class TableServiceImpl implements TableService {
   		  }
         }
     }
+    
+    @Override
+    public List<Map<String, Object>> list(String name, String select, String expand, String filter,
+    		String search, Condition condition, Integer offset, Integer limit, String orderby) {
+    	return this.list(name, select, expand, filter, search, condition, offset, limit, orderby, null);
+    }
    
 	@Override
     public List<Map<String, Object>> list(String name, String select, String expand, String filter,
-    		String search, Condition condition, Integer offset, Integer limit, String orderby) {
+    		String search, Condition condition, Integer offset, Integer limit, String orderby, UserDTO userDTO) {
         TableDTO mainTableDTO = tableMetadataService.get(name);
         
 		Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
@@ -1190,7 +1221,7 @@ public class TableServiceImpl implements TableService {
         mainTableQueryModel.setOrderby(orderby);
 
         //主表数据
-    	List<Map<String, Object>> mainTableDataMapList = queryForList(mainTableQueryModel);
+    	List<Map<String, Object>> mainTableDataMapList = queryForList(mainTableQueryModel, userDTO);
        
     	//主表入栈
     	QueryData mainTableQueryData = new QueryData();
@@ -1267,7 +1298,7 @@ public class TableServiceImpl implements TableService {
                     
                     List<Map<String, Object>> relationTableDataMapList = new ArrayList<Map<String, Object>>();
                     if (relationCondition != null) {
-                    	relationTableDataMapList = queryForList(relationQueryModel);
+                    	relationTableDataMapList = queryForList(relationQueryModel, userDTO);
                     }
                     
                     //更新主表关联字段
@@ -1333,7 +1364,7 @@ public class TableServiceImpl implements TableService {
                          
                     	 relationTableDataMapList = new ArrayList<Map<String, Object>>();
                          if (relationCondition != null) {
-                        	 relationTableDataMapList = queryForList(relationQueryModel);
+                        	 relationTableDataMapList = queryForList(relationQueryModel, userDTO);
                         	 
                         	 //缓存dic
                              dicTableDataCacheMap.put(relatiobTableName, relationTableDataMapList);
@@ -1356,7 +1387,7 @@ public class TableServiceImpl implements TableService {
                          
                          List<Map<String, Object>> rightRelationTableDataMapList = new ArrayList<Map<String, Object>>();
                          if (relationCondition != null) {
-                        	 rightRelationTableDataMapList = queryForList(relationQueryModel);
+                        	 rightRelationTableDataMapList = queryForList(relationQueryModel, userDTO);
                          }
                         
                          relationTableCacheMapList.addAll(rightRelationTableDataMapList);
@@ -1741,50 +1772,65 @@ public class TableServiceImpl implements TableService {
     }
     
 
-    private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap, Long userId) {
+    private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap, UserDTO userDTO) {
     	//userId
-    	newMap.put(COLUMN_UPDATE_BY_ID, userId);
+    	newMap.put(COLUMN_UPDATE_BY_ID, userDTO.getId());
     	
+    	List<String> fullUpdateColumnNameList = new ArrayList<String>();
+        tableDTO.getColumnDTOList().stream().forEach(t -> {
+        	fullUpdateColumnNameList.add(t.getName());
+        });
+        
+        List<String> permissionSelectColumnNameList = this.getWriteTablePermissions(tableDTO, fullUpdateColumnNameList, userDTO);
+    	
+    	if (!CollectionUtils.isEmpty(permissionSelectColumnNameList)) {
+    		fullUpdateColumnNameList.retainAll(permissionSelectColumnNameList);
+        } else {
+        	throw new BusinessException(ApiErrorCode.AUTH_FORBIDDEN, "没有编辑权限，至少配置一个字段！"); 
+        }
+        
     	List<String> columnNameList = new ArrayList<String>();
         List<Object> valueList = new ArrayList<Object>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
-            if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
-                columnNameList.add(t.getName());
-                valueList.add(DateTimeUtils.sqlTimestamp());
-            } else if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
-                columnNameList.add(t.getName());
-                
-                Object obj = newMap.get(t.getName());
-                Object newObj = obj;
-        		if (obj != null && !obj.toString().isEmpty()) {
-        			String objStr = obj.toString();
-        			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
-            			newObj = Long.parseLong(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
-            			newObj = Integer.parseInt(objStr);
-            		}  else if (t.getDataType().equals(DataTypeEnum.TINYINT)) {
-            			newObj = Integer.parseInt(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.DOUBLE)) {
-            			newObj = Double.parseDouble(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.FLOAT)) {
-            			newObj = Float.parseFloat(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
-            			newObj = new BigDecimal(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
-            			newObj = encodePassword(objStr);
-                    } else if (t.getDataType().equals(DataTypeEnum.DATETIME)) {
-            			newObj = Timestamp.valueOf(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.DATE)) {
-            			newObj = Date.valueOf(objStr);
-            		} else if (t.getDataType().equals(DataTypeEnum.TIME)) {
-            			newObj = Time.valueOf(objStr);
+        	if (fullUpdateColumnNameList.indexOf(t.getName()) >= 0) {
+        		if (t.getName().equalsIgnoreCase(COLUMN_LAST_MODIFIED_DATE)) {
+                    columnNameList.add(t.getName());
+                    valueList.add(DateTimeUtils.sqlTimestamp());
+                } else if (newMap.containsKey(t.getName()) && !t.getName().equalsIgnoreCase(COLUMN_CRAEAED_DATE)) {
+                    columnNameList.add(t.getName());
+                    
+                    Object obj = newMap.get(t.getName());
+                    Object newObj = obj;
+            		if (obj != null && !obj.toString().isEmpty()) {
+            			String objStr = obj.toString();
+            			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
+                			newObj = Long.parseLong(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
+                			newObj = Integer.parseInt(objStr);
+                		}  else if (t.getDataType().equals(DataTypeEnum.TINYINT)) {
+                			newObj = Integer.parseInt(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.DOUBLE)) {
+                			newObj = Double.parseDouble(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.FLOAT)) {
+                			newObj = Float.parseFloat(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
+                			newObj = new BigDecimal(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.PASSWORD)) {
+                			newObj = encodePassword(objStr);
+                        } else if (t.getDataType().equals(DataTypeEnum.DATETIME)) {
+                			newObj = Timestamp.valueOf(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.DATE)) {
+                			newObj = Date.valueOf(objStr);
+                		} else if (t.getDataType().equals(DataTypeEnum.TIME)) {
+                			newObj = Time.valueOf(objStr);
+                		}
             		}
-        		}
-                
-                valueList.add(newObj);
-            }
+                    
+                    valueList.add(newObj);
+                }
+        	}
         });
-
+        
         String physicalTableName = tableDTO.getTableName();
         
         Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -1795,7 +1841,7 @@ public class TableServiceImpl implements TableService {
     	crudService.patch(physicalTableName, recId, dataMap);
     }
     
-    private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap,  Long userId) {
+    private void updateRecursion(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap,  UserDTO userDTO) {
     	//获取旧表数据
         Map<String, Object> oldMap = selectRecursion(tableDTO, recId, null, null);
         log.info("oldMap = " + oldMap.toString());
@@ -1846,7 +1892,7 @@ public class TableServiceImpl implements TableService {
         }
         
         //3. 修改本表字段
-        updateMainOnly(tableDTO, recId, newMap, userId);
+        updateMainOnly(tableDTO, recId, newMap, userDTO);
         
         //4. 一对多，删除，修改，添加, 一对一，修改，添加
         for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
@@ -1895,19 +1941,19 @@ public class TableServiceImpl implements TableService {
                     String fkName = tableRelationDTO.getToColumnDTO().getName();
                     for (String deleteId : deleteIds) {
                     	 Map<String, Object> deleteRecId = convertToRecId(relationTableDTO, deleteId);
-                    	 deleteRecursion(relationTableDTO, deleteRecId, false, userId);
+                    	 deleteRecursion(relationTableDTO, deleteRecId, false, userDTO);
                     }
                     
                     updateMapList.stream().forEach(t -> {
                         t.put(fkName, recId.get(pkName));
                         Map<String, Object> relationRecId = generateRecId(relationTableDTO, t);
                         log.info("updateRecursion relationRecId: " + relationRecId);
-                        updateRecursion(relationTableDTO, relationRecId, t, userId);
+                        updateRecursion(relationTableDTO, relationRecId, t, userDTO);
                     });
                     
             		insertMapList.stream().forEach(t -> {
                         t.put(fkName, recId.get(pkName));
-                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userId);
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userDTO);
                         log.info("insertRecursion relationRecId: " + relationRecId);
                     });
                 }
@@ -1924,12 +1970,12 @@ public class TableServiceImpl implements TableService {
                     
                     String newItemId = generateId(relationTableDTO, obj);
         			if (StringUtils.isAllEmpty(newItemId)) {
-                		Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userId);
+                		Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userDTO);
                         log.info("insertRecursion relationRecId: " + relationRecId);
                 	} else {
                 		Map<String, Object> relationRecId = generateRecId(relationTableDTO, obj);
                         log.info("updateRecursion relationRecId: " + relationRecId);
-                        updateRecursion(relationTableDTO, relationRecId, obj, userId);
+                        updateRecursion(relationTableDTO, relationRecId, obj, userDTO);
                 	}
                 }
             } 
@@ -2027,7 +2073,7 @@ public class TableServiceImpl implements TableService {
         return fullTextBodyMap;
     }
     
-    private Map<String, Object> insertRecursion(TableDTO tableDTO, Map<String, Object> paramMap, Long userId) {
+    private Map<String, Object> insertRecursion(TableDTO tableDTO, Map<String, Object> paramMap, UserDTO userDTO) {
         // 1. 多对一，一对一：本表字段平铺
         Long tableId = tableDTO.getId();
         List<TableRelationDTO> tableRelationDTOList = tableRelationService.getFromTable(tableId);
@@ -2057,7 +2103,7 @@ public class TableServiceImpl implements TableService {
         }
 
         // 2. 插入本表数据
-        Map<String, Object> recId = insertMainOnly(tableDTO, paramMap, userId);
+        Map<String, Object> recId = insertMainOnly(tableDTO, paramMap, userDTO);
 
         // 3. 插入关联表数据
         for (TableRelationDTO tableRelationDTO : tableRelationDTOList) {
@@ -2073,7 +2119,7 @@ public class TableServiceImpl implements TableService {
                     List<Map<String, Object>> mapList = (List<Map<String, Object>>) paramMap.get(relationName);
                     mapList.stream().forEach(t -> {
                         t.put(fkName, recId.get(pkName));
-                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userId);
+                        Map<String, Object> relationRecId = insertRecursion(relationTableDTO, t, userDTO);
                         log.info("relationRecId: " + relationRecId);
                     });
                 }
@@ -2087,7 +2133,7 @@ public class TableServiceImpl implements TableService {
                     String pkName = tableRelationDTO.getFromColumnDTO().getName();
                     String fkName = tableRelationDTO.getToColumnDTO().getName();
                     obj.put(fkName, recId.get(pkName));
-                    Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userId);
+                    Map<String, Object> relationRecId = insertRecursion(relationTableDTO, obj, userDTO);
                     log.info("relationRecId: " + relationRecId);
                 }
             } 
@@ -2096,8 +2142,8 @@ public class TableServiceImpl implements TableService {
         return recId;
     }
 
-    private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap, Long userId) {
-    	//userId
+    private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap,  UserDTO userDTO) {
+    	Long userId = userDTO.getId();
     	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
     	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
     	if (paramMap.get(COLUMN_OWNER_ID) == null) {
@@ -2169,21 +2215,21 @@ public class TableServiceImpl implements TableService {
         return crudService.delete(tableName, cond);
     }
     
-    private int deleteMainOnly(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, Long userId) {
+    private int deleteMainOnly(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, UserDTO userDTO) {
     	if (isSoftDelete != null && Boolean.TRUE.equals(isSoftDelete)) {
     		//userId
     		Map<String, Object> dataMap = new HashMap<String, Object>();
     		dataMap.put(COLUMN_LAST_MODIFIED_DATE, DateTimeUtils.sqlTimestamp());
-    		dataMap.put(COLUMN_UPDATE_BY_ID, userId);
+    		dataMap.put(COLUMN_UPDATE_BY_ID, userDTO.getId());
     		dataMap.put(COLUMN_IS_DELETED, true);
-    		this.updateMainOnly(tableDTO, recId, dataMap, userId);
+    		this.updateMainOnly(tableDTO, recId, dataMap, userDTO);
     		return 1;
     	} else {
     		return this.delete(tableDTO.getTableName(), ConditionUtils.toCondition(recId));	
     	}
     }
 
-    private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, Long userId) {
+    private void deleteRecursion(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, UserDTO userDTO) {
         log.info("deleteRecursion = " + tableDTO.getName() + ", recId:" + recId);
 
         // 1. 一对多，一对一
@@ -2201,13 +2247,13 @@ public class TableServiceImpl implements TableService {
                 List<Map<String, Object>> relationRecIdList = queryIds(relationTableDTO.getTableName(), relationTableDTO.toDataTypeMap(), relationTableDTO.getPrimaryNameList(), ConditionUtils.toCondition(fkColumnName, recId.get(pkColumnName)));
                 for (Map<String, Object> relationRecId : relationRecIdList) {
                     log.info("relationRecId = " + relationRecId);
-                    deleteRecursion(relationTableDTO, relationRecId, isSoftDelete, userId);
+                    deleteRecursion(relationTableDTO, relationRecId, isSoftDelete, userDTO);
                 }
             }
         }
 
         // 2. 删除本表数据
-        deleteMainOnly(tableDTO, recId, isSoftDelete, userId);
+        deleteMainOnly(tableDTO, recId, isSoftDelete, userDTO);
     }
     
 	private String getSubExpandKey(String expand) {
@@ -2437,7 +2483,7 @@ public class TableServiceImpl implements TableService {
         return crudService.list(tableName, dataTypeMap, selectColumnNameList, cond, newOrderby, offset, limit);
     }
 
-    private List<Map<String, Object>> queryForList(QueryModel queryModel) {
+    private List<Map<String, Object>> queryForList(QueryModel queryModel, UserDTO userDTO) {
     	TableDTO tableDTO = queryModel.getTableDTO();
 
     	List<String> fullSelectColumnNameList = new ArrayList<String>();
@@ -2458,6 +2504,14 @@ public class TableServiceImpl implements TableService {
             	}
             });
     	}
+    	
+    	List<String> permissionSelectColumnNameList = this.getQueryTablePermissions(tableDTO, fullSelectColumnNameList, userDTO);
+    	
+    	if (!CollectionUtils.isEmpty(permissionSelectColumnNameList)) {
+        	fullSelectColumnNameList.retainAll(permissionSelectColumnNameList);
+        } else {
+        	throw new BusinessException(ApiErrorCode.AUTH_FORBIDDEN, "没有查询权限，至少配置一个字段！"); 
+        }
     	
     	List<Map<String, Object>> mapList = queryForList(tableDTO.getTableName(),  
     			tableDTO.toDataTypeMap(), 
@@ -2633,16 +2687,77 @@ public class TableServiceImpl implements TableService {
         });
     }
     
+    private List<String> getQueryTablePermissions(TableDTO tableDTO, List<String> fullSelectColumnNameList, UserDTO userDTO) {
+    	TablePermissionDTO tablePermissionDTO = null;
+    	if (userDTO != null) {
+    		for (TablePermissionDTO t : userDTO.getTablePermissions()) {
+        		if (t.getTableId().equals(tableDTO.getId())) {
+        			tablePermissionDTO = t;
+        			break;
+        		}
+    		}
+    	}
+    	
+    	List<String> permissionSelectColumnNameList = fullSelectColumnNameList;
+    	if (tablePermissionDTO != null) {
+    		permissionSelectColumnNameList = new ArrayList<String>();
+    		List<Map<String, Object>> permissions = tablePermissionDTO.getPermissions();
+    		for (Map<String, Object> permission : permissions) {
+				Long columnId = Long.parseLong(permission.get("columnId").toString());
+				Optional<ColumnDTO> op = tableDTO.getColumnDTOList().stream().filter(t -> t.getId().equals(columnId)).findFirst();
+				if (op.isPresent()) {
+					ColumnDTO oldColumnDTO = op.get();
+					permissionSelectColumnNameList.add(oldColumnDTO.getName());
+				}
+			}
+    	}
+    	
+    	return permissionSelectColumnNameList;
+    }
+    
+    private List<String> getWriteTablePermissions(TableDTO tableDTO, List<String> fullUpdateColumnNameList, UserDTO userDTO) {
+    	TablePermissionDTO tablePermissionDTO = null;
+    	if (userDTO != null) {
+    		for (TablePermissionDTO t : userDTO.getTablePermissions()) {
+        		if (t.getTableId().equals(tableDTO.getId())) {
+        			tablePermissionDTO = t;
+        			break;
+        		}
+    		}
+    	}
+    	
+    	List<String> permissionSelectColumnNameList = fullUpdateColumnNameList;
+    	if (tablePermissionDTO != null) {
+    		permissionSelectColumnNameList = new ArrayList<String>();
+    		List<Map<String, Object>> permissions = tablePermissionDTO.getPermissions();
+    		for (Map<String, Object> permission : permissions) {
+				Long columnId = Long.parseLong(permission.get("columnId").toString());
+				Optional<ColumnDTO> op = tableDTO.getColumnDTOList().stream().filter(t -> t.getId().equals(columnId)).findFirst();
+				if (op.isPresent()) {
+					ColumnDTO oldColumnDTO = op.get();
+					Boolean isCanUpdate = Boolean.parseBoolean(permission.get("update").toString());
+					if (isCanUpdate) {
+						permissionSelectColumnNameList.add(oldColumnDTO.getName());
+					}
+				}
+			}
+    	}
+    	
+    	return permissionSelectColumnNameList;
+    }
+    
     private void checkBlackSql(String sql) {
     	String upperSql = sql.toUpperCase();
     	
-    	if (upperSql.indexOf("DELETE") >= 0
-    	|| upperSql.indexOf("ALTER") >= 0
-    	|| upperSql.indexOf("CREATE") >= 0
-    	|| upperSql.indexOf("DROP") >= 0
-    	|| upperSql.indexOf("UPDATE") >= 0) {
-    		throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "非法SQL");
-    	} 
+    	if (upperSql.indexOf("ISDELETED") < 0) {
+    		if (upperSql.indexOf("DELETE") >= 0
+	    	|| upperSql.indexOf("ALTER") >= 0
+	    	|| upperSql.indexOf("CREATE") >= 0
+	    	|| upperSql.indexOf("DROP") >= 0
+	    	|| upperSql.indexOf("UPDATE") >= 0) {
+	    		throw new BusinessException(ApiErrorCode.VALIDATED_ERROR, "非法SQL");
+	    	} 
+    	}
     }
 
     private Condition covertToSqlCondition(String group, String name) {
@@ -2653,7 +2768,7 @@ public class TableServiceImpl implements TableService {
     	return condition;
     }
     
-    private Map<String, Object> getSqlApi(String group, String name, Long userId) {
+    private Map<String, Object> getSqlApi(String group, String name, UserDTO userDTO) {
     	Condition condition = covertToSqlCondition(group, name);
     	List<Map<String, Object>> sqlApis = this.list(TABLCE_SQL_API, null, null, null, null, condition, null, null, null);
 		if (sqlApis.size() <= 0) {
@@ -2665,8 +2780,8 @@ public class TableServiceImpl implements TableService {
 	}
     
 	@Override
-	public Long count(String group, String name, Map<String, Object> paramMap, Long userId) {
-		Map<String, Object> sqlApi = this.getSqlApi(group, name, userId);
+	public Long count(String group, String name, Map<String, Object> paramMap, UserDTO userDTO) {
+		Map<String, Object> sqlApi = this.getSqlApi(group, name, userDTO);
 		String countSql = sqlApi.get(COLUMN_COUNT_SQL).toString();
 		log.info(countSql);
 		checkBlackSql(countSql);
@@ -2674,8 +2789,8 @@ public class TableServiceImpl implements TableService {
 	}
     
 	@Override
-	public List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, Long userId) {
-		Map<String, Object> sqlApi =  this.getSqlApi(group, name, userId);
+	public List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, UserDTO userDTO) {
+		Map<String, Object> sqlApi =  this.getSqlApi(group, name, userDTO);
 		String dataSql = sqlApi.get(COLUMN_DATA_SQL).toString();
 		log.info(dataSql);
 		checkBlackSql(dataSql);

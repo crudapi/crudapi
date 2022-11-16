@@ -63,7 +63,7 @@ public class TableController {
     public ResponseEntity<String> create(@PathVariable("name") String name, 
     		@RequestBody Map<String, Object> map,
     		@CurrentUser UserDTO userDTO) {
-    	String id = tableService.create(name, map, userDTO.getId());
+    	String id = tableService.create(name, map, userDTO);
 
         return new ResponseEntity<String>(id, HttpStatus.CREATED);
     }
@@ -73,7 +73,7 @@ public class TableController {
     public ResponseEntity<Void> batchCreate(@PathVariable("name") String name, 
     		@RequestBody List<Map<String, Object>> mapList,
     		@CurrentUser UserDTO userDTO) {
-    	tableService.importData(name, mapList, userDTO.getId());
+    	tableService.importData(name, mapList, userDTO);
 
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
@@ -86,7 +86,7 @@ public class TableController {
     	Map<String, Object> map = fileService.upload(file);
 		String fileName = map.get("name").toString();
 		File tempFile = fileService.getFile(fileName);
-		tableService.importData(name, tempFile, userDTO.getId());
+		tableService.importData(name, tempFile, userDTO);
 		fileService.delete(fileName);
 		
         return new ResponseEntity<Void>(HttpStatus.CREATED);
@@ -101,7 +101,7 @@ public class TableController {
     	Map<String, Object> map = fileService.upload(file);
 		String fileName = map.get("name").toString();
 		File tempFile = fileService.getFile(fileName);
-		tableService.importData(tempFile, userDTO.getId());
+		tableService.importData(tempFile, userDTO);
 		fileService.delete(fileName);
 		
         return new ResponseEntity<Void>(HttpStatus.CREATED);
@@ -109,8 +109,9 @@ public class TableController {
     
 	@ApiOperation(value="导出JSON数据")
 	@PostMapping("/export")
-    public ResponseEntity<String> exportJsonData(@RequestBody(required = false) List<Long> idList) {
-		String fileName = tableService.exportJsonData("crudapi", idList);
+    public ResponseEntity<String> exportJsonData(@RequestBody(required = false) List<Long> idList,
+    		@CurrentUser UserDTO userDTO) {
+		String fileName = tableService.exportJsonData("crudapi", idList, userDTO);
         return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
     }    
     
@@ -129,10 +130,11 @@ public class TableController {
     		@RequestParam(value = "select", required = false) String select,
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
+			@CurrentUser UserDTO userDTO,
 			HttpServletRequest request) {
     	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request));
     	
-   		String fileName = tableService.exportData(name, null, select, filter, search, condition);
+   		String fileName = tableService.exportData(name, null, select, filter, search, condition, userDTO);
    		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
@@ -145,12 +147,13 @@ public class TableController {
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
 			@RequestParam(value = "isDisplayCaption", required = false) Boolean isDisplayCaption,
+			@CurrentUser UserDTO userDTO,
 			HttpServletRequest request) {
     	List<String> blackList = new ArrayList<>(Arrays.asList("select", "expand", "filter", "search", "offset", "limit", "orderby", "dataSource", "isDisplayCaption"));
  	     
     	Condition condition = ConditionUtils.toCondition(RequestUtils.getParams(request, blackList));
     	
-   		String fileName = tableService.exportToXmlData(name, select, filter, search, condition, isDisplayCaption);
+   		String fileName = tableService.exportToXmlData(name, select, filter, search, condition, isDisplayCaption, userDTO);
    		String url = fileService.getUrl(fileName);
         return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
@@ -161,7 +164,7 @@ public class TableController {
     		@PathVariable("id") String id,
     		@RequestBody Map<String, Object> map,
     		@CurrentUser UserDTO userDTO) {
-    	tableService.update(name, id, map, userDTO.getId());
+    	tableService.update(name, id, map, userDTO);
 
     	return new ResponseEntity<Void>(HttpStatus.OK);
     }
@@ -177,10 +180,11 @@ public class TableController {
 			@RequestParam(value = "offset", required = false) Integer offset,
 			@RequestParam(value = "limit", required = false) Integer limit,
 			@RequestParam(value = "orderby", required = false) String orderby,
+			@CurrentUser UserDTO userDTO,
 			HttpServletRequest request) {
     	Condition condition = convertNewCondition(name, request);
     	
-		List<Map<String, Object>> mapList = tableService.list(name, select, expand, filter, search, condition, offset, limit, orderby);
+		List<Map<String, Object>> mapList = tableService.list(name, select, expand, filter, search, condition, offset, limit, orderby, userDTO);
 
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
 	}
@@ -190,8 +194,9 @@ public class TableController {
 	public ResponseEntity<Long> count(@PathVariable("name") String name,
 			@RequestParam(value = "filter", required = false) String filter,
 			@RequestParam(value = "search", required = false) String search,
+			@CurrentUser UserDTO userDTO,
 			HttpServletRequest request) {
-    	Condition condition =convertNewCondition(name, request);
+    	Condition condition = convertNewCondition(name, request);
     	
     	Long count  = tableService.count(name, filter, search, condition);
 
@@ -203,8 +208,9 @@ public class TableController {
 	@GetMapping(value = "/{name}/{id}")
 	public ResponseEntity<Map<String, Object>> get(@PathVariable("name") String name, @PathVariable("id") String id,
 			@RequestParam(value = "select", required = false) String select,
-			@RequestParam(value = "expand", required = false) String expand) {
-    	Map<String, Object> map = tableService.get(name, id, select, expand);
+			@RequestParam(value = "expand", required = false) String expand,
+			@CurrentUser UserDTO userDTO) {
+    	Map<String, Object> map = tableService.get(name, id, select, expand, userDTO);
 
 		if (map == null) {
 			throw new BusinessException(ApiErrorCode.API_RESOURCE_NOT_FOUND, id);
@@ -218,7 +224,8 @@ public class TableController {
  	public ResponseEntity<List<Map<String, Object>>> listAllByIds(@PathVariable("name") String name,
  			@RequestParam(value = "ids", required = true) String ids,
  			@RequestParam(value = "select", required = false) String select,
- 			@RequestParam(value = "expand", required = false) String expand) {
+ 			@RequestParam(value = "expand", required = false) String expand,
+ 			@CurrentUser UserDTO userDTO) {
     	List<String> idList = new ArrayList<String>();
     	if (!StringUtils.isBlank(ids)) {
     		String[] idArr = ids.split(",");
@@ -229,7 +236,7 @@ public class TableController {
     		}
     	}
     	
-    	List<Map<String, Object>> mapList = tableService.listAllByIds(name, idList, select, expand);
+    	List<Map<String, Object>> mapList = tableService.listAllByIds(name, idList, select, expand, userDTO);
 
  		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
  	}
@@ -241,7 +248,7 @@ public class TableController {
 			@PathVariable("id") String id,
 			@RequestParam(value = "isSoftDelete", required = false) Boolean isSoftDelete,
 			@CurrentUser UserDTO userDTO) {
-    	tableService.delete(name, id, isSoftDelete, userDTO.getId());
+    	tableService.delete(name, id, isSoftDelete, userDTO);
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
@@ -252,7 +259,7 @@ public class TableController {
 			@RequestBody List<String> idList,
 			@RequestParam(value = "isSoftDelete", required = false) Boolean isSoftDelete,
 			@CurrentUser UserDTO userDTO) {
-    	tableService.delete(name, idList, isSoftDelete, userDTO.getId());
+    	tableService.delete(name, idList, isSoftDelete, userDTO);
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}

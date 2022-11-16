@@ -5,7 +5,7 @@
   <parent>
     <groupId>cn.crudapi</groupId>
     <artifactId>crudapi-parent</artifactId>
-    <version>1.6.1</version>
+    <version>1.6.2</version>
   </parent>
   <artifactId>crudapi-weixin</artifactId>
   <name>crudapi-weixin</name>

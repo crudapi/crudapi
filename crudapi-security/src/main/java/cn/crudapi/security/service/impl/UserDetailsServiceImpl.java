@@ -21,14 +21,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import cn.crudapi.core.enumeration.ConditionTypeEnum;
 import cn.crudapi.core.query.CompositeCondition;
 import cn.crudapi.core.query.Condition;
 import cn.crudapi.core.service.TableService;
 import cn.crudapi.core.util.ConditionUtils;
+import cn.crudapi.core.util.JsonUtils;
 import cn.crudapi.core.dto.GrantedAuthorityDTO;
 import cn.crudapi.core.dto.ResourceDTO;
 import cn.crudapi.core.dto.RoleDTO;
+import cn.crudapi.core.dto.TablePermissionDTO;
 import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.security.service.ResourceService;
 import cn.crudapi.security.service.CaUserDetailsService;
@@ -51,6 +55,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 	@SuppressWarnings("unchecked")
 	public List<ResourceDTO> listResource(List<RoleDTO> roleDTOs) {
 		List<ResourceDTO> resourceDTOs = new  ArrayList<ResourceDTO>();
+		
 		if (CollectionUtils.isEmpty(roleDTOs)) {
 			return resourceDTOs;
 		}
@@ -61,7 +66,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 		}
 		
 		Condition condition = ConditionUtils.toCondition("id", roleIdObjs);
-    	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, "resource", null, null, condition, 0, 99999, null);
+    	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, "resource", null, null, condition, null, null, null);
     	
     	
     	for (Map<String, Object> roleMap : mapList) {
@@ -85,6 +90,48 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 		}
 		
     	return resourceDTOs;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<TablePermissionDTO> listTablePermission(List<RoleDTO> roleDTOs) {
+		List<TablePermissionDTO> tablePermissionDTOs = new ArrayList<TablePermissionDTO>();
+		
+		if (CollectionUtils.isEmpty(roleDTOs)) {
+			return tablePermissionDTOs;
+		}
+		
+		List<Object> roleIdObjs = new ArrayList<Object>();
+		for (RoleDTO role : roleDTOs) {
+			roleIdObjs.add(role.getId());
+		}
+		
+		Condition condition = ConditionUtils.toCondition("id", roleIdObjs);
+    	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, "tablePermission", null, null, condition, null, null, null);
+    	
+    	
+    	for (Map<String, Object> roleMap : mapList) {
+    		Object tablePermissionLinesObj = roleMap.get("tablePermissionLines");
+    		if (tablePermissionLinesObj != null) {
+    			List<Map<String, Object>> tablePermissionLines = (List<Map<String, Object>>)tablePermissionLinesObj;
+    			for (Map<String, Object> tablePermissionLine : tablePermissionLines) {
+    				if (tablePermissionLine.get("tablePermission") != null) {
+    					Map<String, Object> tablePermissionMap = (Map<String, Object>)tablePermissionLine.get("tablePermission");
+    					TablePermissionDTO tablePermissionDTO = new TablePermissionDTO();
+        				tablePermissionDTO.setId(Long.parseLong(tablePermissionMap.get("id").toString()));
+        				tablePermissionDTO.setTableId(Long.parseLong(tablePermissionMap.get("tableId").toString()));
+        				tablePermissionDTO.setName(Objects.toString(tablePermissionMap.get("name")));
+        				
+        				List<Map<String, Object>> permissions = JsonUtils.toObject(tablePermissionMap.get("value").toString(), new TypeReference<List<Map<String, Object>>>(){});
+    					
+        				tablePermissionDTO.setPermissions(permissions);
+        				
+        				tablePermissionDTOs.add(tablePermissionDTO);
+    				}
+    			}
+    		}
+		}
+		
+    	return tablePermissionDTOs;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -140,6 +187,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 		}
 		
 		userDTO.setResources(listResource(roleDTOs));
+		userDTO.setTablePermissions(listTablePermission(roleDTOs));
 		userDTO.setRoles(roleDTOs);
 		
 		List<GrantedAuthorityDTO> roleToAuthorities =  createAuthorityList(roles);

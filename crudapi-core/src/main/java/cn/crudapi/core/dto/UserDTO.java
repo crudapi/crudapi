@@ -3,14 +3,11 @@ package cn.crudapi.core.dto;
 
 import java.util.List;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import cn.crudapi.core.dto.AuditDTO;
 
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,6 +45,8 @@ public class UserDTO extends AuditDTO  implements UserDetails {
 	private List<RoleDTO> roles;
 	
 	private List<ResourceDTO> resources;
+	
+	private List<TablePermissionDTO> tablePermissions;
 	
 	private List<GrantedAuthorityDTO> authorities;
 
@@ -179,6 +178,14 @@ public class UserDTO extends AuditDTO  implements UserDetails {
 		this.resources = resources;
 	}
 
+	public List<TablePermissionDTO> getTablePermissions() {
+		return tablePermissions;
+	}
+
+	public void setTablePermissions(List<TablePermissionDTO> tablePermissions) {
+		this.tablePermissions = tablePermissions;
+	}
+
 	public List<GrantedAuthorityDTO> getAuthorities() {
 		return authorities;
 	}
@@ -187,14 +194,15 @@ public class UserDTO extends AuditDTO  implements UserDetails {
 		this.authorities = authorities;
 	}
 
+	
 	@Override
 	public String toString() {
 		return "UserDTO [id=" + id + ", name=" + name + ", openId=" + openId + ", realname=" + realname + ", username="
 				+ username + ", mobile=" + mobile + ", email=" + email + ", password=" + password + ", cleartextPwd="
 				+ cleartextPwd + ", token=" + token + ", enabled=" + enabled + ", accountNonExpired="
 				+ accountNonExpired + ", accountNonLocked=" + accountNonLocked + ", credentialsNonExpired="
-				+ credentialsNonExpired + ", roles=" + roles + ", resources=" + resources + ", authorities="
-				+ authorities + "]";
+				+ credentialsNonExpired + ", roles=" + roles + ", resources=" + resources + ", tablePermissions="
+				+ tablePermissions + ", authorities=" + authorities + "]";
 	}
 
 	@Override

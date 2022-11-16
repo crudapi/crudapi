@@ -42,7 +42,7 @@ public class SqlApiController {
     	paramMap.put("offset", offset);
     	paramMap.put("limit", limit);
     	
-		List<Map<String, Object>> mapList = tableService.list(group, name, paramMap, userDTO.getId());
+		List<Map<String, Object>> mapList = tableService.list(group, name, paramMap, userDTO);
 
 		return new ResponseEntity<List<Map<String, Object>>>(mapList, HttpStatus.OK);
 	}
@@ -56,7 +56,7 @@ public class SqlApiController {
 			HttpServletRequest request) {
     	Map<String, Object> paramMap = RequestUtils.getParams(request, null);
     	
-    	Long count  = tableService.count(group, name, paramMap, userDTO.getId());
+    	Long count  = tableService.count(group, name, paramMap, userDTO);
 
 		return new ResponseEntity<Long>(count, HttpStatus.OK);
 	}

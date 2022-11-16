@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Sheet;
 
+import cn.crudapi.core.dto.UserDTO;
 import cn.crudapi.core.query.Condition;
 
 public interface TableService {
@@ -19,9 +20,9 @@ public interface TableService {
     
     void delete(String name, List<String> idList);
 
-    void delete(String name, String id, Boolean isSoftDelete, Long userId);
+    void delete(String name, String id, Boolean isSoftDelete, UserDTO userDTO);
     
-    void delete(String name, List<String> idList, Boolean isSoftDelete,  Long userId);
+    void delete(String name, List<String> idList, Boolean isSoftDelete,  UserDTO userDTO);
     
 	void deleteAll(List<String> nameList);
 
@@ -31,25 +32,25 @@ public interface TableService {
 	
 	void importData(String name, List<Map<String, Object>> mapList);
 	
-	void importData(String name, String fileName, Long userId);
+	void importData(String name, String fileName, UserDTO userDTO);
 	
-	void importData(String name, File file, Long userId);
+	void importData(String name, File file, UserDTO userDTO);
 	
-	void importData(String name, List<Map<String, Object>> mapList, Long userId);
+	void importData(String name, List<Map<String, Object>> mapList, UserDTO userDTO);
 	
 	List<Map<String, Object>> convertExecelToData(String name, File file);
 
 	List<Map<String, Object>> convertExecelSheetToData(String name, Sheet sheet);
 	
-	void importData(File jsonFile, Long userId);
+	void importData(File jsonFile, UserDTO userDTO);
 
 	Map<String, Object> convertJsonToData(File jsonFile);
 	
-	void update(String name, String id, Map<String, Object> newMap, Long userId);
+	void update(String name, String id, Map<String, Object> newMap, UserDTO userDTO);
 	
 	void update(String name, String id, Map<String, Object> newMap);
 
-	String create(String name, Map<String, Object> map, Long userId);
+	String create(String name, Map<String, Object> map, UserDTO userDTO);
 	
 	String create(String name, Map<String, Object> map);
 
@@ -66,15 +67,27 @@ public interface TableService {
 	List<Map<String, Object>> listMain(String name, String select, String expand, String filter, String search,
 			Condition condition, Integer offset, Integer limit, String orderby);
 
-	List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, Long userId);
+	List<Map<String, Object>> list(String group, String name, Map<String, Object> paramMap, UserDTO userDTO);
 
-	Long count(String group, String name, Map<String, Object> paramMap, Long userId);
+	Long count(String group, String name, Map<String, Object> paramMap, UserDTO userDTO);
 	
-	String exportJsonData(String name, List<Long> ids);
+	String exportJsonData(String name, List<Long> ids, UserDTO userDTO);
 
-	void batchImportData(String name, List<Map<String, Object>> mapList, Long userId);
+	void batchImportData(String name, List<Map<String, Object>> mapList, UserDTO userDTO);
 
 	List<Map<String, Object>> convertExecelSheetToRawData(Sheet sheet);
 
-	String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption);
+	String exportToXmlData(String name, String select, String filter, String search, Condition condition, Boolean isDisplayCaption, UserDTO userDTO);
+
+	List<Map<String, Object>> list(String name, String select, String expand, String filter, String search,
+			Condition condition, Integer offset, Integer limit, String orderby, UserDTO userDTO);
+
+	Map<String, Object> get(String name, String id, String select, String expand, UserDTO userDTO);
+
+	List<Map<String, Object>> listAllByIds(String name, List<String> idList, String select, String expand,
+			UserDTO userDTO);
+
+	String exportData(String name, String type, String select, String filter, String search, Condition condition,
+			UserDTO userDTO);
+
 }
