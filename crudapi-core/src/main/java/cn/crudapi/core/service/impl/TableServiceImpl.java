@@ -178,7 +178,11 @@ public class TableServiceImpl implements TableService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void importData(String name, List<Map<String, Object>> mapList, UserDTO userDTO) {
-    	Long userId = userDTO.getId();
+    	Long userId = null;
+    	if (userDTO != null) {
+    		userId = userDTO.getId();
+    	}
+    	
     	tableMetadataService.checkTable();
 
     	TableDTO tableDTO = tableMetadataService.get(name);
@@ -222,7 +226,11 @@ public class TableServiceImpl implements TableService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void batchImportData(String name, List<Map<String, Object>> mapList, UserDTO userDTO) {
-    	Long userId = userDTO.getId();
+    	Long userId = null;
+    	if (userDTO != null) {
+    		userId = userDTO.getId();
+    	}
+    	
     	
     	tableMetadataService.checkTable();
 
@@ -1773,8 +1781,10 @@ public class TableServiceImpl implements TableService {
     
 
     private void updateMainOnly(TableDTO tableDTO, Map<String, Object> recId, Map<String, Object> newMap, UserDTO userDTO) {
-    	//userId
-    	newMap.put(COLUMN_UPDATE_BY_ID, userDTO.getId());
+    	if (userDTO != null) {
+    		//userId
+        	newMap.put(COLUMN_UPDATE_BY_ID, userDTO.getId());
+    	}
     	
     	List<String> fullUpdateColumnNameList = new ArrayList<String>();
         tableDTO.getColumnDTOList().stream().forEach(t -> {
@@ -2143,7 +2153,11 @@ public class TableServiceImpl implements TableService {
     }
 
     private Map<String, Object> insertMainOnly(TableDTO tableDTO, Map<String, Object> paramMap,  UserDTO userDTO) {
-    	Long userId = userDTO.getId();
+    	Long userId = null;
+    	if (userDTO != null) {
+    		userId = userDTO.getId();
+    	}
+    	
     	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
     	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
     	if (paramMap.get(COLUMN_OWNER_ID) == null) {
@@ -2217,10 +2231,14 @@ public class TableServiceImpl implements TableService {
     
     private int deleteMainOnly(TableDTO tableDTO, Map<String, Object> recId, Boolean isSoftDelete, UserDTO userDTO) {
     	if (isSoftDelete != null && Boolean.TRUE.equals(isSoftDelete)) {
+    		Long userId = null;
+        	if (userDTO != null) {
+        		userId = userDTO.getId();
+        	}
     		//userId
     		Map<String, Object> dataMap = new HashMap<String, Object>();
     		dataMap.put(COLUMN_LAST_MODIFIED_DATE, DateTimeUtils.sqlTimestamp());
-    		dataMap.put(COLUMN_UPDATE_BY_ID, userDTO.getId());
+    		dataMap.put(COLUMN_UPDATE_BY_ID, userId);
     		dataMap.put(COLUMN_IS_DELETED, true);
     		this.updateMainOnly(tableDTO, recId, dataMap, userDTO);
     		return 1;
