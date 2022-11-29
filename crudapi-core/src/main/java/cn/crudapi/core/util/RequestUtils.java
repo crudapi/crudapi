@@ -22,6 +22,18 @@ public final class RequestUtils {
        return parameterMap;  
 	}
 	
+	
+	public static Map<String, Object> getParamsByWhiteList(HttpServletRequest request, List<String> whiteList) {
+	   Enumeration<String> parameterNameEnumeration = request.getParameterNames();  
+       Map<String, Object> parameterMap = new HashMap<String,Object>();
+       while (parameterNameEnumeration.hasMoreElements()){
+           String parameterName = parameterNameEnumeration.nextElement();  
+           if (whiteList != null && whiteList.contains(parameterName)) {
+               parameterMap.put(parameterName, request.getParameter(parameterName));  
+           }
+       }
+       return parameterMap;  
+	}
 
 	public static Map<String, Object> getParams(HttpServletRequest request) {
 	   List<String> blackList = new ArrayList<>(Arrays.asList("select", "expand", "filter", "search", "offset", "limit", "orderby", "dataSource"));
