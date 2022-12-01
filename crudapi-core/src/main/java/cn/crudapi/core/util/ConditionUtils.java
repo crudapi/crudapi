@@ -90,9 +90,11 @@ public final class ConditionUtils {
 				  } else {
 					  if (valueStr.equalsIgnoreCase("ISNULL")
 						|| valueStr.equalsIgnoreCase("ISNOTNULL")) {
-						  OperatorTypeEnum opt = null;
-						  opt = OperatorTypeEnum.valueOf(valueStr);
+						  OperatorTypeEnum opt = OperatorTypeEnum.valueOf(valueStr);
 						  newOperatorType = opt;
+						  condition.addValue(valueStr);
+					  } else {
+						  condition.addValue(value);
 					  }
 				  }
 			  }
