@@ -88,7 +88,12 @@ public final class ConditionUtils {
 						  condition.addValue(value);
 					  }
 				  } else {
-					  condition.addValue(value);
+					  if (valueStr.equalsIgnoreCase("ISNULL")
+						|| valueStr.equalsIgnoreCase("ISNOTNULL")) {
+						  OperatorTypeEnum opt = null;
+						  opt = OperatorTypeEnum.valueOf(valueStr);
+						  newOperatorType = opt;
+					  }
 				  }
 			  }
 			  
