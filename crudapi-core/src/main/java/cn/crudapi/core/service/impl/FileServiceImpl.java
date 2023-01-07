@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +176,12 @@ public class FileServiceImpl implements FileService {
 	public String getRandomFileName(String fileName) {
 		UUID uuid = UUID.randomUUID();
 		String ext = getFileExt(fileName);
-		return uuid.toString().replace("-", "") + "." + ext;
+		 
+	    DateTime dt = DateTime.now();
+	    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd");
+	    String subPath = dt.toString(f);
+	    
+	    return subPath + "/" + uuid.toString().replace("-", "") + "." + ext;
 	}
 	
 	@Override
