@@ -164,6 +164,9 @@ public class FileServiceImpl implements FileService {
 	public File getFile(String fileName) {
 		try {
 			File dest = new File(ossFilePath + "/" + ossUploadPath + "/" + fileName);
+		    if (!dest.getParentFile().exists()) { //判断文件父目录是否存在
+		        dest.getParentFile().mkdir();
+		    }
 			return dest;
 		} catch (Exception e) {
 	        e.printStackTrace();

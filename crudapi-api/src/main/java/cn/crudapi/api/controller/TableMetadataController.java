@@ -195,7 +195,8 @@ public class TableMetadataController {
 	@PostMapping("/tables/export")
     public ResponseEntity<String> getExportFile(@RequestBody(required = false) List<Long> idList) {
 		String fileName = metadataService.getExportFile("crudapi", idList);
-        return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
+		String url = fileService.getUrl(fileName);
+        return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }
 	
 	@ApiOperation(value="删除表")

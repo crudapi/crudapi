@@ -112,7 +112,8 @@ public class TableController {
     public ResponseEntity<String> exportJsonData(@RequestBody(required = false) List<Long> idList,
     		@CurrentUser UserDTO userDTO) {
 		String fileName = tableService.exportJsonData("crudapi", idList, userDTO);
-        return new ResponseEntity<String>(fileName, HttpStatus.CREATED);
+		String url = fileService.getUrl(fileName);
+        return new ResponseEntity<String>(url, HttpStatus.CREATED);
     }    
     
     @ApiOperation(value="获取导入数据模板")
