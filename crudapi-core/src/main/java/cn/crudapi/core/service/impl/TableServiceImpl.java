@@ -1618,7 +1618,8 @@ public class TableServiceImpl implements TableService {
 	private Long getDate(Cell cell) {
 		Long value = null;
 		java.util.Date date = null;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			if (cell.getCellType().equals(CellType.STRING)) {
 				String str = cell.getStringCellValue();
@@ -1630,13 +1631,19 @@ public class TableServiceImpl implements TableService {
 					}
 					
 					if (value == null) {
-						date = sdf.parse(str);
-						value = date.getTime();
+						try {
+							date = sdf1.parse(str);
+							value = date.getTime();
+						}  catch (Exception e) {
+							log.info(e.getMessage());
+							date = sdf2.parse(str);
+							value = date.getTime();
+						}
 					}
 				}
 			} else {
 				date  = cell.getDateCellValue();
-				log.info(sdf.format(date));
+				log.info(sdf1.format(date));
 				value = date.getTime();
 				
 				Long newValue = convertCellToLong(cell);
