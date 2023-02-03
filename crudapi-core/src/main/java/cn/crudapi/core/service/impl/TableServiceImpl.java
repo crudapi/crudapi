@@ -31,6 +31,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2632,7 +2636,14 @@ public class TableServiceImpl implements TableService {
             		} else if (t.getDataType().equals(DataTypeEnum.DECIMAL)) {
             			newObj = new BigDecimal(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.DATETIME)) {
-            			newObj = Timestamp.valueOf(objStr);
+            			try {
+            				newObj = Timestamp.valueOf(objStr);
+            			} catch (Exception e) {
+            				//2023-02-02T22:54:55.000+0800
+            				DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+            		        DateTime dateTime = fmt.parseDateTime(objStr);
+            		        newObj = new Timestamp(dateTime.getMillis());
+            			}
             		} else if (t.getDataType().equals(DataTypeEnum.DATE)) {
             			newObj = Date.valueOf(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.TIME)) {
