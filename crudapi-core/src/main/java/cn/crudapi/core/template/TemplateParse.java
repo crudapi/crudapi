@@ -83,7 +83,7 @@ public class TemplateParse {
     		template.process(dataModel, stringWriter);
 
     		str = stringWriter.getBuffer().toString().trim();
-            log.info(str);
+            log.debug(str);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
