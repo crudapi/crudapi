@@ -25,7 +25,7 @@ public class TemplateParse {
 	private String readInputStream(ClassPathResource resource) {
 		String value =  null;
 		try {
-	    	log.info(resource.getPath());
+	    	log.debug(resource.getPath());
 	    	
 	    	InputStream inStream = resource.getInputStream();
         	byte[] bytes = new byte[0];
@@ -33,7 +33,7 @@ public class TemplateParse {
         	inStream.read(bytes);
         	value = new String(bytes);
 		} catch (FileNotFoundException e) {
-			log.warn(e.getMessage());
+			log.debug(e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, e.getMessage());
@@ -50,13 +50,13 @@ public class TemplateParse {
         		templateBase = TEMPLTE_BASE;
         	}
         	resource = new ClassPathResource(templateBase + "/" + database + "/" + templateName);
-        	log.info(resource.getPath());
+        	log.debug(resource.getPath());
         	
         	templateValue = readInputStream(resource);
         	
         	if (database != "sql" && templateValue == null) {
         		resource = new ClassPathResource(templateBase + "/sql/" + templateName);
-            	log.info("retry read:" + resource.getPath());
+            	log.debug("retry read:" + resource.getPath());
             	
             	templateValue = readInputStream(resource);
         	}
