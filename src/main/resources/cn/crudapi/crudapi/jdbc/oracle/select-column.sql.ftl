@@ -1,0 +1,14 @@
+SELECT
+t.TABLE_NAME AS "tableName",
+t.COLUMN_NAME AS "columnName",
+c.COMMENTS AS "comment",
+t.DATA_TYPE AS "dataType",
+t.DATA_LENGTH AS "dataLength",
+t.DATA_PRECISION AS "dataPrecision",
+t.DATA_SCALE AS "dataScale",
+t.DATA_DEFAULT AS "dataDefault",
+t.NULLABLE AS "nullable"
+FROM USER_TAB_COLUMNS t
+LEFT JOIN USER_COL_COMMENTS c ON c.TABLE_NAME = t.TABLE_NAME
+AND c.COLUMN_NAME = t.COLUMN_NAME
+WHERE t.TABLE_NAME = '${tableName}'
