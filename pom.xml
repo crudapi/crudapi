@@ -17,7 +17,7 @@
 	<licenses>
 	    <license>
 	        <name>MIT License</name>
-	        <url>https://opensource.org/license/mit/</url>
+	        <url>https://github.com/crudapi/crudapi/blob/main/LICENSE</url>
 	    </license>
 	</licenses>
 	<developers>
@@ -29,7 +29,7 @@
 	</developers>
 	<scm>
       <url>https://github.com/crudapi/crudapi</url>
-      <connection>https://github.com/crudapi/crudapi.git</connection>
+      <connection>https://github.com/crudapi/crudapi</connection>
       <developerConnection>https://github.com/crudapi/crudapi</developerConnection>
     </scm>
 	<properties>
