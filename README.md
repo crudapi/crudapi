@@ -9,7 +9,7 @@ crudapi是crud+api组合，表示增删改查接口，是一款零代码可配�
 mvn clean install -Dmaven.test.skip=true
 
 #aliyun mirror
-mvn clean install -Dmaven.test.skip=true -s settings.xml
+mvn clean install -Dmaven.test.skip=true -s mirror-settings.xml
 ```
 
 ### downloadSources
@@ -17,7 +17,7 @@ mvn clean install -Dmaven.test.skip=true -s settings.xml
 mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true
 
 #aliyun mirror
-mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true -s settings.xml
+mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true -s mirror-settings.xml
 ```
 
 ### package
@@ -27,7 +27,7 @@ mvn clean package -Dmaven.test.skip=true
 
 ### deploy
 ```bash
-mvn clean deploy -Dmaven.test.skip=true -s settings.xml
+mvn clean deploy -Dmaven.test.skip=true -s deploy-settings.xml
 ```
 
 ### run
