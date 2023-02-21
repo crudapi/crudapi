@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>cn.crudapi</groupId>
 	<artifactId>crudapi</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>crudapi</name>
 	<description>Zero code generation crud RESTful api</description>
 	<url>https://github.com/crudapi/crudapi</url>
@@ -25,13 +25,15 @@
         <name>crudapi</name>
         <email>admin@crudapi.cn</email>
         <url>https://github.com/crudapi</url>
+        <organization>crudapi</organization>
+      	<organizationUrl>http://crudapi.cn</organizationUrl>
       </developer>
 	</developers>
-	<scm>
-      <url>https://github.com/crudapi/crudapi</url>
-      <connection>https://github.com/crudapi/crudapi</connection>
-      <developerConnection>https://github.com/crudapi/crudapi</developerConnection>
-    </scm>
+    <scm>
+	  <connection>scm:git:git://github.com/crudapi/crudapi.git</connection>
+	  <developerConnection>scm:git:ssh://github.com:crudapi/crudapi.git</developerConnection>
+	  <url>http://github.com/crudapi/crudapi/tree/main</url>
+	</scm>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

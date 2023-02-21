@@ -27,7 +27,7 @@ mvn clean package -Dmaven.test.skip=true
 
 ### deploy
 ```bash
-mvn clean deploy -Dmaven.test.skip=true
+mvn clean deploy -Dmaven.test.skip=true -s settings.xml
 ```
 
 ### run
