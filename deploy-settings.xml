@@ -2,23 +2,12 @@
   <servers>
     <server>
       <id>ossrh</id>
-      <username></username>
-      <password></password>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_CENTRAL_TOKEN}</password>
     </server>
     <server>
-      <id></id>
-      <passphrase></passphrase>
+      <id>gpg.passphrase</id>
+      <passphrase>${env.MAVEN_GPG_PASSPHRASE}</passphrase>
     </server>
   </servers>
-  <profiles>
-    <profile>
-      <id>ossrh</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <gpg.keyname></gpg.keyname>
-      </properties>
-    </profile>
-  </profiles>
 </settings>
