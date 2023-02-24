@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>cn.crudapi</groupId>
 	<artifactId>crudapi</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>crudapi</name>
 	<description>Zero code generation crud RESTful api</description>
 	<url>https://github.com/crudapi/crudapi</url>

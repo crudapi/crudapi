@@ -20,17 +20,39 @@ mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true
 mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true -s mirror-settings.xml
 ```
 
+### run
+```bash
+java -jar ./target/crudapi-0.0.4-SNAPSHOT.jar
+```
+
 ### package
 ```bash
 mvn clean package -Dmaven.test.skip=true
 ```
 
-### deploy
+### GPG
 ```bash
-mvn clean deploy -Dmaven.test.skip=true -s deploy-settings.xml
+gpg --gen-key
+
+gpg --list-secret-key
+gpg --list-key
+
+gpg --delete-secret-keys
+gpg --delete-keys
+
+gpg --keyserver keyserver.ubuntu.com --send-keys KEY_ID
+gpg --keyserver keyserver.ubuntu.com --recv-keys KEY_ID
+
+gpg --list-signatures --keyid-format 0xshort
+
+gpg --armor --export-secret-keys KEY_ID
+gpg --armor --export KEY_ID
 ```
 
-### run
+### deploy
 ```bash
-java -jar ./target/crudapi-0.0.1-SNAPSHOT.jar
+export MAVEN_USERNAME=
+export MAVEN_CENTRAL_TOKEN=
+export MAVEN_GPG_PASSPHRASE=
+mvn clean deploy -Dmaven.test.skip=true -s deploy-settings.xml
 ```
