@@ -1,0 +1,11 @@
+SELECT
+i.TABLE_OWNER AS "tableOwner",
+i.TABLE_NAME AS "tableName",
+i.INDEX_NAME AS "indexName",
+i.INDEX_TYPE AS "indexType",
+i.UNIQUENESS AS "uniqueness",
+c.COLUMN_NAME AS "columnName"
+FROM USER_INDEXES i
+INNER JOIN USER_IND_COLUMNS c ON i.TABLE_NAME = c.TABLE_NAME
+AND c.INDEX_NAME = i.INDEX_NAME
+WHERE i.TABLE_NAME = '${tableName}'
