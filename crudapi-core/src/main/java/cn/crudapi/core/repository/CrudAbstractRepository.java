@@ -1233,9 +1233,22 @@ public abstract class CrudAbstractRepository {
 			public boolean hasValue(String paramName) {
 				return paramMap.containsKey(paramName);
 			}
+			@SuppressWarnings("unchecked")
 			@Override
 			public Object getValue(String paramName) throws IllegalArgumentException {
-				return paramMap.get(paramName);
+				Object obj = paramMap.get(paramName);
+				if (obj instanceof List) {
+					List<Object> objList = (ArrayList<Object>)(obj);
+					
+					List<String> strList = new ArrayList<String>();
+					for (Object t : objList) {
+						strList.add(t.toString());
+					}
+					String str = String.join(",", strList);
+					return str;
+				}
+				
+				return obj;
 			}
 		};
 	}
