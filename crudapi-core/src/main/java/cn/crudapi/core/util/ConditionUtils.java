@@ -51,22 +51,17 @@ public final class ConditionUtils {
 			  
 			  LeafCondition condition = new LeafCondition();
 			  condition.setColumnName(key);
-			  if (newOperatorType.equals(OperatorTypeEnum.MLIKE)
-				|| valueStr.contains(",")) {
+			  if (newOperatorType.equals(OperatorTypeEnum.MLIKE)) {
        			String[] valueArr = valueStr.split(",");
       			for (String v : valueArr) { 
       				if (!v.isEmpty()) {
       					condition.addValue(v);
       				}
       			}
-      			
-      			if (newOperatorType.equals(OperatorTypeEnum.EQ)) {
-      				newOperatorType = OperatorTypeEnum.IN;
-      			}
 			  } else {
-				  //name=LIKE crudapi&productCount=LE 2
+				  //name=LIKE crudapi&productCount=LE 2&quantity=BETWEEN%20100,200
 				  List<String> opValueList = new ArrayList<String>();
-				  String[] opValueArr = valueStr.replaceAll(" +", ";").split(";");
+				  String[] opValueArr = valueStr.replaceFirst(" +", ";").split(";");
 				  for (String ov : opValueArr) { 
 					if (!ov.isEmpty()) {
 						opValueList.add(ov);
@@ -81,12 +76,50 @@ public final class ConditionUtils {
 						  
 					  }
 					  
+					  String newValueStr = valueStr;
 					  if (opt != null) {
 						  newOperatorType = opt;
-						  condition.addValue(valueStr.replaceFirst(opValueList.get(0), "").trim());
-					  } else {
-						  condition.addValue(value);
+						  newValueStr = valueStr.replaceFirst(opValueList.get(0), "").trim();
 					  }
+					  
+					  String[] newValueArr = newValueStr.split(",");
+					  
+					  if (newOperatorType.equals(OperatorTypeEnum.BETWEEN)) {
+						  if (newValueArr.length > 1) {
+							  String beginValue = newValueArr[0];
+							  String endValue = newValueArr[1];
+							  if (!beginValue.isEmpty() && !endValue.isEmpty()) { 
+								  condition.addValue(beginValue);
+								  condition.addValue(endValue);
+							  } else if (beginValue.isEmpty() && !endValue.isEmpty()) {
+								  newOperatorType = OperatorTypeEnum.LE;
+								  condition.addValue(endValue);
+							  } else if (!beginValue.isEmpty() && endValue.isEmpty()) {
+								  newOperatorType = OperatorTypeEnum.GE;
+								  condition.addValue(beginValue);
+							  } else if (beginValue.isEmpty() && endValue.isEmpty()) { 
+								  condition = null;
+							  }
+						  } else if (newValueArr.length == 1) {
+							  newOperatorType = OperatorTypeEnum.GE;
+							  condition.addValue(newValueArr[0]);
+						  } else {
+							  condition = null;
+						  }
+					  } else {
+						  for (String v : newValueArr) { 
+		      				if (!v.isEmpty()) {
+		      					condition.addValue(v);
+		      				}
+		      			  }
+					  }
+					  
+					  //change = to in
+					  if (newOperatorType.equals(OperatorTypeEnum.EQ)  
+						&& condition.getValueList().size() > 0 ) {
+						  newOperatorType = OperatorTypeEnum.IN;
+					  }
+					  
 				  } else {
 					  if (valueStr.equalsIgnoreCase("ISNULL")
 						|| valueStr.equalsIgnoreCase("ISNOTNULL")) {
@@ -99,8 +132,10 @@ public final class ConditionUtils {
 				  }
 			  }
 			  
-			  condition.setOperatorType(newOperatorType);
-			  compositeCondition.add(condition);
+			  if (condition != null) {
+				  condition.setOperatorType(newOperatorType);
+				  compositeCondition.add(condition);
+			  }
 		  }
 		}
 		
