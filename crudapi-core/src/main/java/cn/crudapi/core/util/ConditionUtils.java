@@ -71,7 +71,18 @@ public final class ConditionUtils {
 				  if (opValueList.size() > 1) {
 					  OperatorTypeEnum opt = null;
 					  try {
-						  opt = OperatorTypeEnum.valueOf(opValueList.get(0));
+						  String optStr = opValueList.get(0);
+						  if (optStr.equals(">=")) {
+							  optStr = "GE";
+						  } else if (optStr.equals(">")) {
+							  optStr = "GT";
+						  } else if (optStr.equals("<=")) {
+							  optStr = "LE";
+						  } else if (optStr.equals("<")) {
+							  optStr = "LT";
+						  }
+						  
+						  opt = OperatorTypeEnum.valueOf(optStr);
 					  } catch (Exception e) {
 						  
 					  }
