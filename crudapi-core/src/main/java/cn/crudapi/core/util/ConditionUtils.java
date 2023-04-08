@@ -138,7 +138,18 @@ public final class ConditionUtils {
 						  newOperatorType = opt;
 						  condition.addValue(valueStr);
 					  } else {
-						  condition.addValue(value);
+						  String[] valueArr = valueStr.split(",");
+			      		  for (String v : valueArr) { 
+			      		    if (!v.isEmpty()) {
+			      		      condition.addValue(v);
+			      		    }
+			      		  }
+			      		  
+			      		  //change = to in
+						  if (newOperatorType.equals(OperatorTypeEnum.EQ)  
+							&& condition.getValueList().size() > 0 ) {
+							  newOperatorType = OperatorTypeEnum.IN;
+						  }
 					  }
 				  }
 			  }
