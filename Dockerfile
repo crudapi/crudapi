@@ -1,4 +1,5 @@
-FROM maven:3.8-openjdk-8 as builder
+#FROM maven:3.8-openjdk-8 as builder
+FROM registry.cn-qingdao.aliyuncs.com/dh-mirror/maven:3.8-openjdk-8 as builder
 
 COPY settings.xml /crudapi/settings.xml
 COPY pom.xml /crudapi/pom.xml
@@ -31,6 +32,7 @@ RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml &&
     cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/crudapi/$version && \
     cp /crudapi/crudapi-service/target/*.jar /crudapi
 
+#FROM registry.cn-qingdao.aliyuncs.com/dh-mirror/openjdk:8-jdk-alpine
 FROM openjdk:8-jdk-alpine
 
 ENV TZ Asia/Shanghai
