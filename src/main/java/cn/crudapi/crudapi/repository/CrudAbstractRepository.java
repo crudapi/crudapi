@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
 import cn.crudapi.crudapi.template.TemplateParse;
+import cn.crudapi.crudapi.util.CrudapiUtils;
 
 public abstract class CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(CrudAbstractRepository.class);
@@ -54,7 +55,19 @@ public abstract class CrudAbstractRepository {
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
 		log.info("CrudAbstractRepository->queryForList", sql);
-		return namedParameterJdbcTemplate.queryForList(sql, paramMap);
+		List<Map<String, Object>> mapList = namedParameterJdbcTemplate.queryForList(sql, paramMap);
+		
+		List<Map<String, Object>> newMapList = new ArrayList<>();
+		for (Map<String, Object> t : mapList) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			for(Map.Entry<String, Object> entry : t.entrySet()) {
+				map.put(CrudapiUtils.underlineToCamel(entry.getKey()), entry.getValue());
+			}
+			newMapList.add(map);
+		}
+		
+		return newMapList;
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {

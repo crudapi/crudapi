@@ -70,18 +70,22 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
 	           		String driverClassName = t.getDriverClassName();
 	           		String url = t.getUrl();
 	           		Boolean deleted = t.getDeleted();
-
+	           		String status = t.getStatus();
 	           		if (Boolean.TRUE.equals(deleted)) {
-		           		log.info("[config skip dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, dataBaseType, driverClassName, deleted, url);
+		           		log.warn("[config skip dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, dataBaseType, driverClassName, deleted, url);
 	           		} else {
-		           		log.info("[config add dataSoure]name = {}, caption = {},dataBaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, dataBaseType, driverClassName, deleted, url);
-		           		dynamicDataSourcePropertiesList.add(map);
+	           			if ("ACTIVE".equals(status)) {
+	           				log.info("[config add dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, dataBaseType, driverClassName, status, url);
+			           		dynamicDataSourcePropertiesList.add(map);
+	           			} else {
+	           				log.warn("[config skip dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, dataBaseType, driverClassName, status, url);
+	           			}
 	           		}
                 });
             });
     	}
     	
-    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `DATA_SOURCE`  WHERE `DELETED` = false", new HashMap<String, Object>());
+    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `DATA_SOURCE`  WHERE `DELETED` = false AND `status` = 'ACTIVE' ORDER BY `DISPLAY_ORDER` ASC", new HashMap<String, Object>());
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
     		 String name = t.get("NAME").toString();
@@ -92,7 +96,8 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		 String username = t.get("USERNAME").toString();
     		 String password = t.get("PASSWORD").toString();
     		 
-    		 log.info("[database add dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, url = {}", name, dataBaseType, driverClassName, url);
+    		 log.info("[database add dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, url = {}",
+    				 name, caption, dataBaseType, driverClassName, url);
     		 
     		 properties.setCaption(caption);
     		 properties.setDriverClassName(driverClassName);
@@ -100,6 +105,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		 properties.setUsername(username);
     		 properties.setPassword(password);
     		 properties.setDataBaseType(dataBaseType);
+    		 properties.setStatus("ACTIVE");
     		 properties.setDeleted(false);
     		 
     		 Map<String, DynamicDataSourceProperties> propertiesMap = new HashMap<String, DynamicDataSourceProperties>();

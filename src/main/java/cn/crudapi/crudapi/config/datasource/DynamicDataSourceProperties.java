@@ -3,14 +3,17 @@ package cn.crudapi.crudapi.config.datasource;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
 public class DynamicDataSourceProperties extends DataSourceProperties {
+	private String caption;
+	
 	/**
 	 * Type of the database .
 	 */
 	private String dataBaseType;
 	
+	private String status;
+	
 	private Boolean deleted;
 	
-	private String caption;
 
 	public String getDataBaseType() {
 		return dataBaseType;
@@ -18,6 +21,14 @@ public class DynamicDataSourceProperties extends DataSourceProperties {
 
 	public void setDataBaseType(String dataBaseType) {
 		this.dataBaseType = dataBaseType;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public Boolean getDeleted() {
