@@ -17,7 +17,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 	
 	@Override
 	public List<Map<String, Object>> queryForList() {
-        return crudService.queryForList("SELECT * FROM `DATA_SOURCE`", new HashMap<String, Object>());
+        return crudService.queryForList("SELECT * FROM `data_source`", new HashMap<String, Object>());
     }
 	
 	@Override

@@ -15,7 +15,7 @@ public class CrudapiUtils {
 	            sb.append(c);
 	        }
 	    }
-	    return sb.toString().toUpperCase();
+	    return sb.toString();
 	}
 
 	public static String underlineToCamel(String param) {
@@ -23,8 +23,6 @@ public class CrudapiUtils {
 	        return "";
 	    }
 	    int len = param.length();
-	    
-	    param = param.toLowerCase();
 	    
 	    StringBuilder sb = new StringBuilder(len);
 	    for (int i = 0; i < len; i++) {

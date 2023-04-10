@@ -57,11 +57,11 @@ public class FlywayConfig {
         if (dataSources != null) {
         	dataSources.forEach((k, v) -> {
             	String datasourceName = k.toString();
-            	String dataBaseType = dataSourceNameDataBaseTypesMap.get(datasourceName);
-            	log.info("[Flyway migrate]datasource = {}, dataBaseType = {}", datasourceName, dataBaseType);
+            	String databaseType = dataSourceNameDataBaseTypesMap.get(datasourceName);
+            	log.info("[Flyway migrate]datasource = {}, databaseType = {}", datasourceName, databaseType);
             	
             	
-            	FlywayProperties properties = flywayPropertiesMap.get(dataBaseType);
+            	FlywayProperties properties = flywayPropertiesMap.get(databaseType);
             	if (properties != null) {
             		log.info("[Flyway migrate]datasource " + datasourceName + " execute flyway migrate!");
             		

@@ -66,45 +66,45 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
                 	
                 	String name = key;
                 	String caption = t.getCaption();
-	           		String dataBaseType = t.getDataBaseType();
+	           		String databaseType = t.getDatabaseType();
 	           		String driverClassName = t.getDriverClassName();
 	           		String url = t.getUrl();
 	           		Boolean deleted = t.getDeleted();
 	           		String status = t.getStatus();
 	           		if (Boolean.TRUE.equals(deleted)) {
-		           		log.warn("[config skip dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, dataBaseType, driverClassName, deleted, url);
+		           		log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, databaseType, driverClassName, deleted, url);
 	           		} else {
 	           			if ("ACTIVE".equals(status)) {
-	           				log.info("[config add dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, dataBaseType, driverClassName, status, url);
+	           				log.info("[config add dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
 			           		dynamicDataSourcePropertiesList.add(map);
 	           			} else {
-	           				log.warn("[config skip dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, dataBaseType, driverClassName, status, url);
+	           				log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
 	           			}
 	           		}
                 });
             });
     	}
     	
-    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `DATA_SOURCE`  WHERE `DELETED` = false AND `status` = 'ACTIVE' ORDER BY `DISPLAY_ORDER` ASC", new HashMap<String, Object>());
+    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `data_source`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
-    		 String name = t.get("NAME").toString();
-    		 String caption = t.get("CAPTION").toString();
-    		 String dataBaseType = t.get("DATABASE_TYPE").toString();
-    		 String driverClassName = t.get("DRIVER_CLASS_NAME").toString();
-    		 String url = t.get("URL").toString();
-    		 String username = t.get("USERNAME").toString();
-    		 String password = t.get("PASSWORD").toString();
+    		 String name = t.get("name").toString();
+    		 String caption = t.get("caption").toString();
+    		 String databaseType = t.get("database_type").toString();
+    		 String driverClassName = t.get("driver_class_name").toString();
+    		 String url = t.get("url").toString();
+    		 String username = t.get("username").toString();
+    		 String password = t.get("password").toString();
     		 
-    		 log.info("[database add dataSoure]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, url = {}",
-    				 name, caption, dataBaseType, driverClassName, url);
+    		 log.info("[database add dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, url = {}",
+    				 name, caption, databaseType, driverClassName, url);
     		 
     		 properties.setCaption(caption);
     		 properties.setDriverClassName(driverClassName);
     		 properties.setUrl(url);
     		 properties.setUsername(username);
     		 properties.setPassword(password);
-    		 properties.setDataBaseType(dataBaseType);
+    		 properties.setDatabaseType(databaseType);
     		 properties.setStatus("ACTIVE");
     		 properties.setDeleted(false);
     		 
@@ -132,14 +132,15 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
             	
             	String name = key;
             	String caption = t.getCaption();
-           		String dataBaseType = t.getDataBaseType();
+           		String databaseType = t.getDatabaseType();
            		String driverClassName = t.getDriverClassName();
            		String url = t.getUrl();
            		String username = t.getUsername();
            		String password = t.getPassword();
            		Boolean deleted = t.getDeleted();
 
-           		log.info("[build dataSource]name = {}, caption = {}, dataBaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, dataBaseType, driverClassName, deleted, url);
+           		log.info("[build dataSource]name = {}, caption = {}, databaseType = {}, driverClassName = {}, deleted = {}, url = {}", 
+           				name, caption, databaseType, driverClassName, deleted, url);
        			DataSourceProperties properties = new DataSourceProperties();
        			properties.setDriverClassName(driverClassName);
            		properties.setUrl(url);
@@ -148,7 +149,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
            		
                 DataSource dataSource = buildDataSource(properties);
                 targetDataSourcesMap.put(name, dataSource);
-                targetDataSourceNameDataBaseTypesMap.put(name, dataBaseType);
+                targetDataSourceNameDataBaseTypesMap.put(name, databaseType);
             });
         });
     	

@@ -8,19 +8,19 @@ public class DynamicDataSourceProperties extends DataSourceProperties {
 	/**
 	 * Type of the database .
 	 */
-	private String dataBaseType;
+	private String databaseType;
 	
 	private String status;
 	
 	private Boolean deleted;
 	
 
-	public String getDataBaseType() {
-		return dataBaseType;
+	public String getDatabaseType() {
+		return databaseType;
 	}
 
-	public void setDataBaseType(String dataBaseType) {
-		this.dataBaseType = dataBaseType;
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
 	}
 
 	public String getStatus() {

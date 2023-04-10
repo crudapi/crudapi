@@ -62,7 +62,22 @@ public abstract class CrudAbstractRepository {
 			Map<String, Object> map = new HashMap<String, Object>();
 			
 			for(Map.Entry<String, Object> entry : t.entrySet()) {
-				map.put(CrudapiUtils.underlineToCamel(entry.getKey()), entry.getValue());
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (key.toLowerCase().startsWith("is_")) {
+					key = key.substring(3);
+					
+					if (value != null ) {
+						String valueStr = value.toString();
+						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
+							value = true;
+		    			} else {
+		    				value = false;
+		    			}
+					}
+				}
+				
+				map.put(CrudapiUtils.underlineToCamel(key), value);
 			}
 			newMapList.add(map);
 		}
