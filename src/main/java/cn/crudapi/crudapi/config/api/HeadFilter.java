@@ -21,30 +21,31 @@ public class HeadFilter extends OncePerRequestFilter {
 	
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    	HeadRequestWrapper headRequestWrapper = new HeadRequestWrapper(request);
+    	
+    	
+    	String dataSource = "primary";
     	if (!"/api/auth/login".equals(request.getRequestURI())
     		&& !"/api/auth/jwt/login".equals(request.getRequestURI())
     		&& !"/api/auth/logout".equals(request.getRequestURI())
-    		&& !"/api/crudapi/dataSources".equals(request.getRequestURI())) {
-    		String dataSource = request.getParameter("dataSource");
-        	HeadRequestWrapper headRequestWrapper = new HeadRequestWrapper(request);
-        	
+    		&& !"/api/crudapi/system/data-sources".equals(request.getRequestURI())) {
+    		dataSource = request.getParameter("dataSource");
         	if (ObjectUtils.isEmpty(dataSource)) {
         		dataSource = headRequestWrapper.getHeader("dataSource");
                 if (ObjectUtils.isEmpty(dataSource)) {
                 	dataSource = "primary";
-                	headRequestWrapper.addHead("dataSource", dataSource);
                 }
             }
-        	
-        	DataSourceContextHolder.setHeaderDataSource(dataSource);
-        	
-            log.info(request.getRequestURI() + ", dataSource: " + dataSource);
-            
-            // finish
-            filterChain.doFilter(headRequestWrapper, response);
 		} else {
-		    log.info(request.getRequestURI() + ", skip set dataSource!");
-			filterChain.doFilter(request, response);
+		    log.info(request.getRequestURI() + ", use primary dataSource!");
 		}
+    	
+    	headRequestWrapper.addHead("dataSource", dataSource);
+    	DataSourceContextHolder.setHeaderDataSource(dataSource);
+    	
+        log.info(request.getRequestURI() + ", dataSource: " + dataSource);
+        
+        // finish
+        filterChain.doFilter(headRequestWrapper, response);
     }
 }

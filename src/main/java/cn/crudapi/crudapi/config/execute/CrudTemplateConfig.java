@@ -26,7 +26,7 @@ import cn.crudapi.crudapi.repository.sqlite.SqliteCrudFactory;
 @ConfigurationProperties(prefix = "spring.datasource.hikari")
 public class CrudTemplateConfig {
 	@Autowired
-	private DataSourceProperties datasourceProperties;
+	private DataSourceProperties dataSourceProperties;
 	
 	
 	@Autowired
@@ -61,7 +61,7 @@ public class CrudTemplateConfig {
     
     @Bean(name = "crudAbstractFactory")
 	public CrudAbstractFactory getDefaultCrudAbstractFactory() {
-		String driverClassName = datasourceProperties.getDriverClassName();
+		String driverClassName = dataSourceProperties.getDriverClassName();
 		return CrudTemplateUtils.createCrudAbstractFactory(driverClassName);
 	}
 	

@@ -47,7 +47,7 @@ public class FlywayConfig {
 
     @Bean
     public void migrate() {
-    	log.info("[Flyway migrate]begin migrate multi datasource...");
+    	log.info("[Flyway migrate]begin migrate multi dataSource...");
     	Map<String, FlywayProperties> flywayPropertiesMap = getFlywayPropertiesMap();
     	
         Map<Object, Object> dataSources = dynamicDataSourceProvider.getTargetDataSourcesMap();
@@ -56,14 +56,14 @@ public class FlywayConfig {
         
         if (dataSources != null) {
         	dataSources.forEach((k, v) -> {
-            	String datasourceName = k.toString();
-            	String databaseType = dataSourceNameDataBaseTypesMap.get(datasourceName);
-            	log.info("[Flyway migrate]datasource = {}, databaseType = {}", datasourceName, databaseType);
+            	String dataSourceName = k.toString();
+            	String databaseType = dataSourceNameDataBaseTypesMap.get(dataSourceName);
+            	log.info("[Flyway migrate]dataSource = {}, databaseType = {}", dataSourceName, databaseType);
             	
             	
             	FlywayProperties properties = flywayPropertiesMap.get(databaseType);
             	if (properties != null) {
-            		log.info("[Flyway migrate]datasource " + datasourceName + " execute flyway migrate!");
+            		log.info("[Flyway migrate]dataSource " + dataSourceName + " execute flyway migrate!");
             		
             		DataSource dataSource = (DataSource)v;
                     
@@ -72,21 +72,21 @@ public class FlywayConfig {
                     
                     Location[] locations = fluentConfiguration.getLocations();
                     for (Location location: locations) {
-                    	 log.info("[Flyway migrate]datasource " + datasourceName + " locations = " + location.toString());
+                    	 log.info("[Flyway migrate]dataSource " + dataSourceName + " locations = " + location.toString());
                     }
                    
                     Flyway flyway = fluentConfiguration.load();
                     flyway.migrate();
             	} else {
-            		log.info("[Flyway migrate]datasource " + datasourceName + " skip flyway migrate!");
+            		log.info("[Flyway migrate]dataSource " + dataSourceName + " skip flyway migrate!");
             	}
             });
         } else {
-        	log.info("[Flyway migrate]migrate multi datasources is null, skip!");
+        	log.info("[Flyway migrate]migrate multi dataSources is null, skip!");
         }
         
         
-        log.info("[Flyway migrate]migrate multi datasource is done!");
+        log.info("[Flyway migrate]migrate multi dataSource is done!");
     }
 
 	public List<Map<String, FlywayProperties>> getDataSources() {

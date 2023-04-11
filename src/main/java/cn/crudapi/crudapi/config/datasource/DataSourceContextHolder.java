@@ -27,6 +27,7 @@ public class DataSourceContextHolder {
 
     public static void cleanDataSource() {
         CONTEXT_HOLDER.remove();
+        HEADER_HOLDER.remove();
     }
     
     public static void setHeaderDataSource(String key) {
