@@ -15,7 +15,7 @@ import cn.crudapi.crudapi.service.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags ="配置")
+@Api(tags ="系统-数据源")
 @RestController
 @RequestMapping("/api/crudapi/system/data-sources")
 public class DataSourceController {

@@ -85,7 +85,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
             });
     	}
     	
-    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `data_source`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
+    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `ca_system_data_source`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
     		 String name = t.get("name").toString();
@@ -95,9 +95,13 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		 String url = t.get("url").toString();
     		 String username = t.get("username").toString();
     		 String password = t.get("password").toString();
+    		 String metadataTablePrefix = t.get("metadata_table_prefix").toString();
+    		 String metadataDatabaseNaming = t.get("metadata_database_naming").toString();
+    		 String businessTablePrefix = t.get("business_table_prefix").toString();
+    		 String businessDatabaseNaming = t.get("business_database_naming").toString();
     		 
-    		 log.info("[database add dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, url = {}",
-    				 name, caption, databaseType, driverClassName, url);
+    		 log.info("[database add dataSoure]name = {}, caption = {}, databaseType = {}, metadataTablePrefix = {}, metadataDatabaseNaming = {}, businessTablePrefix = {}, businessDatabaseNaming = {}, driverClassName = {}, url = {}",
+    				 name, caption, databaseType, metadataTablePrefix, metadataDatabaseNaming, businessTablePrefix, businessDatabaseNaming, driverClassName, url);
     		 
     		 properties.setCaption(caption);
     		 properties.setDriverClassName(driverClassName);
@@ -105,6 +109,10 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		 properties.setUsername(username);
     		 properties.setPassword(password);
     		 properties.setDatabaseType(databaseType);
+    		 properties.setMetadataTablePrefix(metadataTablePrefix);
+    		 properties.setMetadataDatabaseNaming(metadataDatabaseNaming);
+    		 properties.setBusinessTablePrefix(businessTablePrefix);
+    		 properties.setBusinessDatabaseNaming(businessDatabaseNaming);
     		 properties.setStatus("ACTIVE");
     		 properties.setDeleted(false);
     		 

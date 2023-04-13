@@ -15,19 +15,19 @@ import cn.crudapi.crudapi.service.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags ="元数据-表")
+@Api(tags ="元数据-表关系")
 @RestController
-@RequestMapping("/api/crudapi/metadata/tables")
-public class TableController {
-	private static final Logger log = LoggerFactory.getLogger(TableController.class);
+@RequestMapping("/api/crudapi/metadata/table-relations")
+public class TableRelationController {
+	private static final Logger log = LoggerFactory.getLogger(TableRelationController.class);
 	
 	@Autowired
 	private DataSourceService dataSourceService;
 	
-	@ApiOperation("获取表列表")
+	@ApiOperation("获取表关系列表")
 	@GetMapping()
     public List<Map<String, Object>> list() {
-		log.info("TableController->list dataSource = " + DataSourceContextHolder.getDataSource());
+		log.info("TableRelationController->list dataSource = " + DataSourceContextHolder.getDataSource());
 		
 		List<Map<String, Object>> mapList = dataSourceService.getMetaDatas();
         
