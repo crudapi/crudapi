@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
-import cn.crudapi.crudapi.service.DataSourceService;
+import cn.crudapi.crudapi.service.system.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -29,8 +29,6 @@ public class TableRelationController {
     public List<Map<String, Object>> list() {
 		log.info("TableRelationController->list dataSource = " + DataSourceContextHolder.getDataSource());
 		
-		List<Map<String, Object>> mapList = dataSourceService.getMetaDatas();
-        
-        return mapList;
+        return null;
     }
 }

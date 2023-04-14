@@ -57,12 +57,13 @@ CREATE TABLE `ca_system_config` (
   `update_by_id` INTEGER DEFAULT NULL,
   `status` VARCHAR(255) NOT NULL DEFAULT 'ACTIVE',
   `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+  `is_default` BOOLEAN NOT NULL DEFAULT false,
   `api_resource_naming` VARCHAR(255) DEFAULT 'LOWER_HYPHEN',
   `api_param_naming` VARCHAR(255) DEFAULT 'LOWER_UNDERSCORE',
   `object_naming` VARCHAR(255) DEFAULT 'LOWER_CAMEL'
 );
 
-INSERT INTO `ca_system_config` (`name`, `caption`, `display_order`)
-VALUES ('default', 'DEFAULT', 1);
+INSERT INTO `ca_system_config` (`name`, `caption`, `display_order`, `is_default`)
+VALUES ('default', 'DEFAULT', 1, true);
 
 

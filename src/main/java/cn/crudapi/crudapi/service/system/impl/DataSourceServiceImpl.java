@@ -1,4 +1,4 @@
-package cn.crudapi.crudapi.service.impl;
+package cn.crudapi.crudapi.service.system.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.service.CrudService;
-import cn.crudapi.crudapi.service.DataSourceService;
+import cn.crudapi.crudapi.service.system.DataSourceService;
 
 @Service
 public class DataSourceServiceImpl implements DataSourceService {
@@ -16,12 +16,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 	private CrudService crudService;
 	
 	@Override
-	public List<Map<String, Object>> queryForList() {
-        return crudService.queryForList("SELECT * FROM `data_source`", new HashMap<String, Object>());
-    }
-	
-	@Override
-	public List<Map<String, Object>> getMetaDatas() {
-        return crudService.getMetaDatas();
+	public List<Map<String, Object>> list() {
+        return crudService.queryForList("SELECT * FROM `ca_system_data_source`", new HashMap<String, Object>());
     }
 }

@@ -1,6 +1,5 @@
 package cn.crudapi.crudapi.controller.system;
 
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -11,24 +10,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
-import cn.crudapi.crudapi.service.system.DataSourceService;
+import cn.crudapi.crudapi.service.system.ConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(tags ="系统-数据源")
+@Api(tags ="系统-配置")
 @RestController
-@RequestMapping("/api/crudapi/system/data-sources")
-public class DataSourceController {
-	private static final Logger log = LoggerFactory.getLogger(DataSourceController.class);
+@RequestMapping("/api/crudapi/system/configs")
+public class ConfigController {
+	private static final Logger log = LoggerFactory.getLogger(ConfigController.class);
 	
 	@Autowired
-	private DataSourceService dataSourceService;
+	private ConfigService configService;
 	
-	@ApiOperation("获取数据源列表")
+	@ApiOperation("获取默认配置")
 	@GetMapping()
-    public List<Map<String, Object>> list() {
-		log.info("DataSourceController.list dataSource = " + DataSourceContextHolder.getDataSource());
+    public Map<String, Object> getDefault() {
+		log.info("ConfigController.getDefault dataSource = " + DataSourceContextHolder.getDataSource());
 		
-        return dataSourceService.list();
+        return configService.getDefault();
     }
 }

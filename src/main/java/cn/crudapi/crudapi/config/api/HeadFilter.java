@@ -28,7 +28,7 @@ public class HeadFilter extends OncePerRequestFilter {
     	if (!"/api/auth/login".equals(request.getRequestURI())
     		&& !"/api/auth/jwt/login".equals(request.getRequestURI())
     		&& !"/api/auth/logout".equals(request.getRequestURI())
-    		&& !"/api/crudapi/system/data-sources".equals(request.getRequestURI())) {
+    		&& !request.getRequestURI().startsWith("/api/crudapi/system/")) {
     		dataSource = request.getParameter("dataSource");
         	if (ObjectUtils.isEmpty(dataSource)) {
         		dataSource = headRequestWrapper.getHeader("dataSource");

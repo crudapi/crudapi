@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
-import cn.crudapi.crudapi.service.DataSourceService;
+import cn.crudapi.crudapi.service.metadata.TableService;
+import cn.crudapi.crudapi.service.system.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -22,14 +23,14 @@ public class TableController {
 	private static final Logger log = LoggerFactory.getLogger(TableController.class);
 	
 	@Autowired
-	private DataSourceService dataSourceService;
+	private TableService tableService;
 	
 	@ApiOperation("获取表列表")
 	@GetMapping()
     public List<Map<String, Object>> list() {
 		log.info("TableController->list dataSource = " + DataSourceContextHolder.getDataSource());
 		
-		List<Map<String, Object>> mapList = dataSourceService.getMetaDatas();
+		List<Map<String, Object>> mapList = tableService.list();
         
         return mapList;
     }
