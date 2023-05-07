@@ -1,5 +1,7 @@
 package cn.crudapi.crudapi.util;
 
+import cn.crudapi.crudapi.constant.Naming;
+
 public class CrudapiUtils {
 	public static String camelToUnderline(String param) {
 	    if (param == null || "".equals(param.trim())) {
@@ -36,5 +38,21 @@ public class CrudapiUtils {
 	        }
 	    }
 	    return sb.toString();
+	}
+	
+	public static String lowerHyphenToLowerUnderscore(String param) {
+	    if (param == null || "".equals(param.trim())) {
+	        return "";
+	    }
+	    
+	    return param.replace("-", "_");
+	}
+	
+	public static String convert(String param, String fromNaming, String toNaming) {
+		if (fromNaming.equals(Naming.LOWER_HYPHEN) && toNaming.equals(Naming.LOWER_UNDERSCORE)) {
+			return CrudapiUtils.lowerHyphenToLowerUnderscore(param);
+		}
+		
+		return param;
 	}
 }

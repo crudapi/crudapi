@@ -24,7 +24,7 @@ public class ConfigController {
 	private ConfigService configService;
 	
 	@ApiOperation("获取默认配置")
-	@GetMapping()
+	@GetMapping("/default")
     public Map<String, Object> getDefault() {
 		log.info("ConfigController.getDefault dataSource = " + DataSourceContextHolder.getDataSource());
 		

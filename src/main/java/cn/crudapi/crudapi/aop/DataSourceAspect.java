@@ -21,12 +21,16 @@ public class DataSourceAspect {
 	@Around("applicationPackagePointcut()")
 	public Object dataSourceAround(ProceedingJoinPoint joinPoint) throws Throwable {
 		String dataSource = DataSourceContextHolder.getHeaderDataSource();
-		log.info("DataSourceAspect DataSourceContextHolder setDataSource = " + dataSource);
+		if (log.isDebugEnabled()) {
+			log.debug("DataSourceAspect DataSourceContextHolder setDataSource {}", dataSource);
+		}
 		DataSourceContextHolder.setDataSource(dataSource);
 		try {
 			return joinPoint.proceed();
 		} finally {
-			log.info("DataSourceAspect DataSourceContextHolder cleanDataSource");
+			if (log.isDebugEnabled()) {
+				log.debug("DataSourceContextHolder cleanDataSource");
+			}
 			DataSourceContextHolder.cleanDataSource();
 		}
 	}

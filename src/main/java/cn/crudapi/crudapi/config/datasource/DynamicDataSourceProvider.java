@@ -21,6 +21,8 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import cn.crudapi.crudapi.constant.SystemConsts;
+
 @Component
 @EnableConfigurationProperties(DataSourceProperties.class)
 @ConfigurationProperties(prefix = "spring.datasource.hikari")
@@ -85,7 +87,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
             });
     	}
     	
-    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `ca_system_data_source`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
+    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `" + SystemConsts.TABLE_DATA_SOURCE +  "`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
     		 String name = t.get("name").toString();

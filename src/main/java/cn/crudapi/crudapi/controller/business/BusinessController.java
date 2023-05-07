@@ -26,11 +26,11 @@ public class BusinessController {
 	private BusinessService businessService;
 	
 	@ApiOperation("获取业务数据列表")
-	@GetMapping(value = "/{tableName}")
-    public List<Map<String, Object>> list(@PathVariable("tableName") String tableName) {
+	@GetMapping(value = "/{resourceName}")
+    public List<Map<String, Object>> list(@PathVariable("resourceName") String resourceName) {
 		log.info("BusinessController->list dataSource = " + DataSourceContextHolder.getDataSource());
 		
-		List<Map<String, Object>> mapList = businessService.list(tableName);
+		List<Map<String, Object>> mapList = businessService.list(resourceName);
 	
         return mapList;
     }
