@@ -75,7 +75,7 @@ public class CrudTemplateConfig {
     public DynamicCrudSqlExecute dynamicCrudSqlExecute() {
 		Map<String, String> targetDriverClassNames = new HashMap<String, String>();
 		
-		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.getDynamicDataSourcePropertiesList();
+		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.queryDynamicDataSourcePropertiesList();
 		
 		dynamicDataSourcePropertiesList.forEach(map -> {
             Set<String> keys = map.keySet();

@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import cn.crudapi.crudapi.constant.SystemConsts;
 
 @Component
-@EnableConfigurationProperties(DataSourceProperties.class)
+@EnableConfigurationProperties({ DataSourceProperties.class, DataSourceExtProperties.class })
 @ConfigurationProperties(prefix = "spring.datasource.hikari")
 public class DynamicDataSourceProvider implements DataSourceProvider {
 	private static final Logger log = LoggerFactory.getLogger(DynamicDataSourceProvider.class);
@@ -39,13 +39,36 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     
 	private List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList;
 	
-	private Map<Object,Object> targetDataSourcesMap;
+	private Map<Object, Object> targetDataSourcesMap;
 	
 	private Map<String, String> targetDataSourceNameDataBaseTypesMap;
 	
 	@Resource
 	private DataSourceProperties dataSourceProperties;
     
+	@Resource
+	private DataSourceExtProperties dataSourceExtProperties;
+	
+	private DynamicDataSourceProperties dynamicDataSourceProperties;
+	
+	public DynamicDataSourceProperties queryDynamicDataSourceProperties() {
+		if (this.dynamicDataSourceProperties != null) {
+			return this.dynamicDataSourceProperties;
+		}
+		DynamicDataSourceProperties dynamicDataSourceProperties = new DynamicDataSourceProperties();
+		dynamicDataSourceProperties.setBusinessDatabaseNaming(this.dataSourceExtProperties.getBusinessDatabaseNaming());
+		dynamicDataSourceProperties.setBusinessTablePrefix(this.dataSourceExtProperties.getBusinessTablePrefix());
+		dynamicDataSourceProperties.setMetadataDatabaseNaming(this.dataSourceExtProperties.getMetadataDatabaseNaming());
+		dynamicDataSourceProperties.setMetadataTablePrefix(this.dataSourceExtProperties.getMetadataTablePrefix());
+		dynamicDataSourceProperties.setCaption(this.dataSourceExtProperties.getCaption());
+		dynamicDataSourceProperties.setDatabaseType(this.dataSourceExtProperties.getDatabaseType());
+		dynamicDataSourceProperties.setName("dataSource");
+		
+		this.dynamicDataSourceProperties = dynamicDataSourceProperties;
+		
+		return dynamicDataSourceProperties;
+	}
+
 	private DataSource buildDataSource(DataSourceProperties prop) {
         DataSourceBuilder<?> builder = DataSourceBuilder.create();
         builder.driverClassName(prop.getDriverClassName());
@@ -55,7 +78,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
         return builder.build();
     }
     
-    public List<Map<String, DynamicDataSourceProperties>> getDynamicDataSourcePropertiesList() {
+    public List<Map<String, DynamicDataSourceProperties>> queryDynamicDataSourcePropertiesList() {
     	if (this.dynamicDataSourcePropertiesList != null) {
     		return this.dynamicDataSourcePropertiesList;
     	}
@@ -133,7 +156,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	Map<String, String> targetDataSourceNameDataBaseTypesMap = new HashMap<>();
     	List<DataSource> res = new ArrayList<>();
     	
-    	List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = this.getDynamicDataSourcePropertiesList();
+    	List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = this.queryDynamicDataSourcePropertiesList();
     	
 		dynamicDataSourcePropertiesList.forEach(map -> {
             Set<String> keys = map.keySet();
@@ -187,10 +210,12 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     }
     
     public List<Map<String, String>> getDataSourceNames() {
+    	DynamicDataSourceProperties dynamicDataSourceProperties = this.queryDynamicDataSourceProperties();
+    	
     	List<Map<String, String>> dataSourceNames = new ArrayList<Map<String, String>>();
     	Map<String, String> dataSourceNameMap = new HashMap<String, String>();
     	dataSourceNameMap.put("name", "primary");
-    	dataSourceNameMap.put("caption", "主数据源");
+    	dataSourceNameMap.put("caption", dynamicDataSourceProperties.getCaption());
     	dataSourceNameMap.put("database", parseDatabaseName(dataSourceProperties));
     	dataSourceNames.add(dataSourceNameMap);
     	

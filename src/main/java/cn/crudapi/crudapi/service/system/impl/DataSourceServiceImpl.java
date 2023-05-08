@@ -28,14 +28,18 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 	@Override
 	public DynamicDataSourceProperties getDynamicDataSourcePropertiesByName(String name) {
-		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.getDynamicDataSourcePropertiesList();
-
+		DynamicDataSourceProperties dynamicDataSourceProperties = dynamicDataSourceProvider.queryDynamicDataSourceProperties();
+		if (dynamicDataSourceProperties.getName().equals(name)) {
+			return dynamicDataSourceProperties;
+		}
+		
+		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.queryDynamicDataSourcePropertiesList();
+		
 		for (Map<String, DynamicDataSourceProperties> t : dynamicDataSourcePropertiesList) {
 			if (t.containsKey(name)) {
 				DynamicDataSourceProperties d = t.get(name);
 				return d;
 			}
-
 		}
 
 		return null;
