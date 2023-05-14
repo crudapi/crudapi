@@ -21,6 +21,9 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import cn.crudapi.crudapi.constant.ColumnConsts;
+import cn.crudapi.crudapi.constant.SqlConsts;
+import cn.crudapi.crudapi.constant.Status;
 import cn.crudapi.crudapi.constant.SystemConsts;
 
 @Component
@@ -110,7 +113,43 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
             });
     	}
     	
-    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList("SELECT * FROM `" + SystemConsts.TABLE_DATA_SOURCE +  "`  WHERE `is_deleted` = false AND `status` = 'ACTIVE' ORDER BY `display_order` ASC", new HashMap<String, Object>());
+    	Map<String, Object> paramsMap = new HashMap<String, Object>();
+		paramsMap.put(ColumnConsts.IS_DELETED, false);
+		paramsMap.put(ColumnConsts.STATUS, Status.ACTIVE);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(SqlConsts.SELECT)
+			.append(" * ")
+			.append(SqlConsts.FROM)
+			.append(" ")
+			.append(SystemConsts.TABLE_DATA_SOURCE)
+			.append(" ")
+			.append(SqlConsts.WHERE)
+			.append(" ")
+			.append(ColumnConsts.IS_DELETED)
+			.append(" = :")
+			.append(ColumnConsts.IS_DELETED)
+			.append(" ")
+			.append(SqlConsts.AND)
+			.append(" ")
+			.append(ColumnConsts.STATUS)
+			.append(" = :")
+			.append(ColumnConsts.STATUS)
+			.append(" ")
+			.append(SqlConsts.ORDER)
+			.append(" ")
+			.append(SqlConsts.BY)
+			.append(" ")
+			.append(ColumnConsts.DISPLAY_ORDER)
+			.append(" ")
+			.append(SqlConsts.ASC);
+
+		
+		String sql = sb.toString();
+		
+		log.info(sql);
+		
+    	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList(sql, paramsMap);
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
     		 String name = t.get("name").toString();
