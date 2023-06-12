@@ -2481,12 +2481,16 @@ public class TableServiceImpl implements TableService {
         
     	String newOrderby = null;
         if (StringUtils.isEmpty(orderby)) {
-        	List<String> primaryNameWithQuotationList = new ArrayList<String>();
-        	for (String t : primaryNameList) {
-        		primaryNameWithQuotationList.add(sqlQuotation + t + sqlQuotation);
+        	if (selectColumnNameList.contains("displayOrder")) {
+        		newOrderby = sqlQuotation + "displayOrder" + sqlQuotation + " ASC";
+        	} else {
+        		List<String> primaryNameWithQuotationList = new ArrayList<String>();
+            	for (String t : primaryNameList) {
+            		primaryNameWithQuotationList.add(sqlQuotation + t + sqlQuotation);
+            	}
+            	
+            	newOrderby = String.join(",", primaryNameWithQuotationList) + " DESC";
         	}
-        	
-        	newOrderby = String.join(",", primaryNameWithQuotationList) + " DESC";
         } else {
         	log.info(orderby);
         	String[] orderbys = orderby.replaceAll(" +", ";").split(";");
