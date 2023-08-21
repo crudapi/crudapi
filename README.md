@@ -4,6 +4,37 @@ crudapi is a combination of crud and api, which stands for create, delete, updat
 ### 增删改查接口👋
 crudapi是crud+api组合，表示增删改查接口，是一款零代码可配置的产品。使用crudapi可以告别枯燥无味的增删改查代码，让您更加专注业务，节约大量成本，从而提高工作效率。crudapi的目标是让处理数据变得更简单，所有人都可以免费使用！
 
+## GIT地址
+名称 | 类型 | 授权 | GitHub仓库 | Gitee仓库
+--- | --- | --- | --- | ---
+crudapi-admin-web | Vue Qusar源码 | 开源 | [crudapi-admin-web](https://github.com/crudapi/crudapi-admin-web) | [crudapi-admin-web](https://gitee.com/crudapi/crudapi-admin-web)
+crudapi-example| Java集成SDK | 永久免费 | [crudapi-example](https://github.com/crudapi/crudapi-example) | [crudapi-example](https://gitee.com/crudapi/crudapi-example)
+crudapi| Java源码(开源中...) | 开源 | [crudapi](https://github.com/crudapi/crudapi) | [crudapi](https://gitee.com/crudapi/crudapi)
+
+备注：
+1. 目前后台Java代码[crudapi](https://github.com/crudapi/crudapi)正在重构中，持续更新。
+2. 在重构完成之前，请先使用[crudapi-example](https://github.com/crudapi/crudapi-example)，通过SDK集成，功能无任何限制。
+3. 如需提前下载crudapi后台Java源码，请微信联系。
+
+### 文档
+[https://help.crudapi.cn](https://help.crudapi.cn)
+
+1. [基于Java和Spring Boot的后端零代码crudapi项目实战之环境搭建（一）](https://help.crudapi.cn/crudapi/helloworld.html)
+
+持续更新中。。。
+
+## 演示
+演示地址：[https://demo.crudapi.cn/crudapi/](https://demo.crudapi.cn/crudapi/)
+
+![table](./img/table.png)
+表单对应不同的对象
+
+![relation](./img/relation.png)
+表关系图显示不同对象之间的关系
+
+![customer](./img/customer.png)
+业务数据操作
+
 ### build
 ```bash
 mvn clean install -Dmaven.test.skip=true
@@ -56,3 +87,29 @@ export MAVEN_CENTRAL_TOKEN=
 export MAVEN_GPG_PASSPHRASE=
 mvn clean deploy -Dmaven.test.skip=true -s deploy-settings.xml
 ```
+
+## 联系方式
+#### 邮箱
+admin@crudapi.cn
+
+#### QQ
+1440737304
+
+#### QQ群
+632034576
+
+#### 微信
+undefinedneqnull
+
+<div align="left">
+  <img width = "200" src="./img/crudapiweixin.jpeg">
+</div>
+
+如有任何问题，欢迎咨询和交流！
+
+## 授权
+
+Copyright (c) 2021-present crudapi
+
+[MIT License](https://baike.baidu.com/item/MIT许可证)
+
