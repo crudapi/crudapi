@@ -17,11 +17,16 @@ public class CrudSqlExecute {
 	private volatile CrudAbstractFactory crudFactory;
 
 	public CrudSqlExecute() {
-		log.debug("CrudSqlExecute->Constructor");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->Constructor"); 
+		}
 	}
 	
 	public CrudSqlExecute(CrudAbstractFactory crudFactory) {
-		log.debug("CrudSqlExecute->Constructor crudFactory");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->Constructor crudFactory"); 
+		}
+		
 		this.crudFactory = crudFactory;
 	}
 	
@@ -30,32 +35,50 @@ public class CrudSqlExecute {
 	}
 
 	public String getSqlQuotation() { 
-		log.debug("CrudSqlExecute->getSqlQuotation");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->getSqlQuotation"); 
+		}
+		
 		return crudFactory.getSqlQuotation();
 	}
 	
 	public String getDateBaseName() { 
-		log.debug("CrudSqlExecute->getDateBaseName");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->getDateBaseName"); 
+		}
+		
 		return crudFactory.getDateBaseName();
 	}
 	
 	public JdbcTemplate getJdbcTemplate() {
-		log.debug("CrudSqlExecute->getJdbcTemplate");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->getJdbcTemplate"); 
+		}
+		
 		return crudFactory.getJdbcTemplate();
 	}
 	
 	public void execute(String sql) { 
-		log.debug("CrudSqlExecute->execute");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->execute"); 
+		}
+		
 		crudFactory.execute(sql);
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {
-		log.debug("CrudSqlExecute->getMetaDatas");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->getMetaDatas"); 
+		}
+		
 		return crudFactory.getMetaDatas();
 	}
 	
 	public Map<String, Object> getMetaData(String tableName) {
-		log.debug("CrudSqlExecute->getMetaData");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudSqlExecute->getMetaData"); 
+		}
+		
 		return crudFactory.getMetaData(tableName);
 	}
 	

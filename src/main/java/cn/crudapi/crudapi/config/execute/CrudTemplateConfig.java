@@ -32,7 +32,6 @@ public class CrudTemplateConfig {
 	@Autowired
 	private DynamicDataSourceProvider dynamicDataSourceProvider;
 	
-	
     
     @Bean(name = "postSqlCrudFactory")
   	public PostSqlCrudFactory getPostSqlCrudFactory() {

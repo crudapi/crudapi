@@ -54,7 +54,7 @@ public abstract class CrudAbstractRepository {
 	}
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
-		log.info("CrudAbstractRepository->queryForList", sql);
+		log.info("CrudAbstractRepository->queryForList sql: {}", sql);
 		List<Map<String, Object>> mapList = namedParameterJdbcTemplate.queryForList(sql, paramMap);
 		
 		List<Map<String, Object>> newMapList = new ArrayList<>();

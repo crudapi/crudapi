@@ -21,43 +21,64 @@ public class CrudServiceImpl implements CrudService {
 	
 	@Override
 	public String getSqlQuotation() {
-		log.debug("CrudServiceImpl->getSqlQuotation");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->getSqlQuotation"); 
+		}
+		
 		return crudTemplate.getSqlQuotation();
 	}
 	
 	@Override
 	public String getDateBaseName() {
-		log.debug("CrudServiceImpl->getDateBaseName");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->getDateBaseName"); 
+		}
+		
 		return crudTemplate.getDateBaseName();
 	}
 	
 	@Override
 	public JdbcTemplate getJdbcTemplate() {
-		log.debug("CrudServiceImpl->getJdbcTemplate");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->getJdbcTemplate"); 
+		}
+		
 		return crudTemplate.getJdbcTemplate();
 	}
 	
 	@Override
 	public void execute(String sql) { 
-		log.debug("CrudServiceImpl->execute");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->execute"); 
+		}
+		
 		crudTemplate.execute(sql);
 	}
 	
 	@Override
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
-		log.debug("CrudServiceImpl->queryForList");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->queryForList"); 
+		}
+		
 		return crudTemplate.queryForList(sql, paramMap);
 	}
 		
 	@Override
 	public List<Map<String, Object>> getMetaDatas() {
-		log.debug("CrudServiceImpl->getMetaDatas");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->getMetaDatas"); 
+		}
+		
 		return crudTemplate.getMetaDatas();
 	}
 	
 	@Override
 	public Map<String, Object> getMetaData(String tableName) {
-		log.debug("CrudServiceImpl->getMetaData");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudServiceImpl->getMetaData"); 
+		}
+		
 		return crudTemplate.getMetaData(tableName);
 	}
 

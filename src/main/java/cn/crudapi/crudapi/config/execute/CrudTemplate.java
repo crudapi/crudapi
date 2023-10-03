@@ -14,47 +14,73 @@ public class CrudTemplate {
 	private volatile DynamicCrudSqlExecute dynamicCrudSqlExecute;
 
 	public CrudTemplate() {
-		log.debug("CrudTemplate->Constructor");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->Constructor"); 
+		}
 	}
 	
 	public CrudTemplate(DynamicCrudSqlExecute dynamicCrudSqlExecute) {
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->Constructor dynamicCrudSqlExecute"); 
+		}
+		
 		this.dynamicCrudSqlExecute = dynamicCrudSqlExecute;
-		log.debug("CrudTemplate->Constructor dynamicCrudSqlExecute");
 	}
 
 
 	public String getSqlQuotation() { 
-		log.debug("CrudTemplate->getSqlQuotation");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->getSqlQuotation"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getSqlQuotation();
 	}
 	
 	public String getDateBaseName() { 
-		log.debug("CrudTemplate->getDateBaseName");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->getDateBaseName"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getDateBaseName();
 	}
 	
 	public JdbcTemplate getJdbcTemplate() {
-		log.debug("CrudTemplate->getJdbcTemplate");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->getJdbcTemplate"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getJdbcTemplate();
 	}
 	
 	public void execute(String sql) { 
-		log.debug("CrudTemplate->execute");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->execute"); 
+		}
+		
 		dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().execute(sql);
 	}
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
-		log.debug("CrudTemplate->queryForList");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->queryForList"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().queryForList(sql, paramMap);
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {
-		log.debug("CrudTemplate->getMetaDatas");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->getMetaDatas"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetaDatas();
 	}
 	
 	public Map<String, Object> getMetaData(String tableName) {
-		log.debug("CrudTemplate->getMetaData");
+		if (log.isDebugEnabled()) { 
+			log.debug("CrudTemplate->getMetaData"); 
+		}
+		
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetaData(tableName);
 	}
 	
