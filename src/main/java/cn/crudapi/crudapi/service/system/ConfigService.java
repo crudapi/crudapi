@@ -1,7 +1,8 @@
 package cn.crudapi.crudapi.service.system;
 
-import java.util.Map;
+
+import cn.crudapi.crudapi.property.SystemConfigProperties;
 
 public interface ConfigService {
-	Map<String, Object> getDefault();
+	SystemConfigProperties getDefault();
 }

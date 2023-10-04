@@ -45,27 +45,3 @@ VALUES ('database-sqlite-crudapi', 'SQLITE_CRUDAPI', 7, 'ACTIVE', false, 'sqlite
 
 INSERT INTO `ca_system_data_source` (`name`, `caption`, `display_order`, `status`, `is_deleted`, `database_type`, `driver_class_name`, `url`, `username`, `password`)
 VALUES ('database-mariadb-crudapi', 'MARIADB_CRUDAPI', 8, 'ACTIVE', false, 'mariadb', 'org.mariadb.jdbc.Driver', 'jdbc:mariadb://localhost:3307/crudapi?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true', 'root', 'root@Mysql');
-
-CREATE TABLE `ca_system_config` (
-  `id` INTEGER CONSTRAINT `pk_id` PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `name` VARCHAR(255) CONSTRAINT `uk_name` UNIQUE NOT NULL,
-  `caption` VARCHAR(255) CONSTRAINT `uk_caption` UNIQUE NOT NULL,
-  `description` varchar(2000) DEFAULT NULL,
-  `display_order` INTEGER NOT NULL DEFAULT 0,
-  `create_time` DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-  `update_time` DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-  `owner_id` INTEGER DEFAULT NULL,
-  `create_by_id` INTEGER DEFAULT NULL,
-  `update_by_id` INTEGER DEFAULT NULL,
-  `status` VARCHAR(255) NOT NULL DEFAULT 'ACTIVE',
-  `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-  `is_default` BOOLEAN NOT NULL DEFAULT false,
-  `api_resource_naming` VARCHAR(255) DEFAULT 'LOWER_HYPHEN',
-  `api_param_naming` VARCHAR(255) DEFAULT 'LOWER_UNDERSCORE',
-  `object_naming` VARCHAR(255) DEFAULT 'LOWER_CAMEL'
-);
-
-INSERT INTO `ca_system_config` (`name`, `caption`, `display_order`, `is_default`)
-VALUES ('default', 'DEFAULT', 1, true);
-
-

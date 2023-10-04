@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
+import cn.crudapi.crudapi.property.SystemConfigProperties;
 import cn.crudapi.crudapi.service.system.ConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +26,7 @@ public class ConfigController {
 	
 	@ApiOperation("获取默认配置")
 	@GetMapping("/default")
-    public Map<String, Object> getDefault() {
+    public SystemConfigProperties getDefault() {
 		log.info("ConfigController.getDefault dataSource = " + DataSourceContextHolder.getDataSource());
 		
         return configService.getDefault();

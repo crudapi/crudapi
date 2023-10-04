@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
+import cn.crudapi.crudapi.property.SystemConfigProperties;
 import cn.crudapi.crudapi.service.CrudService;
 import cn.crudapi.crudapi.service.business.BusinessService;
 import cn.crudapi.crudapi.service.system.ConfigService;
@@ -39,10 +40,10 @@ public class BusinessServiceImpl implements BusinessService {
 	public String getTableName(String dataSourceName, String resourceName) {
 		DynamicDataSourceProperties dynamicDataSourceProperties = dataSourceService.getDynamicDataSourcePropertiesByName(dataSourceName);
 		
-		Map<String, Object> defaultConfig = configService.getDefault();
-		String apiResourceNaming = defaultConfig.get("apiResourceNaming").toString();
-		String apiParamNaming = defaultConfig.get("apiParamNaming").toString();
-		String objectNaming = defaultConfig.get("objectNaming").toString();
+		SystemConfigProperties defaultConfig = configService.getDefault();
+		String apiResourceNaming = defaultConfig.getApiResourceNaming();
+		String apiParamNaming = defaultConfig.getApiParamNaming();
+		String objectNaming = defaultConfig.getObjectNaming();
 		
 		String businessTablePrefix = dynamicDataSourceProperties.getBusinessTablePrefix();
 		String businessDatabaseNaming = dynamicDataSourceProperties.getBusinessDatabaseNaming();
