@@ -55,34 +55,7 @@ public abstract class CrudAbstractRepository {
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
 		log.info("CrudAbstractRepository->queryForList sql: {}", sql);
-		List<Map<String, Object>> mapList = namedParameterJdbcTemplate.queryForList(sql, paramMap);
-		
-		List<Map<String, Object>> newMapList = new ArrayList<>();
-		for (Map<String, Object> t : mapList) {
-			Map<String, Object> map = new HashMap<String, Object>();
-			
-			for(Map.Entry<String, Object> entry : t.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-				if (key.toLowerCase().startsWith("is_")) {
-					key = key.substring(3);
-					
-					if (value != null ) {
-						String valueStr = value.toString();
-						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
-							value = true;
-		    			} else {
-		    				value = false;
-		    			}
-					}
-				}
-				
-				map.put(CrudapiUtils.underlineToCamel(key), value);
-			}
-			newMapList.add(map);
-		}
-		
-		return newMapList;
+		return namedParameterJdbcTemplate.queryForList(sql, paramMap);
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {

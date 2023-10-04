@@ -1,5 +1,7 @@
 package cn.crudapi.crudapi.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.config.execute.CrudTemplate;
 import cn.crudapi.crudapi.service.CrudService;
+import cn.crudapi.crudapi.service.system.ConfigService;
+import cn.crudapi.crudapi.util.CrudapiUtils;
 
 @Service
 public class CrudServiceImpl implements CrudService {
@@ -18,6 +22,10 @@ public class CrudServiceImpl implements CrudService {
 	
 	@Autowired
 	private CrudTemplate crudTemplate;
+	
+	@Autowired
+	private ConfigService configService;
+	
 	
 	@Override
 	public String getSqlQuotation() {
@@ -61,7 +69,34 @@ public class CrudServiceImpl implements CrudService {
 			log.debug("CrudServiceImpl->queryForList"); 
 		}
 		
-		return crudTemplate.queryForList(sql, paramMap);
+		List<Map<String, Object>> mapList =  crudTemplate.queryForList(sql, paramMap);
+		
+		List<Map<String, Object>> newMapList = new ArrayList<>();
+		for (Map<String, Object> t : mapList) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			for(Map.Entry<String, Object> entry : t.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (key.toLowerCase().startsWith("is_")) {
+					key = key.substring(3);
+					
+					if (value != null ) {
+						String valueStr = value.toString();
+						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
+							value = true;
+		    			} else {
+		    				value = false;
+		    			}
+					}
+				}
+				
+				map.put(CrudapiUtils.underlineToCamel(key), value);
+			}
+			newMapList.add(map);
+		}
+		
+		return newMapList;
 	}
 		
 	@Override
