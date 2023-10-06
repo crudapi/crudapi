@@ -1,6 +1,5 @@
 package cn.crudapi.crudapi.service.system.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,11 +10,6 @@ import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
-import cn.crudapi.crudapi.constant.ColumnConsts;
-import cn.crudapi.crudapi.constant.SqlConsts;
-import cn.crudapi.crudapi.constant.Status;
-import cn.crudapi.crudapi.constant.SystemConsts;
-import cn.crudapi.crudapi.service.CrudService;
 import cn.crudapi.crudapi.service.system.DataSourceService;
 
 @Service
@@ -23,28 +17,14 @@ public class DataSourceServiceImpl implements DataSourceService {
 	private static final Logger log = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
 	@Autowired
-	private CrudService crudService;
-	
-	@Autowired
 	private DynamicDataSourceProvider dynamicDataSourceProvider;
 
 	@Override
-	public List<Map<String, Object>> list() {
-		Map<String, Object> paramsMap = new HashMap<String, Object>();
+	public List<Map<String, DynamicDataSourceProperties>> list() {
+		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.queryDynamicDataSourcePropertiesList();
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append(SqlConsts.SELECT)
-			.append(" * ")
-			.append(SqlConsts.FROM)
-			.append(" ")
-			.append(SystemConsts.TABLE_DATA_SOURCE)
-			.append(" ");
-		
-		String sql = sb.toString();
-		
-		log.info(sql);
-        return crudService.queryForList(sql, paramsMap);
-    }
+		return dynamicDataSourcePropertiesList;
+	}
 
 	@Override
 	public DynamicDataSourceProperties getDynamicDataSourcePropertiesByName(String name) {

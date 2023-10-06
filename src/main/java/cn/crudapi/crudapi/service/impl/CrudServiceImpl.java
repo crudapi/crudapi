@@ -11,9 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
+import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 import cn.crudapi.crudapi.config.execute.CrudTemplate;
+import cn.crudapi.crudapi.property.SystemConfigProperties;
 import cn.crudapi.crudapi.service.CrudService;
 import cn.crudapi.crudapi.service.system.ConfigService;
+import cn.crudapi.crudapi.service.system.DataSourceService;
 import cn.crudapi.crudapi.util.CrudapiUtils;
 
 @Service
@@ -26,6 +30,8 @@ public class CrudServiceImpl implements CrudService {
 	@Autowired
 	private ConfigService configService;
 	
+	@Autowired
+	private DataSourceService dataSourceService;
 	
 	@Override
 	public String getSqlQuotation() {
@@ -71,6 +77,16 @@ public class CrudServiceImpl implements CrudService {
 		
 		List<Map<String, Object>> mapList =  crudTemplate.queryForList(sql, paramMap);
 		
+		DynamicDataSourceProperties dynamicDataSourceProperties = dataSourceService.getDynamicDataSourcePropertiesByName(DataSourceContextHolder.getDataSource());
+		
+		String businessTablePrefix = dynamicDataSourceProperties.getBusinessTablePrefix();
+		String businessDatabaseNaming = dynamicDataSourceProperties.getBusinessDatabaseNaming();
+		String metadataTablePrefix = dynamicDataSourceProperties.getMetadataTablePrefix();
+		String metadataDatabaseNaming = dynamicDataSourceProperties.getMetadataDatabaseNaming();
+		
+		SystemConfigProperties systemConfigProperties = configService.getDefault();
+		String objectNaming = systemConfigProperties.getObjectNaming();
+		
 		List<Map<String, Object>> newMapList = new ArrayList<>();
 		for (Map<String, Object> t : mapList) {
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -91,7 +107,9 @@ public class CrudServiceImpl implements CrudService {
 					}
 				}
 				
-				map.put(CrudapiUtils.underlineToCamel(key), value);
+				String newKey = CrudapiUtils.convert(key, businessDatabaseNaming, systemConfigProperties.getObjectNaming());
+				
+				map.put(newKey, value);
 			}
 			newMapList.add(map);
 		}

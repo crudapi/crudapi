@@ -1,9 +1,13 @@
 package cn.crudapi.crudapi.util;
 
+import org.springframework.util.StringUtils;
+
+import cn.crudapi.crudapi.constant.ApiErrorCode;
 import cn.crudapi.crudapi.constant.Naming;
+import cn.crudapi.crudapi.exception.BusinessException;
 
 public class CrudapiUtils {
-	public static String camelToUnderline(String param) {
+	public static String lowerCamelToLowerUnderscore(String param) {
 	    if (param == null || "".equals(param.trim())) {
 	        return "";
 	    }
@@ -20,10 +24,19 @@ public class CrudapiUtils {
 	    return sb.toString();
 	}
 
-	public static String underlineToCamel(String param) {
+	public static String lowerHyphenToLowerUnderscore(String param) {
 	    if (param == null || "".equals(param.trim())) {
 	        return "";
 	    }
+	    
+	    return param.replace("-", "_");
+	}
+	
+	public static String lowerUnderscoreToLowerCamel(String param) {
+	    if (!StringUtils.hasLength(param)) {
+	        return "";
+	    }
+	    
 	    int len = param.length();
 	    
 	    StringBuilder sb = new StringBuilder(len);
@@ -40,19 +53,13 @@ public class CrudapiUtils {
 	    return sb.toString();
 	}
 	
-	public static String lowerHyphenToLowerUnderscore(String param) {
-	    if (param == null || "".equals(param.trim())) {
-	        return "";
-	    }
-	    
-	    return param.replace("-", "_");
-	}
-	
 	public static String convert(String param, String fromNaming, String toNaming) {
 		if (fromNaming.equals(Naming.LOWER_HYPHEN) && toNaming.equals(Naming.LOWER_UNDERSCORE)) {
 			return CrudapiUtils.lowerHyphenToLowerUnderscore(param);
+		} else if (fromNaming.equals(Naming.LOWER_UNDERSCORE) && toNaming.equals(Naming.LOWER_CAMEL)) {
+			return CrudapiUtils.lowerUnderscoreToLowerCamel(param);
+		} else {
+			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, fromNaming + " to " + toNaming + "is not define!");
 		}
-		
-		return param;
 	}
 }

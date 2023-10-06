@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
+import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 import cn.crudapi.crudapi.service.system.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,7 +27,7 @@ public class DataSourceController {
 	
 	@ApiOperation("获取数据源列表")
 	@GetMapping()
-    public List<Map<String, Object>> list() {
+    public List<Map<String, DynamicDataSourceProperties>> list() {
 		log.info("DataSourceController.list dataSource = " + DataSourceContextHolder.getDataSource());
 		
         return dataSourceService.list();
