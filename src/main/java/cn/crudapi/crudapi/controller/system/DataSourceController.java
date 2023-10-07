@@ -27,7 +27,7 @@ public class DataSourceController {
 	
 	@ApiOperation("获取数据源列表")
 	@GetMapping()
-    public List<Map<String, DynamicDataSourceProperties>> list() {
+    public List<Map<String, Object>> list() {
 		log.info("DataSourceController.list dataSource = " + DataSourceContextHolder.getDataSource());
 		
         return dataSourceService.list();

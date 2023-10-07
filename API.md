@@ -12,10 +12,12 @@ objectNaming | LOWER_CAMEL | 小驼峰
 ### Database Config
 Name |  Value | Remark
 --- | --- | ---
+systemTablePrefix | ca_system_ | 系统数据
 metadataTablePrefix | ca_m_ | 元数据
 businessTablePrefix | ca_b_ | 业务数据
 metadataDatabaseNaming | LOWER_UNDERSCORE | 小写下划线
 businessDatabaseNaming | LOWER_UNDERSCORE | 小写下划线
+systemDatabaseNaming | LOWER_UNDERSCORE | 小写下划线
 
 
 ## API

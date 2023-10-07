@@ -10,7 +10,11 @@ import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
+import cn.crudapi.crudapi.constant.Naming;
+import cn.crudapi.crudapi.property.SystemConfigProperties;
+import cn.crudapi.crudapi.service.system.ConfigService;
 import cn.crudapi.crudapi.service.system.DataSourceService;
+import cn.crudapi.crudapi.util.CrudapiUtils;
 
 @Service
 public class DataSourceServiceImpl implements DataSourceService {
@@ -19,11 +23,17 @@ public class DataSourceServiceImpl implements DataSourceService {
 	@Autowired
 	private DynamicDataSourceProvider dynamicDataSourceProvider;
 
+	@Autowired
+	private ConfigService configService;
+	
 	@Override
-	public List<Map<String, DynamicDataSourceProperties>> list() {
-		List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = dynamicDataSourceProvider.queryDynamicDataSourcePropertiesList();
+	public List<Map<String, Object>> list() {
+		List<Map<String, Object>> mapList = dynamicDataSourceProvider.listDataSourceFromDatabase();
 		
-		return dynamicDataSourcePropertiesList;
+		SystemConfigProperties systemConfigProperties = configService.getDefault();
+		
+		return CrudapiUtils.convert(mapList, Naming.LOWER_UNDERSCORE, systemConfigProperties.getObjectNaming());
+		
 	}
 
 	@Override

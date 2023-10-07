@@ -1,5 +1,10 @@
 package cn.crudapi.crudapi.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.util.StringUtils;
 
 import cn.crudapi.crudapi.constant.ApiErrorCode;
@@ -61,5 +66,36 @@ public class CrudapiUtils {
 		} else {
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, fromNaming + " to " + toNaming + "is not define!");
 		}
+	}
+	
+	public static List<Map<String, Object>> convert(List<Map<String, Object>> mapList, String fromNaming, String toNaming) {
+		List<Map<String, Object>> newMapList = new ArrayList<>();
+		for (Map<String, Object> t : mapList) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+			for(Map.Entry<String, Object> entry : t.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if (key.toLowerCase().startsWith("is_")) {
+					key = key.substring(3);
+					
+					if (value != null ) {
+						String valueStr = value.toString();
+						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
+							value = true;
+		    			} else {
+		    				value = false;
+		    			}
+					}
+				}
+				
+				String newKey = CrudapiUtils.convert(key, fromNaming, toNaming);
+				
+				map.put(newKey, value);
+			}
+			newMapList.add(map);
+		}
+		
+		return newMapList;
 	}
 }

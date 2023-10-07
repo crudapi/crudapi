@@ -80,40 +80,9 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
         builder.url(prop.getUrl());
         return builder.build();
     }
-    
-    public List<Map<String, DynamicDataSourceProperties>> queryDynamicDataSourcePropertiesList() {
-    	if (this.dynamicDataSourcePropertiesList != null) {
-    		return this.dynamicDataSourcePropertiesList;
-    	}
-    	List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = new ArrayList<Map<String, DynamicDataSourceProperties>>();
-    	if (dataSources != null) {
-            dataSources.forEach(map -> {
-                Set<String> keys = map.keySet();
-                keys.forEach(key -> {
-                	DynamicDataSourceProperties t = map.get(key);
-                	
-                	String name = key;
-                	String caption = t.getCaption();
-	           		String databaseType = t.getDatabaseType();
-	           		String driverClassName = t.getDriverClassName();
-	           		String url = t.getUrl();
-	           		Boolean deleted = t.getDeleted();
-	           		String status = t.getStatus();
-	           		if (Boolean.TRUE.equals(deleted)) {
-		           		log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, databaseType, driverClassName, deleted, url);
-	           		} else {
-	           			if ("ACTIVE".equals(status)) {
-	           				log.info("[config add dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
-			           		dynamicDataSourcePropertiesList.add(map);
-	           			} else {
-	           				log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
-	           			}
-	           		}
-                });
-            });
-    	}
-    	
-    	Map<String, Object> paramsMap = new HashMap<String, Object>();
+	
+	public List<Map<String, Object>> listDataSourceFromDatabase() {
+		Map<String, Object> paramsMap = new HashMap<String, Object>();
 		paramsMap.put(ColumnConsts.IS_DELETED, false);
 		paramsMap.put(ColumnConsts.STATUS, Status.ACTIVE);
 		
@@ -150,19 +119,57 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
 		log.info(sql);
 		
     	List<Map<String, Object>> dataSourceMapList = namedParameterJdbcTemplate.queryForList(sql, paramsMap);
+    	
+    	return dataSourceMapList;
+	}
+    
+    public List<Map<String, DynamicDataSourceProperties>> queryDynamicDataSourcePropertiesList() {
+    	if (this.dynamicDataSourcePropertiesList != null) {
+    		return this.dynamicDataSourcePropertiesList;
+    	}
+    	List<Map<String, DynamicDataSourceProperties>> dynamicDataSourcePropertiesList = new ArrayList<Map<String, DynamicDataSourceProperties>>();
+    	if (dataSources != null) {
+            dataSources.forEach(map -> {
+                Set<String> keys = map.keySet();
+                keys.forEach(key -> {
+                	DynamicDataSourceProperties t = map.get(key);
+                	
+                	String name = key;
+                	String caption = t.getCaption();
+	           		String databaseType = t.getDatabaseType();
+	           		String driverClassName = t.getDriverClassName();
+	           		String url = t.getUrl();
+	           		Boolean deleted = t.getDeleted();
+	           		String status = t.getStatus();
+	           		if (Boolean.TRUE.equals(deleted)) {
+		           		log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, deleted = {}, url = {}", name, caption, databaseType, driverClassName, deleted, url);
+	           		} else {
+	           			if (Status.ACTIVE.equals(status)) {
+	           				log.info("[config add dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
+			           		dynamicDataSourcePropertiesList.add(map);
+	           			} else {
+	           				log.warn("[config skip dataSoure]name = {}, caption = {}, databaseType = {}, driverClassName = {}, status = {}, url = {}", name, caption, databaseType, driverClassName, status, url);
+	           			}
+	           		}
+                });
+            });
+    	}
+    	
+    	List<Map<String, Object>> dataSourceMapList = this.listDataSourceFromDatabase();
+    	
     	for (Map<String, Object> t : dataSourceMapList) {
     		 DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
-    		 String name = t.get("name").toString();
-    		 String caption = t.get("caption").toString();
-    		 String databaseType = t.get("database_type").toString();
-    		 String driverClassName = t.get("driver_class_name").toString();
-    		 String url = t.get("url").toString();
-    		 String username = t.get("username").toString();
-    		 String password = t.get("password").toString();
-    		 String metadataTablePrefix = t.get("metadata_table_prefix").toString();
-    		 String metadataDatabaseNaming = t.get("metadata_database_naming").toString();
-    		 String businessTablePrefix = t.get("business_table_prefix").toString();
-    		 String businessDatabaseNaming = t.get("business_database_naming").toString();
+    		 String name = t.get(ColumnConsts.NAME).toString();
+    		 String caption = t.get(ColumnConsts.CAPTION).toString();
+    		 String databaseType = t.get(ColumnConsts.DATABASE_TYPE).toString();
+    		 String driverClassName = t.get(ColumnConsts.DRIVER_CLASS_NAME).toString();
+    		 String url = t.get(ColumnConsts.URL).toString();
+    		 String username = t.get(ColumnConsts.USERNAME).toString();
+    		 String password = t.get(ColumnConsts.PASSWORD).toString();
+    		 String metadataTablePrefix = t.get(ColumnConsts.METADATA_TABLE_PREFIX).toString();
+    		 String metadataDatabaseNaming = t.get(ColumnConsts.METADATA_DATABASE_NAMING).toString();
+    		 String businessTablePrefix = t.get(ColumnConsts.BUSINESS_TABLE_PREFIX).toString();
+    		 String businessDatabaseNaming = t.get(ColumnConsts.BUSINESS_DATABASE_NAMING).toString();
     		 
     		 log.info("[database add dataSoure]name = {}, caption = {}, databaseType = {}, metadataTablePrefix = {}, metadataDatabaseNaming = {}, businessTablePrefix = {}, businessDatabaseNaming = {}, driverClassName = {}, url = {}",
     				 name, caption, databaseType, metadataTablePrefix, metadataDatabaseNaming, businessTablePrefix, businessDatabaseNaming, driverClassName, url);
@@ -177,7 +184,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		 properties.setMetadataDatabaseNaming(metadataDatabaseNaming);
     		 properties.setBusinessTablePrefix(businessTablePrefix);
     		 properties.setBusinessDatabaseNaming(businessDatabaseNaming);
-    		 properties.setStatus("ACTIVE");
+    		 properties.setStatus(Status.ACTIVE);
     		 properties.setDeleted(false);
     		 
     		 Map<String, DynamicDataSourceProperties> propertiesMap = new HashMap<String, DynamicDataSourceProperties>();

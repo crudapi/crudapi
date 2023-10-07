@@ -87,34 +87,7 @@ public class CrudServiceImpl implements CrudService {
 		SystemConfigProperties systemConfigProperties = configService.getDefault();
 		String objectNaming = systemConfigProperties.getObjectNaming();
 		
-		List<Map<String, Object>> newMapList = new ArrayList<>();
-		for (Map<String, Object> t : mapList) {
-			Map<String, Object> map = new HashMap<String, Object>();
-			
-			for(Map.Entry<String, Object> entry : t.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-				if (key.toLowerCase().startsWith("is_")) {
-					key = key.substring(3);
-					
-					if (value != null ) {
-						String valueStr = value.toString();
-						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
-							value = true;
-		    			} else {
-		    				value = false;
-		    			}
-					}
-				}
-				
-				String newKey = CrudapiUtils.convert(key, businessDatabaseNaming, systemConfigProperties.getObjectNaming());
-				
-				map.put(newKey, value);
-			}
-			newMapList.add(map);
-		}
-		
-		return newMapList;
+		return CrudapiUtils.convert(mapList, businessDatabaseNaming, systemConfigProperties.getObjectNaming());
 	}
 		
 	@Override

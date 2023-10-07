@@ -6,7 +6,7 @@ import java.util.Map;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 
 public interface DataSourceService {
-	List<Map<String, DynamicDataSourceProperties>> list();
+	List<Map<String, Object>> list();
 
 	DynamicDataSourceProperties getDynamicDataSourcePropertiesByName(String name);
 }
