@@ -18,11 +18,6 @@ import cn.crudapi.crudapi.repository.CrudAbstractRepository;
 public class OracleCrudRepository extends CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(OracleCrudRepository.class);
 
-	@Override
-	public String getDateBaseName() {
-		return "oracle";
-	}
-	
 	public String getSchema() {
 		return "crudapi";
 	}

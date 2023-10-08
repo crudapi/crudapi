@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
 import cn.crudapi.crudapi.template.TemplateParse;
-import cn.crudapi.crudapi.util.CrudapiUtils;
 
 public abstract class CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(CrudAbstractRepository.class);
@@ -29,8 +28,8 @@ public abstract class CrudAbstractRepository {
 	@Autowired
 	private DynamicDataSourceProvider dynamicDataSourceProvider;
 	
-	public String getDateBaseName() {
-		return "sql";
+	public String getDataBaseType() {
+		return dynamicDataSourceProvider.getDatabaseType();
 	}
 	
 	public String getSchema() {
@@ -91,18 +90,18 @@ public abstract class CrudAbstractRepository {
 	}
 	
 	public String processTemplateToString(String templateName, String key, Object value) {
-		return templateParse.processTemplateToString(getDateBaseName(), templateName, key, value);
+		return templateParse.processTemplateToString(getDataBaseType(), templateName, key, value);
 	}
 	
 	public String processTemplateToString(String templateName, Object dataModel) {
-		return templateParse.processTemplateToString(getDateBaseName(), templateName, dataModel);
+		return templateParse.processTemplateToString(getDataBaseType(), templateName, dataModel);
 	}
 	
 	public String processTemplateToString(String templateBase, String templateName, String key, Object value) {
-		return templateParse.processTemplateToString(templateBase, getDateBaseName(), templateName, key, value);
+		return templateParse.processTemplateToString(templateBase, getDataBaseType(), templateName, key, value);
 	}
 	
 	public String processTemplateToString(String templateBase, String templateName, Map<String, Object> map) {
-		return templateParse.processTemplateToString(templateBase, getDateBaseName(), templateName, map);
+		return templateParse.processTemplateToString(templateBase, getDataBaseType(), templateName, map);
 	}
 }

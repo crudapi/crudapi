@@ -12,13 +12,8 @@ public class MariadbCrudRepository extends CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(MariadbCrudRepository.class);
 
 	@Override
-	public String getDateBaseName() {
-		return "mariadb";
-	}
-	
-	@Override
 	public String getSqlQuotation() {
-		log.info("MySqlCrudRepository->getSqlQuotation");
+		log.info("MariadbCrudRepository->getSqlQuotation");
 		return super.getSqlQuotation();
 	}
 }

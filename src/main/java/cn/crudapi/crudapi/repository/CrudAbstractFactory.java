@@ -20,12 +20,12 @@ public abstract class CrudAbstractFactory {
 		return repository.getSqlQuotation();
 	}
 	
-	public String getDateBaseName() {
+	public String getDataBaseType() {
 		if (log.isDebugEnabled()) {
-			log.debug("CrudAbstractFactory->getDateBaseName");
+			log.debug("CrudAbstractFactory->getDataBaseType");
 		}
 		CrudAbstractRepository repository = this.getCrudRepository();
-		return repository.getDateBaseName();
+		return repository.getDataBaseType();
 	}
 	
 	

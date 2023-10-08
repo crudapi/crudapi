@@ -42,12 +42,12 @@ public class CrudSqlExecute {
 		return crudFactory.getSqlQuotation();
 	}
 	
-	public String getDateBaseName() { 
+	public String getDataBaseType() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudSqlExecute->getDateBaseName"); 
+			log.debug("CrudSqlExecute->getDataBaseType");
 		}
 		
-		return crudFactory.getDateBaseName();
+		return crudFactory.getDataBaseType();
 	}
 	
 	public JdbcTemplate getJdbcTemplate() {

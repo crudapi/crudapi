@@ -14,11 +14,6 @@ public class PostSqlCrudRepository extends CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(PostSqlCrudRepository.class);
 
 
-	@Override
-	public String getDateBaseName() {
-		return "postsql";
-	}
-	
 	public String getSchema() {
 		return "public";
 	}

@@ -9,7 +9,7 @@ public interface CrudService {
 	
 	String getSqlQuotation();
 	
-	String getDateBaseName();
+	String getDataBaseType();
 
 	JdbcTemplate getJdbcTemplate();
 	

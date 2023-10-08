@@ -16,12 +16,6 @@ public class SqliteCrudRepository extends CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(SqliteCrudRepository.class);
 
 	@Override
-	public String getDateBaseName() {
-		return "sqlite";
-	}
-	
-	
-	@Override
 	public String getSqlQuotation() {
 		return "`";
 	}

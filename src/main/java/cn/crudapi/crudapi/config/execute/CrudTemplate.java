@@ -36,12 +36,12 @@ public class CrudTemplate {
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getSqlQuotation();
 	}
 	
-	public String getDateBaseName() { 
+	public String getDataBaseType() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudTemplate->getDateBaseName"); 
+			log.debug("CrudTemplate->getDataBaseType");
 		}
 		
-		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getDateBaseName();
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getDataBaseType();
 	}
 	
 	public JdbcTemplate getJdbcTemplate() {

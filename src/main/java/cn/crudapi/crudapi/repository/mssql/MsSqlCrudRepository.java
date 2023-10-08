@@ -14,11 +14,6 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(MsSqlCrudRepository.class);
 	
 	@Override
-	public String getDateBaseName() {
-		return "mssql";
-	}
-	
-	@Override
 	public String getSqlQuotation() {
 		return "\"";
 	}

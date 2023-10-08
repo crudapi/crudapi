@@ -29,12 +29,12 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
-	public String getDateBaseName() {
+	public String getDataBaseType() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudServiceImpl->getDateBaseName"); 
+			log.debug("CrudServiceImpl->getDataBaseType");
 		}
 		
-		return crudTemplate.getDateBaseName();
+		return crudTemplate.getDataBaseType();
 	}
 	
 	@Override

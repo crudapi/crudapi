@@ -66,7 +66,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
 		dynamicDataSourceProperties.setMetadataTablePrefix(this.dataSourceExtProperties.getMetadataTablePrefix());
 		dynamicDataSourceProperties.setCaption(this.dataSourceExtProperties.getCaption());
 		dynamicDataSourceProperties.setDatabaseType(this.dataSourceExtProperties.getDatabaseType());
-		dynamicDataSourceProperties.setName("dataSource");
+		dynamicDataSourceProperties.setName(DataSourceConsts.DEFAULT);
 		
 		this.dynamicDataSourceProperties = dynamicDataSourceProperties;
 		
@@ -262,6 +262,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	List<Map<String, String>> dataSourceNames = new ArrayList<Map<String, String>>();
     	Map<String, String> dataSourceNameMap = new HashMap<String, String>();
     	dataSourceNameMap.put("name", DataSourceConsts.PRIMARY);
+    	dataSourceNameMap.put("databaseType", dynamicDataSourceProperties.getDatabaseType());
     	dataSourceNameMap.put("caption", dynamicDataSourceProperties.getCaption());
     	dataSourceNameMap.put("database", parseDatabaseName(dataSourceProperties));
     	dataSourceNames.add(dataSourceNameMap);
@@ -273,6 +274,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	        	Map<String, String> t = new HashMap<String, String>();
     	        	t.put("name", entry.getKey());
     	        	DynamicDataSourceProperties p = entry.getValue();
+    	        	dataSourceNameMap.put("databaseType", p.getDatabaseType());
     	        	t.put("caption", p.getCaption());
     	        	t.put("database", parseDatabaseName(p));
     	        	
@@ -297,6 +299,22 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
 	    	return dataSourceNames.stream()
 	    	.filter(t -> t.get("name").toString().equals(DataSourceConsts.PRIMARY))
 	    	.findFirst().get().get("database");
+    	}
+    }
+    
+    public String getDatabaseType() {
+    	List<Map<String, String>> dataSourceNames = this.getDataSourceNames();
+    	String dataSource = DataSourceContextHolder.getDataSource();
+    	
+    	Optional<Map<String, String>> op = dataSourceNames.stream()
+    	.filter(t -> t.get("name").toString().equals(dataSource))
+    	.findFirst();
+    	if (op.isPresent()) {
+    		return op.get().get("databaseType");
+    	} else {
+	    	return dataSourceNames.stream()
+	    	.filter(t -> t.get("name").toString().equals(DataSourceConsts.PRIMARY))
+	    	.findFirst().get().get("databaseType");
     	}
     }
     
