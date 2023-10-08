@@ -27,14 +27,18 @@ public class CrudTemplateUtils {
 	
 	public static String getBeanClassName(String driverClassName) {
 		String beanClassName = null;
-		log.debug("CrudTemplateUtils->getBeanName driverClassName = {}", driverClassName);
+		if (log.isDebugEnabled()) {
+			log.debug("CrudTemplateUtils->getBeanName driverClassName = {}", driverClassName);
+		}
 		
 		try {
 			String factoryClassName = driverClassNameMap.get(driverClassName);
 			if (factoryClassName == null) {
 				factoryClassName = driverClassNameMap.get(MYSQL_DRIVER_NAME);
 			}
-			log.debug("CrudTemplateUtils->factoryClassName = {} ", factoryClassName);
+			if (log.isDebugEnabled()) {
+				log.debug("CrudTemplateUtils->factoryClassName = {} ", factoryClassName);
+			}
 			
 			String[] factoryClassNameArr = factoryClassName.split("\\.");
 			beanClassName = factoryClassNameArr[factoryClassNameArr.length - 1];
@@ -47,14 +51,18 @@ public class CrudTemplateUtils {
 
 	public static CrudAbstractFactory createCrudAbstractFactory(String driverClassName) {
 		CrudAbstractFactory crudAbstractFactory = null;
-		log.debug("CrudTemplateUtils->driverClassName = {}", driverClassName);
+		if (log.isDebugEnabled()) {
+			log.debug("CrudTemplateUtils->driverClassName = {}", driverClassName);
+		}
 		
 		try {
 			String factoryClassName = driverClassNameMap.get(driverClassName);
 			if (factoryClassName == null) {
 				factoryClassName = driverClassNameMap.get(MYSQL_DRIVER_NAME);
 			}
-			log.debug("CrudTemplateUtils->factoryClassName = {}", factoryClassName);
+			if (log.isDebugEnabled()) {
+				log.debug("CrudTemplateUtils->factoryClassName = {}", factoryClassName);
+			}
 			
 			Class<?> cls = Class.forName(factoryClassName);
 			Object obj = cls.getDeclaredConstructor().newInstance();

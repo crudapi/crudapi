@@ -13,45 +13,59 @@ public abstract class CrudAbstractFactory {
 	public abstract CrudAbstractRepository getCrudRepository();
 	
     public String getSqlQuotation() { 
-		log.debug("CrudAbstractFactory->getSqlQuotation");
+    	if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->getSqlQuotation");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.getSqlQuotation();
 	}
 	
 	public String getDateBaseName() {
-		log.debug("CrudAbstractFactory->getDateBaseName");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->getDateBaseName");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.getDateBaseName();
 	}
 	
 	
 	public JdbcTemplate getJdbcTemplate() {
-		log.debug("CrudAbstractFactory->getJdbcTemplate");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->getJdbcTemplate");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.getJdbcTemplate();
 	}
 	
 	public void execute(String sql) { 
-		log.debug("CrudAbstractFactory->execute");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->execute");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		repository.execute(sql);
 	}
 	
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
-		log.debug("CrudAbstractFactory->queryForList");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->queryForList");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.queryForList(sql, paramMap);
 	}
 	
 	public List<Map<String, Object>> getMetaDatas() {
-		log.debug("CrudAbstractFactory->getMetaDatas");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->getMetaDatas");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.getMetaDatas();
 	}
 	
 	public Map<String, Object> getMetaData(String tableName) {
-		log.debug("CrudAbstractFactory->getMetaData");
+		if (log.isDebugEnabled()) {
+			log.debug("CrudAbstractFactory->getMetaData");
+		}
 		CrudAbstractRepository repository = this.getCrudRepository();
 		return repository.getMetaData(tableName);
 	}
