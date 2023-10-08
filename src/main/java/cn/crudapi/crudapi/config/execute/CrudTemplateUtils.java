@@ -17,6 +17,7 @@ public class CrudTemplateUtils {
 		private static final long serialVersionUID = 1L;
 		{
 			put("com.mysql.cj.jdbc.Driver", "cn.crudapi.crudapi.repository.mysql.MySqlCrudFactory");
+			put("org.mariadb.jdbc.Driver", "cn.crudapi.crudapi.repository.mariadb.MariadbCrudFactory");
 			put("org.postgresql.Driver", "cn.crudapi.crudapi.repository.postsql.PostSqlCrudFactory");
 			put("com.microsoft.sqlserver.jdbc.SQLServerDriver", "cn.crudapi.crudapi.repository.mssql.MsSqlCrudFactory");
 			put("oracle.jdbc.OracleDriver", "cn.crudapi.crudapi.repository.oracle.OracleCrudFactory");

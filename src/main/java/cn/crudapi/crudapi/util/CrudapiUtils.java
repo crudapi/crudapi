@@ -59,6 +59,10 @@ public class CrudapiUtils {
 	}
 	
 	public static String convert(String param, String fromNaming, String toNaming) {
+		if (toNaming.equals(Naming.RAW)) {
+			return param;
+		}
+		
 		if (fromNaming.equals(Naming.LOWER_HYPHEN) && toNaming.equals(Naming.LOWER_UNDERSCORE)) {
 			return CrudapiUtils.lowerHyphenToLowerUnderscore(param);
 		} else if (fromNaming.equals(Naming.LOWER_UNDERSCORE) && toNaming.equals(Naming.LOWER_CAMEL)) {

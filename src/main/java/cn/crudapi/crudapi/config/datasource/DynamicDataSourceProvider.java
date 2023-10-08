@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import cn.crudapi.crudapi.constant.ColumnConsts;
+import cn.crudapi.crudapi.constant.DataSourceConsts;
 import cn.crudapi.crudapi.constant.SqlConsts;
 import cn.crudapi.crudapi.constant.Status;
 import cn.crudapi.crudapi.constant.SystemConsts;
@@ -260,7 +261,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	
     	List<Map<String, String>> dataSourceNames = new ArrayList<Map<String, String>>();
     	Map<String, String> dataSourceNameMap = new HashMap<String, String>();
-    	dataSourceNameMap.put("name", "primary");
+    	dataSourceNameMap.put("name", DataSourceConsts.PRIMARY);
     	dataSourceNameMap.put("caption", dynamicDataSourceProperties.getCaption());
     	dataSourceNameMap.put("database", parseDatabaseName(dataSourceProperties));
     	dataSourceNames.add(dataSourceNameMap);
@@ -294,7 +295,7 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     		return op.get().get("database");
     	} else {
 	    	return dataSourceNames.stream()
-	    	.filter(t -> t.get("name").toString().equals("primary"))
+	    	.filter(t -> t.get("name").toString().equals(DataSourceConsts.PRIMARY))
 	    	.findFirst().get().get("database");
     	}
     }

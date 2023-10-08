@@ -1,9 +1,9 @@
 package cn.crudapi.crudapi.config.datasource;
 
-public class DataSourceContextHolder {
-	//默认数据源primary=dataSource
-    private static final String DEFAULT_DATASOURCE = "dataSource";
+import cn.crudapi.crudapi.constant.DataSourceConsts;
 
+//默认数据源primary=dataSource
+public class DataSourceContextHolder {
     //保存线程连接的数据源
     private static final ThreadLocal<String> CONTEXT_HOLDER = new ThreadLocal<>();
 
@@ -14,13 +14,13 @@ public class DataSourceContextHolder {
         if (dataSoure != null) {
         	return dataSoure;
         } else {
-        	return DEFAULT_DATASOURCE;
+        	return DataSourceConsts.DEFAULT;
         }
     }
 
     public static void setDataSource(String key) {
-    	if ("primary".equals(key)) {
-    		key = DEFAULT_DATASOURCE;
+    	if (DataSourceConsts.PRIMARY.equals(key)) {
+    		key = DataSourceConsts.DEFAULT;
     	}
         CONTEXT_HOLDER.set(key);
     }
@@ -39,7 +39,7 @@ public class DataSourceContextHolder {
         if (dataSoure != null) {
         	return dataSoure;
         } else {
-        	return DEFAULT_DATASOURCE;
+        	return DataSourceConsts.DEFAULT;
         }
     }
 }

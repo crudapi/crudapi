@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Primary;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProperties;
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
 import cn.crudapi.crudapi.repository.CrudAbstractFactory;
+import cn.crudapi.crudapi.repository.mariadb.MariadbCrudFactory;
 import cn.crudapi.crudapi.repository.mssql.MsSqlCrudFactory;
 import cn.crudapi.crudapi.repository.mysql.MySqlCrudFactory;
 import cn.crudapi.crudapi.repository.oracle.OracleCrudFactory;
@@ -28,20 +29,23 @@ public class CrudTemplateConfig {
 	@Autowired
 	private DataSourceProperties dataSourceProperties;
 	
-	
 	@Autowired
 	private DynamicDataSourceProvider dynamicDataSourceProvider;
-	
-    
+	 
+	@Bean(name = "mySqlCrudFactory")
+	public MySqlCrudFactory getMySqlCrudFactory() {
+		return new MySqlCrudFactory();
+	}
+	 
+	@Bean(name = "mariadbCrudFactory")
+	public MariadbCrudFactory getMariadbCrudFactory() {
+		return new MariadbCrudFactory();
+	}
+
     @Bean(name = "postSqlCrudFactory")
   	public PostSqlCrudFactory getPostSqlCrudFactory() {
   		return new PostSqlCrudFactory();
   	}
-    
-    @Bean(name = "mySqlCrudFactory")
-	public MySqlCrudFactory getMySqlCrudFactory() {
-		return new MySqlCrudFactory();
-	}
     
     @Bean(name = "msSqlCrudFactory")
 	public MsSqlCrudFactory getMsSqlCrudFactory() {
@@ -89,14 +93,16 @@ public class CrudTemplateConfig {
 		targetDriverClassNames.forEach((key, value) -> {
 			CrudAbstractFactory crudAbstractFactory = null;
 			String beanClassName = CrudTemplateUtils.getBeanClassName(value);
-			if (beanClassName.equals("PostSqlCrudFactory")) {
+			if (beanClassName.equals("MySqlCrudFactory")) {
+				crudAbstractFactory = getMySqlCrudFactory();
+			} else if (beanClassName.equals("MariadbCrudFactory")) {
+				crudAbstractFactory = getMariadbCrudFactory();
+			} else if (beanClassName.equals("PostSqlCrudFactory")) {
 				crudAbstractFactory = getPostSqlCrudFactory();
 			} else if (beanClassName.equals("MsSqlCrudFactory")) {
 				crudAbstractFactory = getMsSqlCrudFactory();
 			} else if (beanClassName.equals("OracleCrudFactory")) {
 				crudAbstractFactory = getOracleCrudFactory();
-			} else if (beanClassName.equals("MySqlCrudFactory")) {
-				crudAbstractFactory = getMySqlCrudFactory();
 			} else if (beanClassName.equals("SqliteCrudFactory")) {
 				crudAbstractFactory = getSqliteCrudFactory();
 			}
