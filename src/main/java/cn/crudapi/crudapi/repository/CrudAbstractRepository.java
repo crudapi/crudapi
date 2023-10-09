@@ -73,6 +73,9 @@ public abstract class CrudAbstractRepository {
 	}
 	
 	public Map<String, Object> getMetadata(String tableName) {
+		String tableSchema = getSchema();
+		log.info("tableSchema = " + tableSchema);
+		
 		Map<String, Object> map = new HashMap<String, Object>();
 		
 		String sql = "SHOW TABLE STATUS LIKE '" + tableName + "'";
@@ -85,6 +88,13 @@ public abstract class CrudAbstractRepository {
 		sql = "SHOW INDEX FROM " + getSqlQuotation() + tableName +  getSqlQuotation();
 		List<Map<String, Object>> indexList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
 		map.put("indexs", indexList);
+		
+		sql = "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE" 
+				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		log.info("sql = " + sql);
+		
+		List<Map<String, Object>> constraintList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		map.put("constraints", constraintList);
 		
 		return map;
 	}

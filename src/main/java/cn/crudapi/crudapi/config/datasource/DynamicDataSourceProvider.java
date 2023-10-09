@@ -267,8 +267,8 @@ public class DynamicDataSourceProvider implements DataSourceProvider {
     	dataSourceNameMap.put("database", parseDatabaseName(dataSourceProperties));
     	dataSourceNames.add(dataSourceNameMap);
     	
-    	if (dataSources != null) {
-    		dataSources.forEach(map -> {
+    	if (dynamicDataSourcePropertiesList != null) {
+    		dynamicDataSourcePropertiesList.forEach(map -> {
     			Set<Map.Entry<String, DynamicDataSourceProperties>> entrySet = map.entrySet();
     	        for (Map.Entry<String, DynamicDataSourceProperties> entry : entrySet) {
     	        	Map<String, String> t = new HashMap<String, String>();
