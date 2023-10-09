@@ -44,4 +44,4 @@ INSERT INTO `ca_system_data_source` (`name`, `caption`, `display_order`, `status
 VALUES ('database-sqlite-crudapi', 'SQLITE_CRUDAPI', 7, 'ACTIVE', false, 'sqlite', 'org.sqlite.JDBC', 'jdbc:sqlite:crudapi.db', '', '');
 
 INSERT INTO `ca_system_data_source` (`name`, `caption`, `display_order`, `status`, `is_deleted`, `database_type`, `driver_class_name`, `url`, `username`, `password`)
-VALUES ('database-mariadb-crudapi', 'MARIADB_CRUDAPI', 8, 'ACTIVE', false, 'mariadb', 'org.mariadb.jdbc.Driver', 'jdbc:mariadb://localhost:3307/crudapi?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true', 'root', 'root@Mysql');
+VALUES ('database-mariadb-crudapi2', 'MARIADB_CRUDAPI2', 8, 'ACTIVE', false, 'mariadb', 'org.mariadb.jdbc.Driver', 'jdbc:mariadb://localhost:3307/crudapi2?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true', 'root', 'root@Mysql');
