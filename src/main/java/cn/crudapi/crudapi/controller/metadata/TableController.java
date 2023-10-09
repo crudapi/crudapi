@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,5 +34,15 @@ public class TableController {
 		List<Map<String, Object>> mapList = tableService.list();
         
         return mapList;
+    }
+	
+	@ApiOperation("获取表详情")
+	@GetMapping(value = "{tableName}")
+    public Map<String, Object> get(@PathVariable("tableName") String tableName) {
+		log.info("TableController->list dataSource = " + DataSourceContextHolder.getDataSource());
+		
+		Map<String, Object> map = tableService.get(tableName);
+        
+        return map;
     }
 }

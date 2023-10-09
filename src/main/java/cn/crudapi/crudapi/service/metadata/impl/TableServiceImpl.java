@@ -16,6 +16,11 @@ public class TableServiceImpl implements TableService {
 	
 	@Override
 	public List<Map<String, Object>> list() {
-		 return crudService.getMetaDatas();
+		 return crudService.getMetadatas();
+    }
+
+	@Override
+	public Map<String, Object> get(String tableName) {
+		 return crudService.getMetadata(tableName);
     }
 }

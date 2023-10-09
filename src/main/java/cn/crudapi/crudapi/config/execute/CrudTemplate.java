@@ -68,20 +68,20 @@ public class CrudTemplate {
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().queryForList(sql, paramMap);
 	}
 	
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudTemplate->getMetaDatas"); 
+			log.debug("CrudTemplate->getMetadatas");
 		}
 		
-		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetaDatas();
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetadatas();
 	}
 	
-	public Map<String, Object> getMetaData(String tableName) {
+	public Map<String, Object> getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudTemplate->getMetaData"); 
+			log.debug("CrudTemplate->getMetadata");
 		}
 		
-		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetaData(tableName);
+		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetadata(tableName);
 	}
 	
 	public String processTemplateToString(String templateName, String key, Object value) {

@@ -33,7 +33,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		String sql = processTemplateToString("select-tables.sql.ftl", "tableSchema", getSchema());
 		List<Map<String, Object>> tableList = getJdbcTemplate().queryForList(sql);
 		
@@ -41,8 +41,8 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public Map<String, Object> getMetaData(String tableName) {
-		log.info("getMetaData: " + tableName);
+	public Map<String, Object> getMetadata(String tableName) {
+		log.info("getMetadata: " + tableName);
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		

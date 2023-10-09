@@ -66,20 +66,20 @@ public class CrudSqlExecute {
 		crudFactory.execute(sql);
 	}
 	
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudSqlExecute->getMetaDatas"); 
+			log.debug("CrudSqlExecute->getMetadatas");
 		}
 		
-		return crudFactory.getMetaDatas();
+		return crudFactory.getMetadatas();
 	}
 	
-	public Map<String, Object> getMetaData(String tableName) {
+	public Map<String, Object> getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudSqlExecute->getMetaData"); 
+			log.debug("CrudSqlExecute->getMetadata");
 		}
 		
-		return crudFactory.getMetaData(tableName);
+		return crudFactory.getMetadata(tableName);
 	}
 	
 	public String processTemplateToString(String templateName, String key, Object value) {

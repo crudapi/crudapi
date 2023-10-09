@@ -57,7 +57,7 @@ public abstract class CrudAbstractRepository {
 		return namedParameterJdbcTemplate.queryForList(sql, paramMap);
 	}
 	
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		String tableSchema = getSchema();
 		log.info("tableSchema = " + tableSchema);
 		List<Map<String, Object>> mapList =  namedParameterJdbcTemplate.getJdbcTemplate().queryForList("SHOW TABLE STATUS");
@@ -72,7 +72,7 @@ public abstract class CrudAbstractRepository {
 		return newMapList;
 	}
 	
-	public Map<String, Object> getMetaData(String tableName) {
+	public Map<String, Object> getMetadata(String tableName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		
 		String sql = "SHOW TABLE STATUS LIKE '" + tableName + "'";

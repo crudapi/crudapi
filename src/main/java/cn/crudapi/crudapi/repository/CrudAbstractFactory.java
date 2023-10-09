@@ -54,20 +54,20 @@ public abstract class CrudAbstractFactory {
 		return repository.queryForList(sql, paramMap);
 	}
 	
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		if (log.isDebugEnabled()) {
-			log.debug("CrudAbstractFactory->getMetaDatas");
+			log.debug("CrudAbstractFactory->getMetadatas");
 		}
 		CrudAbstractRepository repository = this.getCrudRepository();
-		return repository.getMetaDatas();
+		return repository.getMetadatas();
 	}
 	
-	public Map<String, Object> getMetaData(String tableName) {
+	public Map<String, Object> getMetadata(String tableName) {
 		if (log.isDebugEnabled()) {
-			log.debug("CrudAbstractFactory->getMetaData");
+			log.debug("CrudAbstractFactory->getMetadata");
 		}
 		CrudAbstractRepository repository = this.getCrudRepository();
-		return repository.getMetaData(tableName);
+		return repository.getMetadata(tableName);
 	}
 	
 	public String processTemplateToString(String templateName, String key, Object value) {

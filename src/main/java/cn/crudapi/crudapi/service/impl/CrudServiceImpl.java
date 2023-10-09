@@ -67,21 +67,21 @@ public class CrudServiceImpl implements CrudService {
 	}
 		
 	@Override
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudServiceImpl->getMetaDatas"); 
+			log.debug("CrudServiceImpl->getMetadatas");
 		}
 		
-		return crudTemplate.getMetaDatas();
+		return crudTemplate.getMetadatas();
 	}
 	
 	@Override
-	public Map<String, Object> getMetaData(String tableName) {
+	public Map<String, Object> getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
-			log.debug("CrudServiceImpl->getMetaData"); 
+			log.debug("CrudServiceImpl->getMetadata");
 		}
 		
-		return crudTemplate.getMetaData(tableName);
+		return crudTemplate.getMetadata(tableName);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class MsSqlCrudRepository extends CrudAbstractRepository {
 
 	
 	@Override
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		String sql = processTemplateToString("select-table.sql.ftl", "tableSchema", getSchema());
 		List<Map<String, Object>> tableList = getJdbcTemplate().queryForList(sql);
 		

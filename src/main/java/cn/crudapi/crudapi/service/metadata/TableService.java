@@ -5,4 +5,6 @@ import java.util.Map;
 
 public interface TableService {
 	List<Map<String, Object>> list();
+
+	Map<String, Object> get(String tableName);
 }

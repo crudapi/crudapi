@@ -15,9 +15,9 @@ public interface CrudService {
 	
 	void execute(String sql);
 	
-	List<Map<String, Object>> getMetaDatas();
+	List<Map<String, Object>> getMetadatas();
 	
-	Map<String, Object> getMetaData(String tableName);
+	Map<String, Object> getMetadata(String tableName);
 	
 	String processTemplateToString(String templateName, String key, Object value);
 

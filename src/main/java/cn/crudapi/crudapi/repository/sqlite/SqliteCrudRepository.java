@@ -26,7 +26,7 @@ public class SqliteCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public List<Map<String, Object>> getMetaDatas() {
+	public List<Map<String, Object>> getMetadatas() {
 		List<Map<String, Object>> tableList = getJdbcTemplate().queryForList("SELECT * FROM `SQLITE_MASTER` WHERE `TYPE` = 'table' AND `name` != 'sqlite_sequence'");
 		
 		List<Map<String, Object>> newMapList =  new ArrayList<Map<String, Object>>();
@@ -42,8 +42,8 @@ public class SqliteCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public Map<String, Object> getMetaData(String tableName) {
-		log.info("getMetaData: " + tableName);
+	public Map<String, Object> getMetadata(String tableName) {
+		log.info("getMetadata: " + tableName);
 		
 		return null;
 	}
