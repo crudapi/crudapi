@@ -78,18 +78,26 @@ public abstract class CrudAbstractRepository {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		
-		String sql = "SHOW TABLE STATUS LIKE '" + tableName + "'";
+		String sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `TABLE_TYPE`, `CREATE_TIME`, `UPDATE_TIME`, `TABLE_COMMENT` FROM `INFORMATION_SCHEMA`.`TABLES`" 
+				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		log.info("sql = " + sql);
 		map = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap(sql);
 	
-		sql = "SHOW FULL COLUMNS FROM " + getSqlQuotation() + tableName + getSqlQuotation();
-		List<Map<String, Object>> descList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
-		map.put("columns", descList);
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `COLUMN_NAME`, `ORDINAL_POSITION`, `COLUMN_DEFAULT`, `IS_NULLABLE`, `DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH`, `CHARACTER_OCTET_LENGTH`, `NUMERIC_PRECISION`, `NUMERIC_SCALE`, `DATETIME_PRECISION`, `COLUMN_TYPE`, `COLUMN_KEY`, `COLUMN_COMMENT` FROM `INFORMATION_SCHEMA`.`COLUMNS`" 
+				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		log.info("sql = " + sql);
 		
-		sql = "SHOW INDEX FROM " + getSqlQuotation() + tableName +  getSqlQuotation();
+		List<Map<String, Object>> columnList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		map.put("columns", columnList);
+		
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `NON_UNIQUE`, `INDEX_SCHEMA`, `INDEX_NAME`, `SEQ_IN_INDEX`, `COLUMN_NAME`, `NULLABLE`, `INDEX_TYPE`, `COMMENT`, `INDEX_COMMENT` FROM `INFORMATION_SCHEMA`.`STATISTICS`"
+				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		log.info("sql = " + sql);
+		
 		List<Map<String, Object>> indexList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
 		map.put("indexs", indexList);
 		
-		sql = "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE" 
+		sql = "SELECT `TABLE_SCHEMA`, `CONSTRAINT_NAME`, `TABLE_NAME`, `COLUMN_NAME`, `ORDINAL_POSITION`, `POSITION_IN_UNIQUE_CONSTRAINT`, `REFERENCED_TABLE_SCHEMA`, `REFERENCED_TABLE_NAME`, `REFERENCED_COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE`" 
 				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
 		log.info("sql = " + sql);
 		
