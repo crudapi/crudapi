@@ -1248,6 +1248,10 @@ public abstract class CrudAbstractRepository {
 					return str;
 				}
 				
+				if (obj != null && obj.toString().equals("DBNULL")) {
+					return null;
+				}
+				
 				return obj;
 			}
 		};

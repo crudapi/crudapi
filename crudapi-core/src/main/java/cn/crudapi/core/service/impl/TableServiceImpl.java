@@ -2626,7 +2626,9 @@ public class TableServiceImpl implements TableService {
         		
         		if (obj != null && !obj.toString().isEmpty()) {
         			String objStr = obj.toString();
-        			if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
+        			if (objStr.equals("DBNULL")) {
+            			newObj = "DBNULL";
+        			} else if (t.getDataType().equals(DataTypeEnum.BIGINT)) {
         				objStr = objStr.replaceAll(",", "");
             			newObj = Long.parseLong(objStr);
             		} else if (t.getDataType().equals(DataTypeEnum.INT)) {
