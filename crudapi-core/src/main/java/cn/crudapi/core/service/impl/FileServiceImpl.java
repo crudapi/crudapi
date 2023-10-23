@@ -126,7 +126,7 @@ public class FileServiceImpl implements FileService {
 	  
 	    File dest = new File(ossFilePath + "/" + ossUploadPath + "/" + fileName);
 	    if (!dest.getParentFile().exists()) { //判断文件父目录是否存在
-	        dest.getParentFile().mkdir();
+	        dest.getParentFile().mkdirs();
 	    }
 	    
 	    fileInfo.put("fullUrl", getFullUrl(fileName));
@@ -165,7 +165,7 @@ public class FileServiceImpl implements FileService {
 		try {
 			File dest = new File(ossFilePath + "/" + ossUploadPath + "/" + fileName);
 		    if (!dest.getParentFile().exists()) { //判断文件父目录是否存在
-		        dest.getParentFile().mkdir();
+		        dest.getParentFile().mkdirs();
 		    }
 			return dest;
 		} catch (Exception e) {
@@ -185,6 +185,18 @@ public class FileServiceImpl implements FileService {
 	    String subPath = dt.toString(f);
 	    
 	    return subPath + "/" + uuid.toString().replace("-", "") + "." + ext;
+	}
+	
+	@Override
+	public String getExportRandomFileName(String fileName) {
+		UUID uuid = UUID.randomUUID();
+		String ext = getFileExt(fileName);
+		 
+	    DateTime dt = DateTime.now();
+	    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd");
+	    String subPath = dt.toString(f);
+	    
+	    return "exportTmp/" + subPath + "/" + uuid.toString().replace("-", "") + "." + ext;
 	}
 	
 	@Override

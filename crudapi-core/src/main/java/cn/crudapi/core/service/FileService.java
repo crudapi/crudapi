@@ -44,4 +44,6 @@ public interface FileService {
 	String getOssFilePath();
 
 	String getOssUploadPath();
+
+	String getExportRandomFileName(String fileName);
 }
