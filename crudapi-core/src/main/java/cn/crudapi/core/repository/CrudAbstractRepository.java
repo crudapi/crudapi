@@ -1271,7 +1271,11 @@ public abstract class CrudAbstractRepository {
 			String key = entry.getKey();
 			Object value = entry.getValue();
             if (value != null) {
-            	newMap.put(key, value);
+            	if (value.toString().equals("DBNULL")) {
+            		newMap.put(key, null);
+            	} else {
+            		newMap.put(key, value);
+            	}
             }
         }
 		
