@@ -12,7 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import cn.crudapi.crudapi.config.datasource.DynamicDataSourceProvider;
+import cn.crudapi.crudapi.constant.Naming;
 import cn.crudapi.crudapi.template.TemplateParse;
+import cn.crudapi.crudapi.util.CrudapiUtils;
 
 public abstract class CrudAbstractRepository {
 	private static final Logger log = LoggerFactory.getLogger(CrudAbstractRepository.class);
@@ -54,7 +56,14 @@ public abstract class CrudAbstractRepository {
 	
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) {
 		log.info("CrudAbstractRepository->queryForList sql: {}", sql);
-		return namedParameterJdbcTemplate.queryForList(sql, paramMap);
+		return this.namedParameterJdbcTemplate.queryForList(sql, paramMap);
+	}
+	
+	public List<Map<String, Object>> queryForListAndConvert(String sql, Map<String, ?> paramMap) {
+		log.info("CrudAbstractRepository->queryForList sql: {}", sql);
+		List<Map<String, Object>> mapList = this.queryForList(sql, paramMap);
+		
+		return CrudapiUtils.convert(mapList, Naming.UPPER_UNDERSCORE, Naming.LOWER_CAMEL);
 	}
 	
 	public List<Map<String, Object>> getMetadatas() {
@@ -74,34 +83,34 @@ public abstract class CrudAbstractRepository {
 	
 	public Map<String, Object> getMetadata(String tableName) {
 		String tableSchema = getSchema();
-		log.info("tableSchema = " + tableSchema);
+		log.info("tableSchema = {}", tableSchema);
+		log.info("tableName = {}", tableName);
 		
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> mapParams = new HashMap<String, Object>();
+		mapParams.put("tableSchema", ":tableSchema");
+		mapParams.put("tableName",  ":tableName");
 		
-		String sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `TABLE_TYPE`, `CREATE_TIME`, `UPDATE_TIME`, `TABLE_COMMENT` FROM `INFORMATION_SCHEMA`.`TABLES`" 
-				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		Map<String, Object> dbParams = new HashMap<String, Object>();
+		mapParams.put("tableSchema", tableSchema);
+		mapParams.put("tableName",  tableName);
+		
+		String sql = processTemplateToString("select-table.sql.ftl", mapParams);
 		log.info("sql = " + sql);
-		map = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap(sql);
+		Map<String, Object> map = this.queryForListAndConvert(sql, dbParams).get(0);
 	
-		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `COLUMN_NAME`, `ORDINAL_POSITION`, `COLUMN_DEFAULT`, `IS_NULLABLE`, `DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH`, `CHARACTER_OCTET_LENGTH`, `NUMERIC_PRECISION`, `NUMERIC_SCALE`, `DATETIME_PRECISION`, `COLUMN_TYPE`, `COLUMN_KEY`, `EXTRA`, `COLUMN_COMMENT` FROM `INFORMATION_SCHEMA`.`COLUMNS`" 
-				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		sql = processTemplateToString("select-column.sql.ftl", mapParams);
 		log.info("sql = " + sql);
-		
-		List<Map<String, Object>> columnList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		List<Map<String, Object>> columnList = this.queryForListAndConvert(sql, dbParams);
 		map.put("columns", columnList);
 		
-		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `NON_UNIQUE`, `INDEX_SCHEMA`, `INDEX_NAME`, `SEQ_IN_INDEX`, `COLUMN_NAME`, `NULLABLE`, `INDEX_TYPE`, `COMMENT`, `INDEX_COMMENT` FROM `INFORMATION_SCHEMA`.`STATISTICS`"
-				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		sql = processTemplateToString("select-index.sql.ftl", mapParams);
 		log.info("sql = " + sql);
-		
-		List<Map<String, Object>> indexList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		List<Map<String, Object>> indexList = this.queryForListAndConvert(sql, dbParams);
 		map.put("indexs", indexList);
 		
-		sql = "SELECT `TABLE_SCHEMA`, `CONSTRAINT_NAME`, `TABLE_NAME`, `COLUMN_NAME`, `ORDINAL_POSITION`, `POSITION_IN_UNIQUE_CONSTRAINT`, `REFERENCED_TABLE_SCHEMA`, `REFERENCED_TABLE_NAME`, `REFERENCED_COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE`" 
-				+ " WHERE TABLE_SCHEMA = '" + tableSchema + "' AND TABLE_NAME = '" + tableName + "'" ;
+		sql = processTemplateToString("select-constraint.sql.ftl", mapParams);
 		log.info("sql = " + sql);
-		
-		List<Map<String, Object>> constraintList = namedParameterJdbcTemplate.getJdbcTemplate().queryForList(sql);
+		List<Map<String, Object>> constraintList = this.queryForListAndConvert(sql, dbParams);
 		map.put("constraints", constraintList);
 		
 		return map;

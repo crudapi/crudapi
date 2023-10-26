@@ -58,6 +58,14 @@ public class CrudapiUtils {
 	    return sb.toString();
 	}
 	
+	public static String upperUnderscoreToLowerCamel(String param) {
+	    if (!StringUtils.hasLength(param)) {
+	        return "";
+	    }
+	    
+	   return CrudapiUtils.lowerUnderscoreToLowerCamel(param.toLowerCase());
+	}
+	
 	public static String convert(String param, String fromNaming, String toNaming) {
 		if (toNaming.equals(Naming.RAW)) {
 			return param;
@@ -67,6 +75,8 @@ public class CrudapiUtils {
 			return CrudapiUtils.lowerHyphenToLowerUnderscore(param);
 		} else if (fromNaming.equals(Naming.LOWER_UNDERSCORE) && toNaming.equals(Naming.LOWER_CAMEL)) {
 			return CrudapiUtils.lowerUnderscoreToLowerCamel(param);
+		} else if (fromNaming.equals(Naming.UPPER_UNDERSCORE) && toNaming.equals(Naming.LOWER_CAMEL)) {
+			return CrudapiUtils.upperUnderscoreToLowerCamel(param);
 		} else {
 			throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, fromNaming + " to " + toNaming + "is not define!");
 		}
@@ -80,16 +90,24 @@ public class CrudapiUtils {
 			for(Map.Entry<String, Object> entry : t.entrySet()) {
 				String key = entry.getKey();
 				Object value = entry.getValue();
-				if (key.toLowerCase().startsWith("is_")) {
-					key = key.substring(3);
+				if (key.toLowerCase().startsWith("is_")
+					|| key.toLowerCase().startsWith("non_")	
+					|| key.toLowerCase().endsWith("able")) {
+					if (key.toLowerCase().startsWith("is_")) {
+						key = key.substring(3);
+					}
 					
 					if (value != null ) {
 						String valueStr = value.toString();
-						if (valueStr.equals("1") || valueStr.toLowerCase().equals("true")) {
+						if (valueStr.equals("1") 
+							|| valueStr.toLowerCase().equals("true") 
+							|| valueStr.toLowerCase().equals("yes")) {
 							value = true;
 		    			} else {
 		    				value = false;
 		    			}
+					} else {
+						value = false;
 					}
 				}
 				
