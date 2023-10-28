@@ -2,6 +2,12 @@ package cn.crudapi.crudapi.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder(alphabetic = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Table {
 	private String name;
 
@@ -9,10 +15,13 @@ public class Table {
 
 	private String description;
 	
+	@JsonProperty("columns")
 	private List<Column> columnList;
 
+	@JsonProperty("indexs")
 	private List<Index> indexList;
 	
+	@JsonProperty("constraints")
 	private List<Constraint> constraintList;
 
 	public String getName() {

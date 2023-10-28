@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import cn.crudapi.crudapi.constant.ApiErrorCode;
 import cn.crudapi.crudapi.exception.BusinessException;
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.repository.CrudAbstractRepository;
 
 @Component
@@ -41,7 +42,7 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public Map<String, Object> getMetadata(String tableName) {
+	public Table getMetadata(String tableName) {
 		log.info("getMetadata: " + tableName);
 		
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -83,6 +84,6 @@ public class OracleCrudRepository extends CrudAbstractRepository {
 		
 		map.put("indexComments", new ArrayList<Map<String, Object>>());
 		
-		return map;
+		return null;
 	}
 }

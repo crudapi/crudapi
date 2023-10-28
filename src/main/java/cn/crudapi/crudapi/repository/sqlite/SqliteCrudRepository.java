@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.repository.CrudAbstractRepository;
 
 @Component
@@ -42,7 +43,7 @@ public class SqliteCrudRepository extends CrudAbstractRepository {
 	}
 	
 	@Override
-	public Map<String, Object> getMetadata(String tableName) {
+	public Table getMetadata(String tableName) {
 		log.info("getMetadata: " + tableName);
 		
 		return null;

@@ -13,7 +13,7 @@ public class Column {
 
 	private Boolean unsigned;
 
-	private Integer length;
+	private Long length;
 
 	private Integer precision;
 
@@ -103,11 +103,11 @@ public class Column {
 		this.unsigned = unsigned;
 	}
 
-	public Integer getLength() {
+	public Long getLength() {
 		return length;
 	}
 
-	public void setLength(Integer length) {
+	public void setLength(Long length) {
 		this.length = length;
 	}
 

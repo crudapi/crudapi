@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.service.CrudService;
 import cn.crudapi.crudapi.service.metadata.TableService;
 
@@ -20,7 +21,7 @@ public class TableServiceImpl implements TableService {
     }
 
 	@Override
-	public Map<String, Object> get(String tableName) {
+	public Table get(String tableName) {
 		 return crudService.getMetadata(tableName);
     }
 }

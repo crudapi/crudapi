@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import cn.crudapi.crudapi.config.execute.CrudTemplate;
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.service.CrudService;
 
 @Service
@@ -76,7 +77,7 @@ public class CrudServiceImpl implements CrudService {
 	}
 	
 	@Override
-	public Map<String, Object> getMetadata(String tableName) {
+	public Table getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
 			log.debug("CrudServiceImpl->getMetadata");
 		}

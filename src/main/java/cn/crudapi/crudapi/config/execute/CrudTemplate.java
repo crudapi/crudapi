@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import cn.crudapi.crudapi.model.Table;
+
 
 public class CrudTemplate {
 	private static final Logger log = LoggerFactory.getLogger(CrudTemplate.class);
@@ -76,7 +78,7 @@ public class CrudTemplate {
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetadatas();
 	}
 	
-	public Map<String, Object> getMetadata(String tableName) {
+	public Table getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
 			log.debug("CrudTemplate->getMetadata");
 		}

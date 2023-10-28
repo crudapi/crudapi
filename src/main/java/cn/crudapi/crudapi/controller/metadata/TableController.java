@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.crudapi.crudapi.config.datasource.DataSourceContextHolder;
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.service.metadata.TableService;
 import cn.crudapi.crudapi.service.system.DataSourceService;
 import io.swagger.annotations.Api;
@@ -38,11 +39,11 @@ public class TableController {
 	
 	@ApiOperation("获取表详情")
 	@GetMapping(value = "{tableName}")
-    public Map<String, Object> get(@PathVariable("tableName") String tableName) {
+    public Table get(@PathVariable("tableName") String tableName) {
 		log.info("TableController->list dataSource = " + DataSourceContextHolder.getDataSource());
 		
-		Map<String, Object> map = tableService.get(tableName);
+		Table table = tableService.get(tableName);
         
-        return map;
+        return table;
     }
 }

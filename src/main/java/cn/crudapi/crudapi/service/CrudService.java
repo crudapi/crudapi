@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import cn.crudapi.crudapi.model.Table;
+
 public interface CrudService {
 	
 	String getSqlQuotation();
@@ -17,7 +19,7 @@ public interface CrudService {
 	
 	List<Map<String, Object>> getMetadatas();
 	
-	Map<String, Object> getMetadata(String tableName);
+	Table getMetadata(String tableName);
 	
 	String processTemplateToString(String templateName, String key, Object value);
 

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
 
+import cn.crudapi.crudapi.model.Table;
 import cn.crudapi.crudapi.repository.CrudAbstractFactory;
 
 public class CrudSqlExecute {
@@ -74,7 +75,7 @@ public class CrudSqlExecute {
 		return crudFactory.getMetadatas();
 	}
 	
-	public Map<String, Object> getMetadata(String tableName) {
+	public Table getMetadata(String tableName) {
 		if (log.isDebugEnabled()) { 
 			log.debug("CrudSqlExecute->getMetadata");
 		}
