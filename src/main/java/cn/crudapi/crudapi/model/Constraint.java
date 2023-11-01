@@ -11,8 +11,6 @@ public class Constraint {
 	
 	private Boolean primary;
 	
-	private Boolean autoIncrement;
-
 	private Boolean unique;
 	
 	private Boolean foreign;
@@ -55,14 +53,6 @@ public class Constraint {
 
 	public void setPrimary(Boolean primary) {
 		this.primary = primary;
-	}
-
-	public Boolean getAutoIncrement() {
-		return autoIncrement;
-	}
-
-	public void setAutoIncrement(Boolean autoIncrement) {
-		this.autoIncrement = autoIncrement;
 	}
 
 	public Boolean getUnique() {
