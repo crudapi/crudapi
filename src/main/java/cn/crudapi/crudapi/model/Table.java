@@ -1,6 +1,7 @@
 package cn.crudapi.crudapi.model;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +25,8 @@ public class Table {
 	@JsonProperty("constraints")
 	private List<Constraint> constraintList;
 
+	Map<String, Object> metadata;
+	
 	public String getName() {
 		return name;
 	}
@@ -70,5 +73,13 @@ public class Table {
 
 	public void setConstraintList(List<Constraint> constraintList) {
 		this.constraintList = constraintList;
+	}
+
+	public Map<String, Object> getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(Map<String, Object> metadata) {
+		this.metadata = metadata;
 	}
 }

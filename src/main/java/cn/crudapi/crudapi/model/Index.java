@@ -10,8 +10,6 @@ public class Index {
 	private String description;
 	
 	private String indexType;
-
-	private String indexStorage;
 	
 	private List<Column> columnList;
 
@@ -45,14 +43,6 @@ public class Index {
 
 	public void setIndexType(String indexType) {
 		this.indexType = indexType;
-	}
-
-	public String getIndexStorage() {
-		return indexStorage;
-	}
-
-	public void setIndexStorage(String indexStorage) {
-		this.indexStorage = indexStorage;
 	}
 
 	public List<Column> getColumnList() {

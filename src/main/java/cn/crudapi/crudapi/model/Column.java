@@ -49,11 +49,10 @@ public class Column {
 	private String referenceOption;
 	
 	/* index */ 
-	private String indexName;
+	private String indexName; //PRIMARY, others
 	
-	private String indexType;
+	private String indexType; //PRIMARY, UNIQUE, INDEX(BTREE, HASH), FULLTEXT
 
-	private String indexStorage;
 
 	public Integer getDisplayOrder() {
 		return displayOrder;
@@ -253,13 +252,5 @@ public class Column {
 
 	public void setIndexType(String indexType) {
 		this.indexType = indexType;
-	}
-
-	public String getIndexStorage() {
-		return indexStorage;
-	}
-
-	public void setIndexStorage(String indexStorage) {
-		this.indexStorage = indexStorage;
 	}
 }

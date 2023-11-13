@@ -126,6 +126,8 @@ public abstract class CrudAbstractRepository {
 		Map<String, Object> map = this.getRawMetadata(tableName);
 		
 		Table table = new Table();
+		table.setMetadata(map);
+		
 		String tableComment = map.get("tableComment") != null ? map.get("tableComment").toString() : null;
 	    table.setName(tableName);
 	    table.setCaption(StringUtils.hasLength(tableComment) ? tableComment : tableName);
@@ -179,7 +181,7 @@ public abstract class CrudAbstractRepository {
 				caption = (indexComment != null ? indexComment.toString() : indexName);
 				
 				indexType = t.get("indexType").toString();
-				unique = t.get("nonUnique").toString().toUpperCase().equals("TRUE");
+				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				
 				String columnName = t.get("columnName").toString();
 				Column column = new Column();
@@ -194,6 +196,8 @@ public abstract class CrudAbstractRepository {
 			
 			if (!unique) {
 				indexList.add(index);
+			} else {
+				log.info("[index add]{} is constraint, skip!", indexName);
 			}
 		}
 		
@@ -217,7 +221,7 @@ public abstract class CrudAbstractRepository {
 		        caption = (constraintComment != null ? constraintComment.toString() : constraintName);
 		        
 		        primary = t.get("indexName").toString().toUpperCase().equals("PRIMARY");
-				unique = t.get("nonUnique").toString().toUpperCase().equals("TRUE");
+				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				
 		        String columnName = t.get("columnName").toString();
 		        Column column = new Column();
@@ -233,7 +237,9 @@ public abstract class CrudAbstractRepository {
 		    
 		    if (unique) {
 		    	constraintList.add(constraint);
-		    }
+		    } else {
+				log.info("[constraint add]{} is index, skip!", constraintName);
+			}
 		}
 
 		table.setConstraintList(constraintList);
