@@ -287,11 +287,19 @@ public abstract class CrudAbstractRepository {
 			Map<String, Object> signleIndex = signleIndexMap.get(columnName);
 			if (signleIndex != null) {
 				Boolean primary = signleIndex.get("indexName").toString().toUpperCase().equals("PRIMARY");
-				Boolean unique = signleIndex.get("nonUnique").toString().toUpperCase().equals("TRUE");
+				Boolean unique = !signleIndex.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				column.setPrimary(primary);
 				column.setUnique(unique);
-				column.setIndexName(signleIndex.get("indexName").toString());
-				column.setIndexType(signleIndex.get("indexType").toString());
+				
+				if (unique) {
+					column.setConstraintName(signleIndex.get("indexName").toString());
+					column.setIndexType(signleIndex.get("indexType").toString());
+			    } else {
+			    	column.setIndexName(signleIndex.get("indexName").toString());
+					column.setIndexType(signleIndex.get("indexType").toString());
+				}
+				 
+				
 			} else {
 				column.setPrimary(false);
 				column.setUnique(false);
