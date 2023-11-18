@@ -281,6 +281,9 @@ public abstract class CrudAbstractRepository {
 			}
 		}
 		
+		List<Map<String, Object>> foreignConstraints = (ArrayList<Map<String, Object>>)map.get("foreignConstraints");
+        
+		
 		//联合外建约束
         for (Map.Entry<String, List<Map<String, Object>>> e : unionConstraintMap.entrySet()) {
             Constraint constraint = new Constraint();
@@ -315,6 +318,12 @@ public abstract class CrudAbstractRepository {
             constraint.setReferenceTableName(refTableName);
             constraint.setColumnList(constraintColumnList);
             constraint.setReferenceColumnList(refColumnList);
+            
+            Map<String, Object> foreignConstraint = foreignConstraints.stream()
+            .filter(s -> constraintName.equals(s.get("constraintName")))
+            .findFirst().get();
+            constraint.setUpdateRule(foreignConstraint.get("updateRule").toString());
+            constraint.setDeleteRule(foreignConstraint.get("deleteRule").toString());
             
             constraintList.add(constraint);
         }
@@ -378,9 +387,17 @@ public abstract class CrudAbstractRepository {
 				}
 			}
 			if (signleConstraint != null) {	
-				column.setConstraintName(signleConstraint.get("constraintName").toString());
+				String constraintName = signleConstraint.get("constraintName").toString();
+				column.setConstraintName(constraintName);
 				column.setReferenceTableName(signleConstraint.get("referencedTableName").toString());
 				column.setReferenceColumnName(signleConstraint.get("referencedColumnName").toString());
+				Map<String, Object> foreignConstraint = foreignConstraints.stream()
+	            .filter(s -> constraintName.equals(s.get("constraintName")))
+	            .findFirst().get();
+				column.setUpdateRule(foreignConstraint.get("updateRule").toString());
+				column.setDeleteRule(foreignConstraint.get("deleteRule").toString());
+				          
+				
 				column.setForeign(true);
 			}
 	    	

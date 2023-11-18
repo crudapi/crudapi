@@ -21,7 +21,9 @@ public class Constraint {
 	
 	private List<Column> referenceColumnList;
 	
-	private String referenceOption;
+	private String deleteRule;
+	
+	private String updateRule;
 
 	public String getName() {
 		return name;
@@ -95,11 +97,19 @@ public class Constraint {
 		this.referenceColumnList = referenceColumnList;
 	}
 
-	public String getReferenceOption() {
-		return referenceOption;
+	public String getDeleteRule() {
+		return deleteRule;
 	}
 
-	public void setReferenceOption(String referenceOption) {
-		this.referenceOption = referenceOption;
+	public void setDeleteRule(String deleteRule) {
+		this.deleteRule = deleteRule;
+	}
+
+	public String getUpdateRule() {
+		return updateRule;
+	}
+
+	public void setUpdateRule(String updateRule) {
+		this.updateRule = updateRule;
 	}
 }

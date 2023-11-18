@@ -46,13 +46,14 @@ public class Column {
 	
 	private String referenceColumnName;
 	
-	private String referenceOption;
+	private String deleteRule;
 	
+	private String updateRule;
+
 	/* index */ 
 	private String indexName; //PRIMARY, others
 	
 	private String indexType; //PRIMARY, UNIQUE, INDEX(BTREE, HASH), FULLTEXT
-
 
 	public Integer getDisplayOrder() {
 		return displayOrder;
@@ -230,12 +231,20 @@ public class Column {
 		this.referenceColumnName = referenceColumnName;
 	}
 
-	public String getReferenceOption() {
-		return referenceOption;
+	public String getDeleteRule() {
+		return deleteRule;
 	}
 
-	public void setReferenceOption(String referenceOption) {
-		this.referenceOption = referenceOption;
+	public void setDeleteRule(String deleteRule) {
+		this.deleteRule = deleteRule;
+	}
+
+	public String getUpdateRule() {
+		return updateRule;
+	}
+
+	public void setUpdateRule(String updateRule) {
+		this.updateRule = updateRule;
 	}
 
 	public String getIndexName() {
