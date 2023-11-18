@@ -118,6 +118,11 @@ public abstract class CrudAbstractRepository {
 		List<Map<String, Object>> constraintList = this.queryForListAndConvert(sql, dbParams);
 		map.put("constraints", constraintList);
 		
+		sql = processTemplateToString("select-foreign-constraint.sql.ftl", mapParams);
+		log.info("sql = " + sql);
+		List<Map<String, Object>> foreignConstraintList = this.queryForListAndConvert(sql, dbParams);
+		map.put("foreignConstraints", foreignConstraintList);
+		
 		return map;
 	}
 	
@@ -163,6 +168,40 @@ public abstract class CrudAbstractRepository {
 			}
 		}
 		
+		//外建约束分组
+        List<Map<String, Object>> constraints = (ArrayList<Map<String, Object>>)map.get("constraints");
+        Map<String, List<Map<String, Object>>> constraintMap = new HashMap<String, List<Map<String, Object>>>();
+        for (Map<String, Object> t : constraints) {
+        	if (t.get("referencedTableName") == null) {
+               continue;
+            }
+        	 
+            String constraintName = t.get("constraintName").toString();
+            List<Map<String, Object>> constraintColumnNames = constraintMap.get(constraintName);
+            if (constraintColumnNames == null) {
+                constraintColumnNames = new ArrayList<Map<String, Object>>();
+                constraintColumnNames.add(t);
+                constraintMap.put(constraintName, constraintColumnNames);
+            } else {
+                constraintColumnNames.add(t);
+            }
+        }
+        
+        //单列外建约束和联合外建约束
+        Map<String, Map<String, Object>> signleConstraintMap = new HashMap<String, Map<String, Object>>();
+        Map<String, List<Map<String, Object>>> unionConstraintMap = new HashMap<String, List<Map<String, Object>>>();
+        for (Map.Entry<String, List<Map<String, Object>>>  e : constraintMap.entrySet()) {
+            String key = e.getKey();
+            List<Map<String, Object>> value = e.getValue();
+            if (value.size() == 1) {
+                Map<String, Object> t = value.get(0);
+                String columnName = t.get("columnName").toString();
+                signleConstraintMap.put(columnName,  t);
+            } else {
+                unionConstraintMap.put(key, value);
+            }
+        }
+        
 		//联合索引
 		List<Index> indexList =  new ArrayList<Index>();
 		for (Map.Entry<String, List<Map<String, Object>>> e : unionIndexMap.entrySet()) {
@@ -241,6 +280,44 @@ public abstract class CrudAbstractRepository {
 				log.info("[constraint add]{} is index, skip!", constraintName);
 			}
 		}
+		
+		//联合外建约束
+        for (Map.Entry<String, List<Map<String, Object>>> e : unionConstraintMap.entrySet()) {
+            Constraint constraint = new Constraint();
+            String constraintName = e.getKey();
+            constraint.setName(constraintName);
+            
+            String caption = null;
+            String refTableName = null;
+            List<Column> constraintColumnList = new ArrayList<Column>();
+            List<Column> refColumnList = new ArrayList<Column>();
+            List<Map<String, Object>> values = e.getValue();
+            for (Map<String, Object> t : values) {
+                caption = constraintName;
+                refTableName =  t.get("referencedTableName").toString();	
+                
+                String columnName = t.get("columnName").toString();
+                Column column = new Column();
+                column.setName(columnName);
+                constraintColumnList.add(column);
+                
+                String refColumnName = t.get("referencedColumnName").toString();
+                Column refColumn = new Column();
+                refColumn.setName(refColumnName);
+                refColumnList.add(refColumn);
+            }
+            
+            constraint.setCaption(caption);
+            constraint.setDescription(caption);
+            constraint.setPrimary(false);
+            constraint.setUnique(false);
+            constraint.setForeign(true);
+            constraint.setReferenceTableName(refTableName);
+            constraint.setColumnList(constraintColumnList);
+            constraint.setReferenceColumnList(refColumnList);
+            
+            constraintList.add(constraint);
+        }
 
 		table.setConstraintList(constraintList);
 		
@@ -279,12 +356,13 @@ public abstract class CrudAbstractRepository {
 	    	Boolean autoIncrement = extra.toUpperCase().equals("AUTO_INCREMENT") ? true : false;
 	    	column.setAutoIncrement(autoIncrement);
 	    	
-//	    	String columnKey = t.get("columnKey").toString();
-//	    	Boolean primary = columnKey.toUpperCase().equals("PRI") ? true : false;
-//	    	column.setPrimary(primary);
-	    	
+	    	column.setPrimary(false);
+			column.setUnique(false);
+			column.setForeign(false);
+			
 	    	//索引
 			Map<String, Object> signleIndex = signleIndexMap.get(columnName);
+			Map<String, Object> signleConstraint = signleConstraintMap.get(columnName);
 			if (signleIndex != null) {
 				Boolean primary = signleIndex.get("indexName").toString().toUpperCase().equals("PRIMARY");
 				Boolean unique = !signleIndex.get("nonUnique").toString().toUpperCase().equals("TRUE");
@@ -298,11 +376,12 @@ public abstract class CrudAbstractRepository {
 			    	column.setIndexName(signleIndex.get("indexName").toString());
 					column.setIndexType(signleIndex.get("indexType").toString());
 				}
-				 
-				
-			} else {
-				column.setPrimary(false);
-				column.setUnique(false);
+			}
+			if (signleConstraint != null) {	
+				column.setConstraintName(signleConstraint.get("constraintName").toString());
+				column.setReferenceTableName(signleConstraint.get("referencedTableName").toString());
+				column.setReferenceColumnName(signleConstraint.get("referencedColumnName").toString());
+				column.setForeign(true);
 			}
 	    	
 	    	columnList.add(column);
