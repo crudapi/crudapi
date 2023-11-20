@@ -130,11 +130,10 @@ public abstract class CrudAbstractRepository {
 	public Table getMetadata(String tableName) {
 		Map<String, Object> map = this.getRawMetadata(tableName);
 		
-		Table table = new Table();
+		Table table = new Table(tableName);
 		table.setMetadata(map);
 		
 		String tableComment = map.get("tableComment") != null ? map.get("tableComment").toString() : null;
-	    table.setName(tableName);
 	    table.setCaption(StringUtils.hasLength(tableComment) ? tableComment : tableName);
 	    table.setDescription(tableComment);
 	    
@@ -223,7 +222,7 @@ public abstract class CrudAbstractRepository {
 				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				
 				String columnName = t.get("columnName").toString();
-				Column column = new Column();
+				Column column = new Column(columnName);
 				column.setName(columnName);
 				indexColumnList.add(column);
 			}
@@ -263,7 +262,7 @@ public abstract class CrudAbstractRepository {
 				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				
 		        String columnName = t.get("columnName").toString();
-		        Column column = new Column();
+		        Column column = new Column(columnName);
 		        column.setName(columnName);
 		        constraintColumnList.add(column);
 		    }
@@ -300,12 +299,12 @@ public abstract class CrudAbstractRepository {
                 refTableName =  t.get("referencedTableName").toString();	
                 
                 String columnName = t.get("columnName").toString();
-                Column column = new Column();
+                Column column = new Column(columnName);
                 column.setName(columnName);
                 constraintColumnList.add(column);
                 
                 String refColumnName = t.get("referencedColumnName").toString();
-                Column refColumn = new Column();
+                Column refColumn = new Column(columnName);
                 refColumn.setName(refColumnName);
                 refColumnList.add(refColumn);
             }
@@ -315,7 +314,7 @@ public abstract class CrudAbstractRepository {
             constraint.setPrimary(false);
             constraint.setUnique(false);
             constraint.setForeign(true);
-            constraint.setReferenceTableName(refTableName);
+            constraint.setReferenceTable(new Table(refTableName));
             constraint.setColumnList(constraintColumnList);
             constraint.setReferenceColumnList(refColumnList);
             
@@ -333,12 +332,10 @@ public abstract class CrudAbstractRepository {
 	    List<Column> columnList = new ArrayList<Column>();
 		List<Map<String, Object>> columns = (ArrayList<Map<String, Object>>)map.get("columns");
 	    for (Map<String, Object> t : columns) {
-	    	Column column = new Column();
+	    	String columnName = t.get("columnName").toString();
+	    	Column column = new Column(columnName);
 	    	
 	    	column.setDisplayOrder(t.get("ordinalPosition") != null ? Integer.parseInt(t.get("ordinalPosition").toString()) : null);
-	    	
-	    	String columnName = t.get("columnName").toString();
-	    	column.setName(columnName);
 	    	
 	    	String columnComment = t.get("columnComment") != null ? t.get("columnComment").toString() : null;
 	    	column.setCaption(StringUtils.hasLength(columnComment) ? columnComment : columnName);
@@ -389,8 +386,8 @@ public abstract class CrudAbstractRepository {
 			if (signleConstraint != null) {	
 				String constraintName = signleConstraint.get("constraintName").toString();
 				column.setConstraintName(constraintName);
-				column.setReferenceTableName(signleConstraint.get("referencedTableName").toString());
-				column.setReferenceColumnName(signleConstraint.get("referencedColumnName").toString());
+				column.setReferenceTable(new Table(signleConstraint.get("referencedTableName").toString()));
+				column.setReferenceColumn(new Column(signleConstraint.get("referencedColumnName").toString()));
 				Map<String, Object> foreignConstraint = foreignConstraints.stream()
 	            .filter(s -> constraintName.equals(s.get("constraintName")))
 	            .findFirst().get();

@@ -42,9 +42,9 @@ public class Column {
 	
 	private Boolean foreign;
 	
-	private String referenceTableName;
+	private Table referenceTable;
 	
-	private String referenceColumnName;
+	private Column referenceColumn;
 	
 	private String deleteRule;
 	
@@ -54,6 +54,11 @@ public class Column {
 	private String indexName; //PRIMARY, others
 	
 	private String indexType; //PRIMARY, UNIQUE, INDEX(BTREE, HASH), FULLTEXT
+
+	public Column(String name) {
+		super();
+		this.name = name;
+	}
 
 	public Integer getDisplayOrder() {
 		return displayOrder;
@@ -215,20 +220,22 @@ public class Column {
 		this.foreign = foreign;
 	}
 
-	public String getReferenceTableName() {
-		return referenceTableName;
+	
+
+	public Table getReferenceTable() {
+		return referenceTable;
 	}
 
-	public void setReferenceTableName(String referenceTableName) {
-		this.referenceTableName = referenceTableName;
+	public void setReferenceTable(Table referenceTable) {
+		this.referenceTable = referenceTable;
 	}
 
-	public String getReferenceColumnName() {
-		return referenceColumnName;
+	public Column getReferenceColumn() {
+		return referenceColumn;
 	}
 
-	public void setReferenceColumnName(String referenceColumnName) {
-		this.referenceColumnName = referenceColumnName;
+	public void setReferenceColumn(Column referenceColumn) {
+		this.referenceColumn = referenceColumn;
 	}
 
 	public String getDeleteRule() {

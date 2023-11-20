@@ -17,7 +17,7 @@ public class Constraint {
 	
 	private List<Column> columnList;
 	
-	private String referenceTableName;
+	private Table referenceTable;
 	
 	private List<Column> referenceColumnList;
 	
@@ -81,12 +81,12 @@ public class Constraint {
 		this.columnList = columnList;
 	}
 
-	public String getReferenceTableName() {
-		return referenceTableName;
+	public Table getReferenceTable() {
+		return referenceTable;
 	}
 
-	public void setReferenceTableName(String referenceTableName) {
-		this.referenceTableName = referenceTableName;
+	public void setReferenceTable(Table referenceTable) {
+		this.referenceTable = referenceTable;
 	}
 
 	public List<Column> getReferenceColumnList() {

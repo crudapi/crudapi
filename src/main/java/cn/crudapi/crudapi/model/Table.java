@@ -27,6 +27,11 @@ public class Table {
 
 	Map<String, Object> metadata;
 	
+	public Table(String name) {
+		super();
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
 	}
