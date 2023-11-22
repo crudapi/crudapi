@@ -1,5 +1,10 @@
 package cn.crudapi.crudapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder(alphabetic = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Column {
 	private Integer displayOrder;
 	 

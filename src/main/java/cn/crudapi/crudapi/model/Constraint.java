@@ -2,6 +2,12 @@ package cn.crudapi.crudapi.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder(alphabetic = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Constraint {
 	private String name;
 
@@ -15,10 +21,12 @@ public class Constraint {
 	
 	private Boolean foreign;
 	
+	@JsonProperty("columns")
 	private List<Column> columnList;
 	
 	private Table referenceTable;
 	
+	@JsonProperty("referenceColumns")
 	private List<Column> referenceColumnList;
 	
 	private String deleteRule;
