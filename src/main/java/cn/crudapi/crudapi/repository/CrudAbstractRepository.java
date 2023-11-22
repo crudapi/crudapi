@@ -142,13 +142,13 @@ public abstract class CrudAbstractRepository {
   		Map<String, List<Map<String, Object>>> indexMap = new HashMap<String, List<Map<String, Object>>>();
   		for (Map<String, Object> t : indexs) {
   			String indexName = t.get("indexName").toString();
-  			List<Map<String, Object>> indexColumnNames = indexMap.get(indexName);
-  			if (indexColumnNames == null) {
-  				indexColumnNames = new ArrayList<Map<String, Object>>();
-  				indexColumnNames.add(t);
-  				indexMap.put(indexName, indexColumnNames);
+  			List<Map<String, Object>> indexColumnList = indexMap.get(indexName);
+  			if (indexColumnList == null) {
+  				indexColumnList = new ArrayList<Map<String, Object>>();
+  				indexColumnList.add(t);
+  				indexMap.put(indexName, indexColumnList);
   			} else {
-  				indexColumnNames.add(t);
+  				indexColumnList.add(t);
   			}
   		}
   		
@@ -176,13 +176,13 @@ public abstract class CrudAbstractRepository {
             }
         	 
             String constraintName = t.get("constraintName").toString();
-            List<Map<String, Object>> constraintColumnNames = constraintMap.get(constraintName);
-            if (constraintColumnNames == null) {
-                constraintColumnNames = new ArrayList<Map<String, Object>>();
-                constraintColumnNames.add(t);
-                constraintMap.put(constraintName, constraintColumnNames);
+            List<Map<String, Object>> constraintColumnList = constraintMap.get(constraintName);
+            if (constraintColumnList == null) {
+            	constraintColumnList = new ArrayList<Map<String, Object>>();
+            	constraintColumnList.add(t);
+                constraintMap.put(constraintName, constraintColumnList);
             } else {
-                constraintColumnNames.add(t);
+            	constraintColumnList.add(t);
             }
         }
         
@@ -201,89 +201,67 @@ public abstract class CrudAbstractRepository {
             }
         }
         
-		//联合索引
+		//联合索引和约束：索引中除了primary和unique，其它的是约束
 		List<Index> indexList =  new ArrayList<Index>();
+		List<Constraint> constraintList = new ArrayList<Constraint>();
 		for (Map.Entry<String, List<Map<String, Object>>> e : unionIndexMap.entrySet()) {
-			Index index = new Index();
 			String indexName = e.getKey();
-			index.setName(indexName);
 			
 			String caption = null;
 			String indexType = null;
+			Boolean primary = false;
 			Boolean unique = false;
-			
+		    
 			List<Column> indexColumnList = new ArrayList<Column>();
+			List<Column> constraintColumnList = new ArrayList<Column>();
+			 
 			List<Map<String, Object>> values = e.getValue();
 			for (Map<String, Object> t : values) {
 				Object indexComment = t.get("indexComment");
-				caption = (indexComment != null ? indexComment.toString() : indexName);
+				caption = (indexComment != null && StringUtils.hasLength(indexComment.toString())) ? indexComment.toString() : indexName;
 				
 				indexType = t.get("indexType").toString();
+				primary = t.get("indexName").toString().toUpperCase().equals("PRIMARY");
 				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				
 				String columnName = t.get("columnName").toString();
 				Column column = new Column(columnName);
 				column.setName(columnName);
-				indexColumnList.add(column);
+				
+				if (unique) {
+					constraintColumnList.add(column);
+				} else {
+					indexColumnList.add(column);
+				}
 			}
-			
-			index.setCaption(caption);
-			index.setDescription(caption);
-			index.setIndexType(indexType);
-			index.setColumnList(indexColumnList);
-			
-			if (!unique) {
-				indexList.add(index);
+
+			if (unique) {
+				log.info("[unionIndex add]{} is constraint!", indexName);
+				Constraint constraint = new Constraint();
+				constraint.setName(indexName);
+				constraint.setCaption(caption);
+			    constraint.setDescription(caption);
+			    constraint.setPrimary(primary);
+			    constraint.setUnique(unique);
+			    constraint.setForeign(false);
+			    constraint.setColumnList(constraintColumnList);
+			    constraintList.add(constraint);
 			} else {
-				log.info("[index add]{} is constraint, skip!", indexName);
+			    log.info("[unionIndex add]{} is index!", indexName);
+				Index index = new Index();
+				index.setName(indexName);
+				index.setCaption(caption);
+				index.setDescription(caption);
+				index.setIndexType(indexType);
+				index.setColumnList(indexColumnList);
+				indexList.add(index);   
 			}
 		}
 		
 		table.setIndexList(indexList);
 	    
-		//联合约束
-		List<Constraint> constraintList = new ArrayList<Constraint>();
-		for (Map.Entry<String, List<Map<String, Object>>> e : unionIndexMap.entrySet()) {
-		    Constraint constraint = new Constraint();
-		    String constraintName = e.getKey();
-		    constraint.setName(constraintName);
-		    
-		    String caption = null;
-		    Boolean primary = false;
-		    Boolean unique = false;
-		    
-		    List<Column> constraintColumnList = new ArrayList<Column>();
-		    List<Map<String, Object>> values = e.getValue();
-		    for (Map<String, Object> t : values) {
-		        Object constraintComment = t.get("indexComment");
-		        caption = (constraintComment != null ? constraintComment.toString() : constraintName);
-		        
-		        primary = t.get("indexName").toString().toUpperCase().equals("PRIMARY");
-				unique = !t.get("nonUnique").toString().toUpperCase().equals("TRUE");
-				
-		        String columnName = t.get("columnName").toString();
-		        Column column = new Column(columnName);
-		        column.setName(columnName);
-		        constraintColumnList.add(column);
-		    }
-		    
-		    constraint.setCaption(caption);
-		    constraint.setDescription(caption);
-		    constraint.setPrimary(primary);
-		    constraint.setUnique(unique);
-		    constraint.setColumnList(constraintColumnList);
-		    
-		    if (unique) {
-		    	constraintList.add(constraint);
-		    } else {
-				log.info("[constraint add]{} is index, skip!", constraintName);
-			}
-		}
-		
-		List<Map<String, Object>> foreignConstraints = (ArrayList<Map<String, Object>>)map.get("foreignConstraints");
-        
-		
 		//联合外建约束
+		List<Map<String, Object>> foreignConstraints = (ArrayList<Map<String, Object>>)map.get("foreignConstraints");
         for (Map.Entry<String, List<Map<String, Object>>> e : unionConstraintMap.entrySet()) {
             Constraint constraint = new Constraint();
             String constraintName = e.getKey();
@@ -337,9 +315,11 @@ public abstract class CrudAbstractRepository {
 	    	
 	    	column.setDisplayOrder(t.get("ordinalPosition") != null ? Integer.parseInt(t.get("ordinalPosition").toString()) : null);
 	    	
-	    	String columnComment = t.get("columnComment") != null ? t.get("columnComment").toString() : null;
-	    	column.setCaption(StringUtils.hasLength(columnComment) ? columnComment : columnName);
-	    	column.setDescription(columnComment);
+	    	Object columnComment = t.get("columnComment");
+	    	String caption = (columnComment != null && StringUtils.hasLength(columnComment.toString())) ? columnComment.toString() : columnName;
+			
+	    	column.setCaption(caption);
+	    	column.setDescription(caption);
 	    	
 	    	String dataType = t.get("dataType").toString();
 	    	column.setDataType(dataType);
@@ -366,9 +346,9 @@ public abstract class CrudAbstractRepository {
 			column.setUnique(false);
 			column.setForeign(false);
 			
-	    	//索引
+	    	//单列索引和约束：索引中除了primary和unique，其它的是约束
+			//创建主键索引或者唯一索引的时候同时创建了相应的约束；但是约束是逻辑上的概念；索引是一个数据结构既包含逻辑的概念也包含物理的存储方式。
 			Map<String, Object> signleIndex = signleIndexMap.get(columnName);
-			Map<String, Object> signleConstraint = signleConstraintMap.get(columnName);
 			if (signleIndex != null) {
 				Boolean primary = signleIndex.get("indexName").toString().toUpperCase().equals("PRIMARY");
 				Boolean unique = !signleIndex.get("nonUnique").toString().toUpperCase().equals("TRUE");
@@ -376,6 +356,7 @@ public abstract class CrudAbstractRepository {
 				column.setUnique(unique);
 				
 				if (unique) {
+					column.setIndexName(signleIndex.get("indexName").toString());
 					column.setConstraintName(signleIndex.get("indexName").toString());
 					column.setIndexType(signleIndex.get("indexType").toString());
 			    } else {
@@ -383,18 +364,20 @@ public abstract class CrudAbstractRepository {
 					column.setIndexType(signleIndex.get("indexType").toString());
 				}
 			}
+			
+			//单列外建约束
+			Map<String, Object> signleConstraint = signleConstraintMap.get(columnName);
 			if (signleConstraint != null) {	
 				String constraintName = signleConstraint.get("constraintName").toString();
 				column.setConstraintName(constraintName);
 				column.setReferenceTable(new Table(signleConstraint.get("referencedTableName").toString()));
 				column.setReferenceColumn(new Column(signleConstraint.get("referencedColumnName").toString()));
 				Map<String, Object> foreignConstraint = foreignConstraints.stream()
-	            .filter(s -> constraintName.equals(s.get("constraintName")))
-	            .findFirst().get();
-				column.setUpdateRule(foreignConstraint.get("updateRule").toString());
-				column.setDeleteRule(foreignConstraint.get("deleteRule").toString());
+		            .filter(s -> constraintName.equals(s.get("constraintName")))
+		            .findFirst().get();
+					column.setUpdateRule(foreignConstraint.get("updateRule").toString());
+					column.setDeleteRule(foreignConstraint.get("deleteRule").toString());
 				          
-				
 				column.setForeign(true);
 			}
 	    	
