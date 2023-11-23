@@ -58,6 +58,10 @@ public class Column {
 	/* index */ 
 	private String indexName; //PRIMARY, others
 	
+	private String indexCaption;
+
+	private String indexDescription;
+	
 	private String indexType; //PRIMARY, UNIQUE, INDEX(BTREE, HASH), FULLTEXT
 
 	public Column(String name) {
@@ -225,8 +229,6 @@ public class Column {
 		this.foreign = foreign;
 	}
 
-	
-
 	public Table getReferenceTable() {
 		return referenceTable;
 	}
@@ -273,5 +275,21 @@ public class Column {
 
 	public void setIndexType(String indexType) {
 		this.indexType = indexType;
+	}
+
+	public String getIndexCaption() {
+		return indexCaption;
+	}
+
+	public void setIndexCaption(String indexCaption) {
+		this.indexCaption = indexCaption;
+	}
+
+	public String getIndexDescription() {
+		return indexDescription;
+	}
+
+	public void setIndexDescription(String indexDescription) {
+		this.indexDescription = indexDescription;
 	}
 }

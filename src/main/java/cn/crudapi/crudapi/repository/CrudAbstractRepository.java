@@ -350,6 +350,9 @@ public abstract class CrudAbstractRepository {
 			//创建主键索引或者唯一索引的时候同时创建了相应的约束；但是约束是逻辑上的概念；索引是一个数据结构既包含逻辑的概念也包含物理的存储方式。
 			Map<String, Object> signleIndex = signleIndexMap.get(columnName);
 			if (signleIndex != null) {
+				Object indexComment = signleIndex.get("indexComment");
+				String indexCaption = (indexComment != null && StringUtils.hasLength(indexComment.toString())) ? indexComment.toString() : signleIndex.get("indexName").toString();
+				
 				Boolean primary = signleIndex.get("indexName").toString().toUpperCase().equals("PRIMARY");
 				Boolean unique = !signleIndex.get("nonUnique").toString().toUpperCase().equals("TRUE");
 				column.setPrimary(primary);
@@ -357,10 +360,14 @@ public abstract class CrudAbstractRepository {
 				
 				if (unique) {
 					column.setIndexName(signleIndex.get("indexName").toString());
+					column.setIndexCaption(indexCaption);
+					column.setIndexDescription(indexCaption);
 					column.setConstraintName(signleIndex.get("indexName").toString());
 					column.setIndexType(signleIndex.get("indexType").toString());
 			    } else {
 			    	column.setIndexName(signleIndex.get("indexName").toString());
+			    	column.setIndexCaption(indexCaption);
+					column.setIndexDescription(indexCaption);
 					column.setIndexType(signleIndex.get("indexType").toString());
 				}
 			}
