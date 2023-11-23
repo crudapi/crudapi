@@ -201,7 +201,7 @@ public abstract class CrudAbstractRepository {
             }
         }
         
-		//联合索引和约束：索引中除了primary和unique，其它的是约束
+		//联合索引和约束：索引中primary和unique是约束，其它的是普通索引
 		List<Index> indexList =  new ArrayList<Index>();
 		List<Constraint> constraintList = new ArrayList<Constraint>();
 		for (Map.Entry<String, List<Map<String, Object>>> e : unionIndexMap.entrySet()) {
@@ -346,8 +346,8 @@ public abstract class CrudAbstractRepository {
 			column.setUnique(false);
 			column.setForeign(false);
 			
-	    	//单列索引和约束：索引中除了primary和unique，其它的是约束
-			//创建主键索引或者唯一索引的时候同时创建了相应的约束；但是约束是逻辑上的概念；索引是一个数据结构既包含逻辑的概念也包含物理的存储方式。
+	    	//单列索引和约束：索引中primary和unique是约束，其它的是普通索引
+			//mysql创建主键索引或者唯一索引的时候同时创建了相应的约束；但是约束是逻辑上的概念；索引是一个数据结构既包含逻辑的概念也包含物理的存储方式。
 			Map<String, Object> signleIndex = signleIndexMap.get(columnName);
 			if (signleIndex != null) {
 				Object indexComment = signleIndex.get("indexComment");
