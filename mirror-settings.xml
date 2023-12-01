@@ -1,0 +1,36 @@
+<settings>
+  <profiles>
+    <profile>
+      <id>aliyun</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>aliyun</id>
+          <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+          <pluginRepository>
+              <id>aliyun-plugin</id>
+              <url>https://maven.aliyun.com/repository/public</url>
+              <releases>
+                  <enabled>true</enabled>
+              </releases>
+              <snapshots>
+                  <enabled>false</enabled>
+              </snapshots>
+          </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <mirrors>
+    <mirror>
+        <id>aliyunmaven</id>
+        <mirrorOf>*</mirrorOf>
+        <name>阿里云公共仓库</name>
+        <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
