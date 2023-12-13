@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Column {
-	private Integer displayOrder;
-	 
 	private String name;
 
 	private String caption;
@@ -18,7 +16,7 @@ public class Column {
 
 	private Boolean unsigned;
 
-	private Long length;
+	private Integer length;
 
 	private Integer precision;
 
@@ -36,45 +34,13 @@ public class Column {
 	
 	private Boolean systemable;
 	
-	/* constraint */ 
-	private String constraintName;
-	
-	private Boolean primary;
-	
 	private Boolean autoIncrement;
-
-	private Boolean unique;
 	
-	private Boolean foreign;
-	
-	private Table referenceTable;
-	
-	private Column referenceColumn;
-	
-	private String deleteRule;
-	
-	private String updateRule;
-
-	/* index */ 
-	private String indexName; //PRIMARY, others
-	
-	private String indexCaption;
-
-	private String indexDescription;
-	
-	private String indexType; //PRIMARY, UNIQUE, INDEX(BTREE, HASH), FULLTEXT
-
+	private Integer displayOrder;
+	 
 	public Column(String name) {
 		super();
 		this.name = name;
-	}
-
-	public Integer getDisplayOrder() {
-		return displayOrder;
-	}
-
-	public void setDisplayOrder(Integer displayOrder) {
-		this.displayOrder = displayOrder;
 	}
 
 	public String getName() {
@@ -117,11 +83,11 @@ public class Column {
 		this.unsigned = unsigned;
 	}
 
-	public Long getLength() {
+	public Integer getLength() {
 		return length;
 	}
 
-	public void setLength(Long length) {
+	public void setLength(Integer length) {
 		this.length = length;
 	}
 
@@ -189,22 +155,6 @@ public class Column {
 		this.systemable = systemable;
 	}
 
-	public String getConstraintName() {
-		return constraintName;
-	}
-
-	public void setConstraintName(String constraintName) {
-		this.constraintName = constraintName;
-	}
-
-	public Boolean getPrimary() {
-		return primary;
-	}
-
-	public void setPrimary(Boolean primary) {
-		this.primary = primary;
-	}
-
 	public Boolean getAutoIncrement() {
 		return autoIncrement;
 	}
@@ -212,84 +162,12 @@ public class Column {
 	public void setAutoIncrement(Boolean autoIncrement) {
 		this.autoIncrement = autoIncrement;
 	}
-
-	public Boolean getUnique() {
-		return unique;
+	
+	public Integer getDisplayOrder() {
+		return displayOrder;
 	}
 
-	public void setUnique(Boolean unique) {
-		this.unique = unique;
-	}
-
-	public Boolean getForeign() {
-		return foreign;
-	}
-
-	public void setForeign(Boolean foreign) {
-		this.foreign = foreign;
-	}
-
-	public Table getReferenceTable() {
-		return referenceTable;
-	}
-
-	public void setReferenceTable(Table referenceTable) {
-		this.referenceTable = referenceTable;
-	}
-
-	public Column getReferenceColumn() {
-		return referenceColumn;
-	}
-
-	public void setReferenceColumn(Column referenceColumn) {
-		this.referenceColumn = referenceColumn;
-	}
-
-	public String getDeleteRule() {
-		return deleteRule;
-	}
-
-	public void setDeleteRule(String deleteRule) {
-		this.deleteRule = deleteRule;
-	}
-
-	public String getUpdateRule() {
-		return updateRule;
-	}
-
-	public void setUpdateRule(String updateRule) {
-		this.updateRule = updateRule;
-	}
-
-	public String getIndexName() {
-		return indexName;
-	}
-
-	public void setIndexName(String indexName) {
-		this.indexName = indexName;
-	}
-
-	public String getIndexType() {
-		return indexType;
-	}
-
-	public void setIndexType(String indexType) {
-		this.indexType = indexType;
-	}
-
-	public String getIndexCaption() {
-		return indexCaption;
-	}
-
-	public void setIndexCaption(String indexCaption) {
-		this.indexCaption = indexCaption;
-	}
-
-	public String getIndexDescription() {
-		return indexDescription;
-	}
-
-	public void setIndexDescription(String indexDescription) {
-		this.indexDescription = indexDescription;
+	public void setDisplayOrder(Integer displayOrder) {
+		this.displayOrder = displayOrder;
 	}
 }

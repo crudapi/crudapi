@@ -33,6 +33,11 @@ public class Constraint {
 	
 	private String updateRule;
 
+	public Constraint(String name) {
+		super();
+		this.name = name;
+	}
+	
 	public String getName() {
 		return name;
 	}

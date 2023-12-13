@@ -9,17 +9,22 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Index {
-	private String name;
+	private String name; //PRIMARY, others
 
 	private String caption;
 
 	private String description;
 	
-	private String indexType;
+	private String indexType; //1. BTREE, HASH(PRIMARY, UNIQUE, INDEX), 2. FULLTEXT
 	
 	@JsonProperty("columns")
 	private List<Column> columnList;
 
+	public Index(String name) {
+		super();
+		this.name = name;
+	}
+	
 	public String getName() {
 		return name;
 	}
