@@ -136,7 +136,7 @@ public final class ConditionUtils {
 						|| valueStr.equalsIgnoreCase("ISNOTNULL")) {
 						  OperatorTypeEnum opt = OperatorTypeEnum.valueOf(valueStr);
 						  newOperatorType = opt;
-						  condition.addValue(valueStr);
+						  //condition.addValue(valueStr);
 					  } else {
 						  String[] valueArr = valueStr.split(",");
 			      		  for (String v : valueArr) { 
