@@ -256,6 +256,60 @@ public class UserDetailsServiceImpl implements UserDetailsService, CaUserDetails
 	}
 	
 	@Override
+	public UserDetails loadOrCreateUserByUsername(String username, String rolename) {
+		log.info("loadOrCreateUserByUsername {}", username);
+		
+		Condition condition = ConditionUtils.toCondition("username", username);
+    	
+    	UserDTO userDTO = loadUserByCondition(condition);
+    	if (userDTO == null) {
+    		Map<String, Object> map = new HashMap<String, Object>();
+    		String randomStr = RandomStringUtils.randomAlphanumeric(10);
+			//log.info("randomStr {}", randomStr);
+			String password = passwordEncoder.encode(randomStr);
+			String token = getGuid();
+
+			map.put("realname", username);
+			map.put("name", username);
+			map.put("username", username);
+			map.put("password", password);
+			map.put("token", token);
+			map.put("enabled", true);
+			map.put("accountNonExpired", true);
+			map.put("accountNonLocked", true);
+			map.put("credentialsNonExpired", true);
+			
+			Condition roleCondition = ConditionUtils.toCondition("code", rolename);
+		 	List<Map<String, Object>> mapList = tableService.list(ROLE_TABLE_NAME, null, null, null, null, roleCondition, null, null, null);
+	    	
+		 	if (mapList.size() == 0) {
+	    		throw new UsernameNotFoundException(rolename + "不存在");
+	    	}
+		 	
+		 	Object roleId = null;
+	    	for (Map<String, Object> roleMap : mapList) {
+	    		roleId = roleMap.get("id");
+	    		break;
+	    	}
+			
+	    	if (roleId != null) {
+	    		List<Map<String, Object>> roleLines = new ArrayList<Map<String, Object>>();
+	    		Map<String, Object> roleLine = new HashMap<String, Object>();
+	    		roleLine.put("name", rolename);
+	    		roleLine.put("roleId", roleId);
+	    		roleLines.add(roleLine);
+	    		
+	    		map.put("roleLines", roleLines);
+	    	}
+	    	
+			create(map);
+			return loadUserByCondition(condition);
+    	} else {
+    		return userDTO;
+    	}
+	}
+	
+	@Override
 	public UserDetails loadUserByOpenId(String openId) {
 		log.info("loadUserByOpenId {}", openId);
 		

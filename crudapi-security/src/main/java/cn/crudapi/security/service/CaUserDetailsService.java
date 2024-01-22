@@ -20,4 +20,6 @@ public interface CaUserDetailsService {
 	void delete(List<String> ids);
 
 	UserDetails loadOrCreateUserByMobile(String mobile) throws UsernameNotFoundException;
+
+	UserDetails loadOrCreateUserByUsername(String username, String rolename);
 }

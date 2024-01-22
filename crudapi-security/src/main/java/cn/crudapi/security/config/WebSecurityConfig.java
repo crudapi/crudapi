@@ -188,7 +188,8 @@ public class WebSecurityConfig<S extends Session> extends WebSecurityConfigurerA
         
         registry
 	        .antMatchers("/api/auth/**/login",
-	        		"/api/auth/logout").permitAll()
+	        		"/api/auth/logout",
+	        		"/api/auth/oauth/**").permitAll()
 	        .anyRequest().authenticated()
         .and()
 	        .formLogin()
