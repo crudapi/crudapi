@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -169,7 +170,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 	
     @Override
-    @CacheEvict(value = "tableRelationMetadata", key="#id")
+    @CacheEvict(value = "tableRelationMetadata", allEntries= true)
     public void update(Long id, TableRelationDTO tableRelationDTO) {
     	TableRelationEntity tableRelationEntity = tableRelationMapper.toEntity(tableRelationDTO);
     	tableRelationEntity.setId(id);
@@ -187,7 +188,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 	
 	@Override
-	//@Cacheable(value = "tableRelationMetadata", key="#fromTableId")
+	@Cacheable(value = "tableRelationMetadata", key="#fromTableId")
 	public List<TableRelationDTO> getFromTable(Long fromTableId) {
 		List<TableRelationEntity> tableRelationEntityList = getTableRelationEntityList(fromTableId);
 		
@@ -196,7 +197,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	
 
 	@Override
-	//@Cacheable(value = "tableRelationMetadata", key="#fromTableName")
+	@Cacheable(value = "tableRelationMetadata", key="#fromTableName")
 	public List<TableRelationDTO> getFromTable(String fromTableName) {
 		TableDTO tableDTO = tableMetadataService.get(fromTableName);
  	    
@@ -230,6 +231,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 
     @Override
+    @CacheEvict(value = "tableRelationMetadata", allEntries= true)
     public void delete(Long id) {
     	crudService.delete(RELATION_TABLE_NAME, id);
     }

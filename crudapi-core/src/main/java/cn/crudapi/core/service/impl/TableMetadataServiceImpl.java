@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -176,7 +178,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     }
 
     @Override
-    //@CacheEvict(value = "tableMetadata", key="#id")
+    @CacheEvict(value = "tableMetadata", allEntries= true)
     public void update(Long id, TableDTO tableDTO) {
     	tableDTO.setId(id);
     	TableEntity tableEntity = getTableEntityIncludeChildren(id);
@@ -230,7 +232,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     }
 
     @Override
-    //@Cacheable(value = "tableMetadata", key="#id")
+    @Cacheable(value = "tableMetadata", key="#id")
     public TableDTO get(Long id) {
         TableEntity tableEntity = getTableEntityIncludeChildren(id);
     	
@@ -238,7 +240,7 @@ public class TableMetadataServiceImpl implements TableMetadataService {
     }
 
     @Override
-    //@Cacheable(value = "tableMetadata", key="#name")
+    @Cacheable(value = "tableMetadata", key="#name")
     public TableDTO get(String name) {
     	TableEntity tableEntity = getTableEntityIncludeChildren(name);
 	    
