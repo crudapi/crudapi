@@ -38,6 +38,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -118,6 +120,9 @@ public class TableServiceImpl implements TableService {
 	
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private TableService _this;
 
     @Override
     public String create(String name, Map<String, Object> map) {
@@ -1101,12 +1106,71 @@ public class TableServiceImpl implements TableService {
    	 	return filterMapList;
     }
     
+    private Map<String, Object> getOneDataByValue(Map<String, Map<String, Object>> dicMap, QueryModel queryModel, String columnName, Object value) {
+        if (value == null) {
+      	  return null;
+        }
+        
+        Map<String, Object> map = dicMap.get(value.toString());
+        if (map == null) {
+			log.warn("getOneDataByValue {} is not exist in dicMap", value);
+			map = this.getDicFromDb(queryModel, columnName, value);
+			if (map == null) {
+				log.warn("getOneDataByValue {} is not exist in db", value);
+		    }
+		}
+        
+        return map;
+    }
+
+    private List<Map<String, Object>> getListDataByValues(Map<String, Map<String, Object>> dicMap, QueryModel queryModel, String columnName, List<Object> values) {
+   	 	 List<Map<String, Object>> filterMapList = new ArrayList<Map<String, Object>>();
+	   	 for (Object t : values) {
+	   		if (t != null) {
+	   			Map<String, Object> map = dicMap.get(t.toString());
+	   			if (map != null) {
+	   				filterMapList.add(map);
+	   			} else {
+	   				log.warn("getListDataByValues {} is not exist in dicMap", t);
+	   				map = this.getDicFromDb(queryModel, columnName, t);
+	   				log.warn("getOneDataByValue {} is not exist in db", t);
+	   				if (map != null) {
+		   				filterMapList.add(map);
+	   				}
+	   			}
+	     		
+	     	}
+	     }
+   	 	 return filterMapList;
+    }
+    
+    private List<Map<String, Object>> getMultipleDataByValue(Map<String, Map<String, Object>> dicMap, QueryModel queryModel, String columnName, Object value) {
+        List<Object> values = new ArrayList<>();
+        
+        if (value != null) {
+        	String[] valueArr = value.toString().trim().replaceAll("，", ",").split(",");
+    		for (String v : valueArr) { 
+    			if (!v.isEmpty()) {
+    				values.add(v);
+    			}
+    		}
+        } else {
+        	return new ArrayList<Map<String, Object>>();
+        }
+    	
+     	return this.getListDataByValues(dicMap, queryModel, columnName, values);
+    }
+    
     private Map<String, Object> getOneDataByColumnName(List<Map<String, Object>> mapList, String columnName, Object value) {
       if (value == null) {
     	  return null;
       }
       
    	  for (Map<String, Object> t : mapList) {
+   		if (t == null) {
+   			throw new BusinessException("t is empty!");
+   		}
+   		  
    		Object oldValue = t.get(columnName);
      	if (oldValue != null && oldValue.toString().equals(value.toString())) {
      		return t;
@@ -1131,17 +1195,6 @@ public class TableServiceImpl implements TableService {
         }
     	
      	return this.getListDataByColumnName(mapList, columnName, values);
-    }
-    
-    private List<Object> getRightValues (List<Object> allValues, List<Object> joinValues) {
-    	 List<Object> rightValues = new ArrayList<>();
-    	 for (Object t : allValues) {
-    		 if (!joinValues.stream().anyMatch( v -> t.toString().equals(v.toString()))) {
-    			 rightValues.add(t);
-    		 }
-         }
-    	 
-    	 return rightValues;
     }
     
     private List<String> getMainSelectAndSubSelectMap(List<String> selectList, Map<String, List<String>> subSelectMap) {
@@ -1209,7 +1262,7 @@ public class TableServiceImpl implements TableService {
     		String search, Condition condition, Integer offset, Integer limit, String orderby, UserDTO userDTO) {
         TableDTO mainTableDTO = tableMetadataService.get(name);
         
-		Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
+		//Map<String, List<Map<String, Object>>> dicTableDataCacheMap = new HashMap<String, List<Map<String, Object>>>();
 		
     	Stack<QueryData> tableQueryDataStack = new Stack<QueryData>();
     	
@@ -1358,57 +1411,11 @@ public class TableServiceImpl implements TableService {
                      
                      relationMainSelectList = relationMainSelectList.stream().distinct().collect(Collectors.toList());
                      relationQueryModel.setSelectList(relationMainSelectList);
-                	 
                      
                      
-                	 //字典表主键
-                	 List<Object> values = getValuesByColumnName(topTableDTO, topMapList, fkColumnName);
-                	 log.info(relatiobTableName + " values" + values.toString());
-                	 
-                     List<Map<String, Object>> relationTableDataMapList = null;
+                     Map<String, Map<String, Object>> dicMap = this.getDicDynamic(relationQueryModel, userDTO, pkColumnName);
                      
-                     //查询旧的字典表数据
-                     List<Map<String, Object>> relationTableCacheMapList = dicTableDataCacheMap.get(relatiobTableName);
-                     
-                     if (relationTableCacheMapList == null) {
-                    	 Condition relationCondition = ConditionUtils.toCondition(pkColumnName, values);
-                         relationQueryModel.setCondition(relationCondition);
-                         
-                    	 relationTableDataMapList = new ArrayList<Map<String, Object>>();
-                         if (relationCondition != null) {
-                        	 relationTableDataMapList = queryForList(relationQueryModel, userDTO);
-                        	 
-                        	 //缓存dic
-                             dicTableDataCacheMap.put(relatiobTableName, relationTableDataMapList);
-                         }
-                     } else {
-                    	 log.info(relatiobTableName + " use cache!");
-                    	 List<Object> cacheValues = getValuesByColumnName(relationTableDTO, relationTableCacheMapList, pkColumnName);
-                    	 log.info(relatiobTableName + " cacheValues" + cacheValues.toString());
-                    	 
-                    	 List<Map<String, Object>> joinRelationTableDataMapList = getListDataByColumnName(relationTableCacheMapList, pkColumnName, values);
-                    	 
-                    	 List<Object> joinValues = getValuesByColumnName(relationTableDTO, joinRelationTableDataMapList, pkColumnName);
-                    	 log.info(relatiobTableName + " joinValues" + joinValues.toString());
-                    	 
-                    	 List<Object> rightValues = getRightValues(values, joinValues);
-                    	 log.info(relatiobTableName + " rightValues" + rightValues.toString());
-                    	 
-                    	 Condition relationCondition = ConditionUtils.toCondition(pkColumnName, rightValues);
-                         relationQueryModel.setCondition(relationCondition);
-                         
-                         List<Map<String, Object>> rightRelationTableDataMapList = new ArrayList<Map<String, Object>>();
-                         if (relationCondition != null) {
-                        	 rightRelationTableDataMapList = queryForList(relationQueryModel, userDTO);
-                         }
-                        
-                         relationTableCacheMapList.addAll(rightRelationTableDataMapList);
-                         
-                         joinRelationTableDataMapList.addAll(rightRelationTableDataMapList);
-                         
-                         relationTableDataMapList = joinRelationTableDataMapList;
-                     }
-                     
+                     log.info("更新主表关联字段 {}, {}", relatiobTableName, fkColumnName);
                      //更新主表关联字段
                      for (Map<String, Object> topMap : topMapList) {
                      	Object value = topMap.get(fkColumnName);
@@ -1416,13 +1423,12 @@ public class TableServiceImpl implements TableService {
                       		
                       		if (topTableDTO.getColumn(fkColumnName).getMultipleValue()) {
                       			List<Map<String, Object>> subRelationTableDataMapList = 
-                      					getMultipleDataByColumnName(relationTableDataMapList, pkColumnName, value);
+                      					getMultipleDataByValue(dicMap, relationQueryModel, pkColumnName, value);
                      			
                      			topMap.put(relationName, subRelationTableDataMapList);
                       		} else {
                       			Map<String, Object> subRelationTableDataMap = 
-                         				getOneDataByColumnName(relationTableDataMapList, pkColumnName, value);
-                     			
+                      					getOneDataByValue(dicMap, relationQueryModel, pkColumnName, value);
                      			topMap.put(relationName, subRelationTableDataMap);
                       		}
                       	}
@@ -1435,6 +1441,55 @@ public class TableServiceImpl implements TableService {
         
         return mainTableDataMapList;
     }
+	
+	@Override
+	@CacheEvict(value = "crudapiBussinessDicFullCache", allEntries= true)
+	public void cleanFullDicFromCache() {
+		 log.info("cleanFullDicFromCache");
+	}
+	
+	@Override
+	@Cacheable(value = "crudapiBussinessDicFullCache", key="#tableName")
+	public Map<String, Map<String, Object>> getFullDicFromCache(String tableName, List<String> selectList, String pkName) {
+		 log.info("crudapiBussinessDicFullCache {}, {}", tableName, selectList);
+		
+		 TableDTO tableDTO = tableMetadataService.get(tableName);
+         
+         QueryModel queryModel = new QueryModel();
+         queryModel.setTableDTO(tableDTO);
+         queryModel.setSelectList(selectList);
+         
+         List<Map<String, Object>> mapList = this.queryForList(queryModel, null);
+         
+         Map<String, Map<String, Object>> map = new HashMap<String, Map<String, Object>>();
+         for (Map<String, Object> t: mapList) {
+        	String id = t.get(pkName).toString();
+        	map.put(id, t);
+         }
+         
+         return map;
+	}
+	
+	//同一个类里@Cacheable缓存不起作用
+	//https://blog.csdn.net/gnail_oug/article/details/90240780
+	private Map<String, Map<String, Object>> getDicDynamic(QueryModel queryModel, UserDTO userDTO, String columnName) {
+		Map<String, Map<String, Object>> map = _this.getFullDicFromCache(queryModel.getTableDTO().getName(), queryModel.getSelectList(), columnName);
+		
+		return map;
+	}
+	
+	private Map<String, Object> getDicFromDb(QueryModel queryModel, String columnName, Object value) {
+	    Condition relationCondition = ConditionUtils.toCondition(columnName, value);
+	   	queryModel.setCondition(relationCondition);
+
+        List<Map<String, Object>> mapList = this.queryForList(queryModel, null);
+        if (mapList.size() == 0) {
+        	log.warn("getDicFromDb {} {} is empty", queryModel.getTableDTO().getName(), value);
+        	return null;
+        }
+        
+        return mapList.get(0);
+	}
     
 	@Override
     public List<Map<String, Object>> listMain(String name, String select, String expand, String filter,

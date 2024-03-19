@@ -34,6 +34,11 @@ public class JobServiceImpl implements JobService {
 		File folder = new File(fileService.getOssFilePath() + "/" + fileService.getOssUploadPath());
 		deleteFolder(folder);
 	  }
+	  
+	  @Override
+	  public void cleanCache() {
+		  tableService.cleanFullDicFromCache();
+	  }
 		
 	  private void deleteFolder(File folder) {
 		log.info("deleteFolder " + folder.getAbsolutePath());

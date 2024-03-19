@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import cn.crudapi.core.dto.UserDTO;
+import cn.crudapi.core.model.QueryModel;
 import cn.crudapi.core.query.Condition;
 
 public interface TableService {
@@ -89,5 +90,10 @@ public interface TableService {
 
 	String exportData(String name, String type, String select, String filter, String search, Condition condition,
 			UserDTO userDTO);
+
+	Map<String, Map<String, Object>> getFullDicFromCache(String tableName, List<String> selectList, String pkName);
+
+	void cleanFullDicFromCache();
+
 
 }

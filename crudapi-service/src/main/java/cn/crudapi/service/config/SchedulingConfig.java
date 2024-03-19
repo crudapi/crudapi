@@ -26,4 +26,15 @@ public class SchedulingConfig {
 			System.err.println(e);
 		}
 	}
+	
+	//每隔半小时执行一次，启动后15分钟执行一次
+	@Scheduled(fixedDelay=30*60*1000,initialDelay=15*60*1000)
+	public void cleanCache() {
+		try {
+			jobService.cleanCache();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			System.err.println(e);
+		}
+	}
 }
