@@ -1449,7 +1449,7 @@ public class TableServiceImpl implements TableService {
 	}
 	
 	@Override
-	@Cacheable(value = "crudapiBussinessDicFullCache", key="#tableName")
+	@Cacheable(value = "crudapiBussinessDicFullCache", key="#tableName.concat(#selectList.toString())")
 	public Map<String, Map<String, Object>> getFullDicFromCache(String tableName, List<String> selectList, String pkName) {
 		 log.info("crudapiBussinessDicFullCache {}, {}", tableName, selectList);
 		
