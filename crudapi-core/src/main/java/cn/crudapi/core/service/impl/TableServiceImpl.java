@@ -1031,7 +1031,7 @@ public class TableServiceImpl implements TableService {
     	
     	List<Map<String, Object>> mapList = this.list(name, select, expand, null, null, condition, null, null, null, userDTO);
       	
-        return mapList.get(0);
+        return  mapList.size() > 0 ? mapList.get(0) : null;
     }
     
 	 @Override

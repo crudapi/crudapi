@@ -11,7 +11,7 @@ CREATE TABLE `${tableName}` (
   <#elseif columnEntity.dataType == "DOUBLE">
     `${columnEntity.name}` DOUBLE<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if> COMMENT '${columnEntity.caption}'<#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DECIMAL">
-    `${columnEntity.name}` DECIMAL<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if> COMMENT '${columnEntity.caption}'<#if columnEntity_has_next>,</#if>
+    `${columnEntity.name}` DECIMAL(${columnEntity.precision}, ${columnEntity.scale})<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if> COMMENT '${columnEntity.caption}'<#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "DATE">
     `${columnEntity.name}` DATE<#if columnEntity.defaultValue??> DEFAULT ${columnEntity.defaultValue}</#if><#if columnEntity.nullable != true> NOT NULL</#if> COMMENT '${columnEntity.caption}'<#if columnEntity_has_next>,</#if>
   <#elseif columnEntity.dataType == "TIME">
