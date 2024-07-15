@@ -30,6 +30,7 @@ RUN mv /crudapi/crudapi-core/pom.xml /crudapi/crudapi-core/pom-noproguard.xml &&
     cp /crudapi/crudapi-rest/target/*.jar /crudapi/dist/crudapi/$version && \
     cp /crudapi/crudapi-security/target/*.jar /crudapi/dist/crudapi/$version && \
     cp /crudapi/crudapi-weixin/target/*.jar /crudapi/dist/crudapi/$version && \
+    cp /crudapi/crudapi-service/target/*.jar /crudapi/dist/crudapi/$version && \
     cp /crudapi/crudapi-service/target/*.jar /crudapi
 
 #FROM registry.cn-qingdao.aliyuncs.com/dh-mirror/openjdk:8-jdk-alpine
