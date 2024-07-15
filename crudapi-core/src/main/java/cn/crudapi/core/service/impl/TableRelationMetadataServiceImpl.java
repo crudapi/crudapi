@@ -81,6 +81,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     
     @Transactional
 	@Override
+	@CacheEvict(value = "tableRelationMetadata", allEntries= true)
 	public void set(List<TableRelationDTO> tableRelationDTOList) {
 		List<TableRelationEntity> oldTableRelationEntityList = crudService.list(RELATION_TABLE_NAME, TableRelationEntity.class);
 		
@@ -106,6 +107,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
     
     @Override
+    @CacheEvict(value = "tableRelationMetadata", allEntries= true)
 	public Long create(TableRelationDTO tableRelationDTO) {
     	TableRelationEntity tableRelationEntity = tableRelationMapper.toEntity(tableRelationDTO);
     	
@@ -118,6 +120,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 
 	@Override
+	@CacheEvict(value = "tableRelationMetadata", allEntries= true)
 	public Long create(TableRelationTypeEnum relationType, 
 						String name, 
 						String caption,
