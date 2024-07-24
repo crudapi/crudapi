@@ -183,7 +183,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
     }
 	
 	@Override
-	@Cacheable(value = "tableRelationMetadata", key="#id")
+	@Cacheable(value = "tableRelationMetadata", key="'id'+#id")
 	public TableRelationDTO get(Long id) {
 		TableRelationEntity tableRelationEntity = getTableRelationEntity(id);
 		
@@ -191,7 +191,7 @@ public class TableRelationMetadataServiceImpl implements TableRelationMetadataSe
 	}
 	
 	@Override
-	@Cacheable(value = "tableRelationMetadata", key="#fromTableId")
+	@Cacheable(value = "tableRelationMetadata", key="'fromTableId'+#fromTableId")
 	public List<TableRelationDTO> getFromTable(Long fromTableId) {
 		List<TableRelationEntity> tableRelationEntityList = getTableRelationEntityList(fromTableId);
 		
