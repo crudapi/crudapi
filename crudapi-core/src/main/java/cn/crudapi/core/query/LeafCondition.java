@@ -433,13 +433,16 @@ public class LeafCondition implements Condition {
     //candidateId in (SELECT id FROM `bs_candidate` where `type` = 'chef') 
     private String toQuerySqlForINSELECT() {
        String querySql = "";
-
-       String selectSql = "SELECT " + toSqlName(inColumnName) + " FROM " + toSqlName(inTableName);
+       
+       String inTableNameSql = inTableName.contains(" ") ? inTableName  : toSqlName(inTableName);
+       
+       String selectSql = "SELECT " + toSqlName(inColumnName) + " FROM " + inTableNameSql;
        if (inCondition != null) {
     	   selectSql += " WHERE ";
            selectSql += inCondition.toQuerySql();
        }
        
+   
        if (operatorType.equals(OperatorTypeEnum.INSELECT)) {
     	   querySql = toSqlName(columnName) + " IN (" + selectSql + ")";
    	   } else {
