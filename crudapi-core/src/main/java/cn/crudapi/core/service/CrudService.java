@@ -121,6 +121,8 @@ public interface CrudService {
 	
 	void execute(String sql);
 	
+	void execute(String sql, Map<String, Object> paramMap);
+	
 	List<Map<String, Object>> getMetaDatas();
 	
 	Map<String, Object> getMetaData(String tableName);

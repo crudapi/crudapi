@@ -18,6 +18,7 @@ import cn.crudapi.core.enumeration.DataTypeEnum;
 import cn.crudapi.core.enumeration.EngineEnum;
 import cn.crudapi.core.enumeration.IndexTypeEnum;
 import cn.crudapi.core.query.Condition;
+import cn.crudapi.core.repository.CrudAbstractRepository;
 import cn.crudapi.core.service.CrudService;
 
 @Service
@@ -343,6 +344,12 @@ public class CrudServiceImpl implements CrudService {
 	public void execute(String sql) { 
 		log.debug("CrudServiceImpl->execute");
 		crudTemplate.execute(sql);
+	}
+	
+	@Override
+	public void execute(String sql, Map<String, Object> paramMap) {
+		log.debug("CrudServiceImpl->execute");
+		crudTemplate.execute(sql, paramMap);
 	}
 	
 	@Override

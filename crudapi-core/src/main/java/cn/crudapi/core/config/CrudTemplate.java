@@ -301,6 +301,11 @@ public class CrudTemplate {
 		dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().execute(sql);
 	}
 	
+	public void execute(String sql, Map<String, Object> paramMap) { 
+		log.debug("CrudTemplate->execute paramMap");
+		dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().execute(sql, paramMap);
+	}
+	
 	public List<Map<String, Object>> getMetaDatas() {
 		log.debug("CrudTemplate->getMetaDatas");
 		return dynamicCrudSqlExecute.determineTargetDataSource().getCrudFactory().getMetaDatas();

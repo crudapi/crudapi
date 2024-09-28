@@ -902,6 +902,10 @@ public abstract class CrudAbstractRepository {
 		namedParameterJdbcTemplate.getJdbcTemplate().execute(sql);
 	}
 	
+	public void execute(String sql, Map<String, ?> paramMap) {
+		namedParameterJdbcTemplate.update(sql, paramMap);
+	}
+	
 	public List<Map<String, Object>> getMetaDatas() {
 		String tableSchema = getSchema();
 		log.info("tableSchema = " + tableSchema);

@@ -339,7 +339,11 @@ public abstract class CrudAbstractFactory {
 		CrudAbstractRepository repository = this.getCrudRepository();
 		repository.execute(sql);
 	}
-	
+	public void execute(String sql, Map<String, Object> paramMap) {
+		log.debug("CrudAbstractFactory->execute paramMap");
+		CrudAbstractRepository repository = this.getCrudRepository();
+		repository.execute(sql, paramMap);
+	}
 	public List<Map<String, Object>> getMetaDatas() {
 		log.debug("CrudAbstractFactory->getMetaDatas");
 		CrudAbstractRepository repository = this.getCrudRepository();
