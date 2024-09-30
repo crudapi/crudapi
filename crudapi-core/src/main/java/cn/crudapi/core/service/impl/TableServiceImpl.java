@@ -2226,8 +2226,11 @@ public class TableServiceImpl implements TableService {
     		userId = userDTO.getId();
     	}
     	
-    	paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
-    	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+    	if (userId != null) {
+    		paramMap.put(COLUMN_CRAEAE_BY_ID, userId);
+        	paramMap.put(COLUMN_UPDATE_BY_ID, userId);
+    	}
+    	
     	if (paramMap.get(COLUMN_OWNER_ID) == null) {
     		paramMap.put(COLUMN_OWNER_ID, userId);
     	}
