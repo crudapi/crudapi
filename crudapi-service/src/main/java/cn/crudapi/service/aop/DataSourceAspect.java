@@ -14,7 +14,7 @@ import cn.crudapi.core.datasource.config.DataSourceContextHolder;
 public class DataSourceAspect {
 	private static final Logger log = LoggerFactory.getLogger(DataSourceAspect.class);
 	
-	@Pointcut("within(cn.crudapi.api.controller..*)")
+	@Pointcut("within(cn.crudapi.api.controller..*) || within(cn.crudapi.security.controller..*)")
 	public void applicationPackagePointcut() {
 	}
 
