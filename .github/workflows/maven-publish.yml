@@ -24,7 +24,7 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-        server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+        server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
         server-username: MAVEN_USERNAME # env variable for username in deploy
         server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
@@ -43,7 +43,7 @@ jobs:
     - name: Publish to Apache Maven Central
       run: mvn deploy -Dmaven.test.skip=true -s settings.xml
       env:
-        MAVEN_USERNAME: eCaCUAB5
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
