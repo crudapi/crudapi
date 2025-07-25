@@ -9,19 +9,24 @@ jobs:
     steps:
     - name: Check
       env:
-        MAVEN_USERNAME: eCaCUAB5
         MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
       run: |
         lsb_release -a
-        echo $MAVEN_USERNAME
         echo $MAVEN_CENTRAL_TOKEN
         echo $MAVEN_GPG_PASSPHRASE
-        echo "$MAVEN_USERNAME" > aa.txt
-        echo "$MAVEN_CENTRAL_TOKEN" >>  aa.txt
+        echo $MAVEN_GPG_PRIVATE_KEY
+        echo "$MAVEN_CENTRAL_TOKEN" > aa.txt
+        echo "$MAVEN_GPG_PASSPHRASE" >>  aa.txt
+        echo "$MAVEN_GPG_PRIVATE_KEY" >>  aa.txt
         cat aa.txt
-    - name: Upload aa.txt as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-          name: my-artifact
-          path: aa.txt
+
+    - name: Upload via SCP (Key Auth)
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/cicd_key
+        chmod 600 ~/.ssh/cicd_key
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/cicd_key aa.txt root@crudapi.cn:/opt/aa.txt
