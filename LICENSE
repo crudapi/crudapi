@@ -1,17 +1,21 @@
+The MIT License (MIT)
+
 Copyright (c) 2021-present crudapi
 
-crudapi简介：
-无需编程，通过配置自动生成crud增删改查RESTful API，提供后台Web管理UI。
-基于主流的开源框架，拥有自主知识产权，支持二次开发，包括API和SDK两种方式。
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-收费情况：
-1. SDK版永久免费（包括个人和商业使用），无功能限制。
-2. 源码版包括所有完整源代码
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-商业付费用户保密协议：
-1. crudapi源码和Jar包只能自己使用，不得转让给第三方，不得二次销售。
-2. 基于crudapi二次开发的源码或产品也不能以crudapi名义转让或销售。
-3. 一旦发现有上述违规行为，取消一切售后服务，情节严重者，依法追究法律责任。
-
-免责声明：
-用户不得将crudapi用于包括但不限于色情、暴力、反动、侵权等违法用途，否则用户承担相应的法律责任，与crudapi无关。
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
