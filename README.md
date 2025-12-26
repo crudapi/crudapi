@@ -6,6 +6,15 @@ crudapi is a combination of crud and api, which stands for create, delete, updat
 ### 增删改查接口👋
 crudapi是crud+api组合，表示增删改查接口，是一款零代码可配置的产品。使用crudapi可以告别枯燥无味的增删改查代码，让您更加专注业务，节约大量成本，从而提高工作效率。crudapi的目标是让处理数据变得更简单，所有人都可以免费使用！
 
+
+## GIT Address
+Name | Type | License | GitHub Repository | Gitee Repository
+--- | --- | --- | --- | ---
+crudapi-admin-web | Vue Quasar Source Code | Open Source | [crudapi-admin-web](https://github.com/crudapi/crudapi-admin-web) | [crudapi-admin-web](https://gitee.com/crudapi/crudapi-admin-web)
+crudapi (main) | Java Source Code (1.0 Stable Version) | Open Source | [crudapi](https://github.com/crudapi/crudapi) | [crudapi](https://gitee.com/crudapi/crudapi)
+crudapi (ft-crudapi-2) | Java Source Code (2.0 Under Development) | Open Source | [crudapi](https://github.com/crudapi/crudapi/tree/ft-crudapi-2) | [crudapi](https://gitee.com/crudapi/crudapi/tree/ft-crudapi-2)
+crudapi-example | Java SDK Integration Demo | Open Source | [crudapi-example](https://github.com/crudapi/crudapi-example) | [crudapi-example](https://gitee.com/crudapi/crudapi-example)
+
 ## GIT地址
 名称 | 类型 | 授权 | GitHub仓库 | Gitee仓库
 --- | --- | --- | --- | ---
@@ -50,12 +59,6 @@ spring.datasource.driverClassName=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5432/crudapi
 spring.datasource.username=postgres
 spring.datasource.password=postgres
-```
-
-## oralce
-```sql
-SELECT * FROM ALL_OBJECTS WHERE OWNER = 'CRUDAPI';
-purge recyclebin;
 ```
 
 ### run
