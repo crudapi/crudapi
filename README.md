@@ -8,13 +8,9 @@ crudapi是crud+api组合，表示增删改查接口，是一款零代码可配�
 名称 | 类型 | 授权 | GitHub仓库 | Gitee仓库
 --- | --- | --- | --- | ---
 crudapi-admin-web | Vue Qusar源码 | 开源 | [crudapi-admin-web](https://github.com/crudapi/crudapi-admin-web) | [crudapi-admin-web](https://gitee.com/crudapi/crudapi-admin-web)
-crudapi-example| Java集成SDK | 永久免费 | [crudapi-example](https://github.com/crudapi/crudapi-example) | [crudapi-example](https://gitee.com/crudapi/crudapi-example)
-crudapi| Java源码(开源中...) | 开源 | [crudapi](https://github.com/crudapi/crudapi) | [crudapi](https://gitee.com/crudapi/crudapi)
-
-备注：
-1. 目前后台Java代码[crudapi](https://github.com/crudapi/crudapi)正在重构中，持续更新。
-2. 在重构完成之前，请先使用[crudapi-example](https://github.com/crudapi/crudapi-example)，通过SDK集成，功能无任何限制。
-3. 如需提前下载crudapi后台Java源码，请微信联系。
+crudapi (main)| Java源码(1.0稳定版) | 开源 | [crudapi](https://github.com/crudapi/crudapi) | [crudapi](https://gitee.com/crudapi/crudapi)
+crudapi (ft-crudapi-2)| Java源码(2.0开发中) | 开源 | [crudapi](https://github.com/crudapi/crudapi/tree/ft-crudapi-2) | [crudapi](https://gitee.com/crudapi/crudapi/tree/ft-crudapi-2)
+crudapi-example| Java集成SDK Demo | 开源 | [crudapi-example](https://github.com/crudapi/crudapi-example) | [crudapi-example](https://gitee.com/crudapi/crudapi-example)
 
 ### 文档
 [https://help.crudapi.cn](https://help.crudapi.cn)
