@@ -2,12 +2,16 @@ package cn.crudapi.core.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -116,19 +120,76 @@ public class FileServiceImpl implements FileService {
 			 throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件不能为空！");
 		}
 		
+		// 3. 获取并验证原始文件名（过滤路径穿越字符）
+	    String originalFilename = file.getOriginalFilename();
+	    if (originalFilename == null || originalFilename.trim().isEmpty()) {
+	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件名不合法！");
+	    }
+	    
+	    // 过滤路径穿越字符
+	    originalFilename = originalFilename.replaceAll("[/\\\\:;*?\"<>|]", "_");
+	    
+	    // 4. 服务端二次文件类型校验
+	    String contentType = file.getContentType();
+	    String extension = getFileExt(originalFilename);
+	    
+	    // 4.1 定义白名单（根据实际业务调整）
+	    Set<String> allowedExtensions = new HashSet<>(Arrays.asList(
+	        "jpg", "jpeg", "png", "gif", "pdf", "doc", "docx", "xls", "xlsx", "txt"
+	    ));
+	    Set<String> allowedContentTypes = new HashSet<>(Arrays.asList(
+	        "image/jpeg", "image/png", "image/gif", "application/pdf",
+	        "application/msword", 
+	        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	        "application/vnd.ms-excel",
+	        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	        "text/plain"
+	    ));
+	    
+	    if (!allowedExtensions.contains(extension.toLowerCase())) {
+	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, 
+	            "不支持的文件类型！仅支持：" + allowedExtensions);
+	    }
+	    
+	    if (!allowedContentTypes.contains(contentType)) {
+	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件MIME类型不合法！");
+	    }
+	    
+	    // 5. 文件头魔数校验（防止伪造Content-Type）
+	    validateFileMagicNumber(file);
+		
 	    long fileSize = file.getSize();
-		String originalFilename = file.getOriginalFilename();
 		String fileName = getRandomFileName(originalFilename);
 		   
+		// 7. 安全构建文件路径（防止路径穿越）
+	    String basePath = ossFilePath + "/" + ossUploadPath;
+	    if (basePath.contains("..")) {
+	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "路径不合法！");
+	    }
+	    
+	    File dest = new File(basePath, fileName); // 使用双参数构造函数更安全
+	    String canonicalPath;
+	    String expectedBasePath;
+		try {
+			canonicalPath = dest.getCanonicalPath();
+			expectedBasePath = new File(basePath).getCanonicalPath();
+
+		    // 8. 二次校验：确保目标文件在预期目录内（防止路径穿越）
+		    if (!canonicalPath.startsWith(expectedBasePath)) {
+		        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "非法路径！");
+		    }
+		} catch (IOException e) {
+			 throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "非法路径！");
+		}
+	    
+	    // 9. 创建目录
+	    if (!dest.getParentFile().exists()) {
+	        dest.getParentFile().mkdirs();
+	    }
+		
 	    Map<String, Object> fileInfo = new HashMap<String, Object>();
 	    fileInfo.put("size", fileSize);
 	    fileInfo.put("name", fileName);
-	  
-	    File dest = new File(ossFilePath + "/" + ossUploadPath + "/" + fileName);
-	    if (!dest.getParentFile().exists()) { //判断文件父目录是否存在
-	        dest.getParentFile().mkdirs();
-	    }
-	    
 	    fileInfo.put("fullUrl", getFullUrl(fileName));
 	    fileInfo.put("url", getUrl(fileName));
 	    
@@ -177,26 +238,35 @@ public class FileServiceImpl implements FileService {
 	
 	@Override
 	public String getRandomFileName(String fileName) {
-		UUID uuid = UUID.randomUUID();
 		String ext = getFileExt(fileName);
 		 
 	    DateTime dt = DateTime.now();
 	    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd");
 	    String subPath = dt.toString(f);
 	    
-	    return subPath + "/" + uuid.toString().replace("-", "") + "." + ext;
+	    DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd-HHmmssSSS");
+	    String timePart = dt.toString(timeFormatter);
+	    
+	    int randomNum = (int)(Math.random() * 900000) + 100000;
+	    
+	    return subPath + "/" + timePart + randomNum + "." + ext;
 	}
 	
 	@Override
 	public String getExportRandomFileName(String fileName) {
-		UUID uuid = UUID.randomUUID();
 		String ext = getFileExt(fileName);
 		 
 	    DateTime dt = DateTime.now();
 	    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd");
 	    String subPath = dt.toString(f);
 	    
-	    return "exportTmp/" + subPath + "/" + uuid.toString().replace("-", "") + "." + ext;
+	    DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd-HHmmssSSS");
+	    String timePart = dt.toString(timeFormatter);
+	    
+	    int randomNum = (int)(Math.random() * 900000) + 100000;
+	    
+	    
+	    return "exportTmp/" + subPath + "/" + timePart + randomNum + "." + ext;
 	}
 	
 	@Override
@@ -229,4 +299,52 @@ public class FileServiceImpl implements FileService {
         String result = filename.substring(index + 1);
         return result;
     }
+	
+	private void validateFileMagicNumber(MultipartFile file) {
+	    try (InputStream is = file.getInputStream()) {
+	        byte[] header = new byte[8];
+	        int read = is.read(header);
+	        if (read < 8) {
+	            throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件内容不合法！");
+	        }
+	        
+	        String hexHeader = bytesToHex(header);
+	        
+	        // 定义常见文件的魔数白名单
+	        Map<String, String> magicNumbers = new HashMap<>();
+	        magicNumbers.put("FFD8FF", "jpg/jpeg");  // JPEG
+	        magicNumbers.put("89504E47", "png");      // PNG
+	        magicNumbers.put("47494638", "gif");      // GIF
+	        magicNumbers.put("25504446", "pdf");      // PDF
+	        magicNumbers.put("D0CF11E0", "doc/xls");  // Office旧格式
+	        
+	        boolean isValid = false;
+	        for (String magic : magicNumbers.keySet()) {
+	            if (hexHeader.startsWith(magic)) {
+	                isValid = true;
+	                break;
+	            }
+	        }
+	        
+	        if (!isValid) {
+	            throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, 
+	                "文件内容与实际类型不符，可能存在伪装风险！");
+	        }
+	    } catch (BusinessException e) {
+	        throw e;
+	    } catch (Exception e) {
+	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件校验失败！");
+	    }
+	}
+
+	/**
+	 * 字节数组转十六进制字符串
+	 */
+	private String bytesToHex(byte[] bytes) {
+	    StringBuilder sb = new StringBuilder();
+	    for (byte b : bytes) {
+	        sb.append(String.format("%02X", b));
+	    }
+	    return sb.toString();
+	}
 }
