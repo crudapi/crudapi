@@ -155,9 +155,6 @@ public class FileServiceImpl implements FileService {
 	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件MIME类型不合法！");
 	    }
 	    
-	    // 5. 文件头魔数校验（防止伪造Content-Type）
-	    validateFileMagicNumber(file);
-		
 	    long fileSize = file.getSize();
 		String fileName = getRandomFileName(originalFilename);
 		   
@@ -300,43 +297,6 @@ public class FileServiceImpl implements FileService {
         return result;
     }
 	
-	private void validateFileMagicNumber(MultipartFile file) {
-	    try (InputStream is = file.getInputStream()) {
-	        byte[] header = new byte[8];
-	        int read = is.read(header);
-	        if (read < 8) {
-	            throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件内容不合法！");
-	        }
-	        
-	        String hexHeader = bytesToHex(header);
-	        
-	        // 定义常见文件的魔数白名单
-	        Map<String, String> magicNumbers = new HashMap<>();
-	        magicNumbers.put("FFD8FF", "jpg/jpeg");  // JPEG
-	        magicNumbers.put("89504E47", "png");      // PNG
-	        magicNumbers.put("47494638", "gif");      // GIF
-	        magicNumbers.put("25504446", "pdf");      // PDF
-	        magicNumbers.put("D0CF11E0", "doc/xls");  // Office旧格式
-	        
-	        boolean isValid = false;
-	        for (String magic : magicNumbers.keySet()) {
-	            if (hexHeader.startsWith(magic)) {
-	                isValid = true;
-	                break;
-	            }
-	        }
-	        
-	        if (!isValid) {
-	            throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, 
-	                "文件内容与实际类型不符，可能存在伪装风险！");
-	        }
-	    } catch (BusinessException e) {
-	        throw e;
-	    } catch (Exception e) {
-	        throw new BusinessException(ApiErrorCode.DEFAULT_ERROR, "文件校验失败！");
-	    }
-	}
-
 	/**
 	 * 字节数组转十六进制字符串
 	 */
